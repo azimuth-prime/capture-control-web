@@ -1,0 +1,196 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="warehouseController" ng-init="findPickSlipById()" ng-keyup="keyup($event)">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li> 
+					<li class="breadcrumb-item"><a href="#/wms-dashboard">WMS</a></li>
+					<li class="breadcrumb-item"><a href="#/picking">Picking</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Pick Details: {{pickslip.orderid}}</li>
+				</ol>  
+			</nav>
+			<div data-barcode-scanner="barcodeScanned"></div>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<div class="col-sm-6">
+								<h5 class="float-start ms-2 fw-bold">Pick Slip</h5>
+							</div>
+							<div class="col-sm-6">
+								<h5 class="float-end me-2 fw-bold">Sales Order #: <a href="#/order/{{pickslip.orderid}}">{{pickslip.orderId}}</a></h5>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="card card-body">
+									<div class="row align-items-center">
+										<div class="col-sm-4">
+											<h6 class="ms-3 fw-bold">
+												{{pickslip.customer.name}} <br />
+												{{pickslip.shipToAddress.address1}} <br />
+												{{pickslip.shipToAddress.city}}, {{pickslip.shipToAddress.province}} <br />
+												{{pickslip.shipToAddress.country}}, {{pickslip.shipToAddress.postalCode}} <br />
+												ATTN: {{pickslip.shipToAddress.contactName}}
+											</h6>						
+										</div>
+										<div class="col-sm-4 text-center">
+											<svg id="orderBarcode"></svg>							
+										</div>
+										<div class="col-sm-4">
+											<h6 class="float-end me-3 ">
+												<span><strong>Sales Order Date: {{pickslip.orderDate | date:'mediumDate'}}</strong></span>
+											</h6>							
+										</div>
+									</div>					
+								</div>
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col-sm-12">
+								<div class="card card-body">
+									<form name="pickForm" id="pickForm">
+										<div class="row">
+											<div class="col-sm-12">
+												<table id="shoppingCart" class="table table-condensed table-responsive table-borderless">
+													<thead>
+														<tr>
+															<th style="width:8%" class="text-start">Line #</th>
+															<th style="width:23%" class="text-start">Product</th>
+															<th style="width:16%" class="text-start">Sku Id</th>
+															<th style="width:21%" class="text-center">Location</th>
+															<th style="width:10%" class="text-center">Quantity Ordered</th>
+															<th style="width:14%" class="text-center">Quantity Picked</th>
+															<th style="width:6%" class="text-end">Pick All</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr class="border" ng-repeat="item in pickslip.items track by $index" ng-class="{'border-success': item.quantityOrdered == item.quantityPicked, 
+														'border-danger': item.quantityPicked < item.quantityOrdered}">
+															<td data-th="Line #" class="text-start align-middle">
+																<span class="ms-1">{{$index + 1}}</span>
+															</td>
+															<td data-th="Product" class="align-middle">
+																<strong>{{item.productId}}</strong>
+																<p class="font-weight-light">{{item.productName}}</p>
+															</td>
+															<td data-th="skuId" class="text-start align-middle">
+																<div class="row">
+																	<div class="col-md-12 text-left mt-sm-2">
+																		<strong>{{item.skuId}}</strong>
+																	</div>
+																</div>
+															</td>
+															<td class="actions text-center align-middle" data-th="Location">
+									                            <strong>{{item.location}}</strong>
+									                        </td>
+									                        <td data-th="Quantity Ordered" class="text-center align-middle">
+									                            <strong>{{(item.quantityOrdered - item.quantityBackordered) | number}}</strong>
+									                        </td>
+									                        <td class="actions align-middle" data-th="Quantity Picked">
+									                            <input ng-disabled="item.quantityOrdered == item.quantityPicked" type="number" required 
+									                            ng-min="item.quantityOrdered" class="form-control form-control-sm text-center" value="1" 
+									                            ng-model="item.quantityPicked" ng-max="item.quantityOrdered">
+									                        </td>
+									                        <td class="text-end align-middle" data-th="Pick All">
+									                            <div class="form-check text-end">
+																	<input class="form-check-input float-end" type="checkbox" 
+																	ng-disabled="item.quantityOrdered == item.quantityPicked" ng-click="pickAllItem(item.skuId)">
+																</div>
+									                        </td>
+														</tr>
+													
+													</tbody>
+												
+												</table>
+												
+											</div>
+										</div>	
+										<div class="row mt-3">
+											<div class="col-sm-12">
+												<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+												 aria-expanded="false" ng-if="pickslip.state === 'PICKED' || pickslip.state === 'PACKED' || pickslip.state === 'PACKING'">Pick Slip</button>
+												<ul class="dropdown-menu">
+													<li>
+														<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'PICK'">
+															Print To System Printer
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="/capture/picking/pdf/{{order.id}}">
+															Download PDF
+														</a>
+													</li>
+												</ul>
+													
+												<button type="button" ng-show="pickslip.state == 'PICKING'" class="btn btn-sm btn-outline-success float-end m-1" ng-click="pickOrder()" 
+												ng-disabled="pickForm.$invalid">Order Picked</button>
+												<button type="button" class="btn btn-sm btn-outline-success float-end m-1" ng-click="viewPackslip(pickslip.orderId)" 
+												ng-show="pickslip.state == 'PICKED' || pickslip.state == 'PACKING'">Pack Order</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="printDialog" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="printForm" id="printForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="vendor"><strong><small>Print Quantity</small></strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p class="small">
+					   						This request will print to the system printer defined within the System Configuration section. If you 
+					   						do not have access to that printer then select the download PDF option for a local copy.
+					   					</p>
+					   					<input required class="form-control form-control-sm" type="number" step="1" name="qty" id="qty" ng-model="print.qty"/>
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="printForm.$invalid" ng-click="printPDF()">Print</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>					

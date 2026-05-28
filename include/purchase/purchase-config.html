@@ -1,0 +1,278 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="configController" ng-init="findGlobalConfig();">
+	<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="templateController" ng-init="findTemplatesByCategory(['purchase'])">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href="#/purchase">Purchase Orders</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Configuration</li>
+			</ol>  
+		</nav>
+		<div class="row mb-2">
+			<div class="col-xs-12 col-sm-12 col-md-12">
+				<div class="card m-1 h-100">
+					<div class="card-body">
+						<div class="col-sm-12">
+							<ul class="nav nav-tabs">
+								<li class="nav-item">
+									<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#config" href="">Purchase Order Configuration</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#templates" href="">Templates</a>
+								</li>
+							</ul>
+							<div class="tab-content" id="tab">
+								<div class="tab-pane fade show active" id="config" role="tabpanel" aria-labelledby="config-tab">
+				   					<div class="card mt-2">
+		  								<div class="card-header">
+		  									<h6><strong>Purchase Order Configuration</strong></h6>
+		  									<p>Configure workflows and settings for Purchase Orders.</p>
+		  								</div>
+		  								<div class="card-body">
+			  								<div class="row">
+												<div class="col-sm-6 mt-2">
+				  									<div class="card h-100">
+				  										<div class="card-header">
+															<span class=""><strong>Automation</strong></span>			
+															<h6>Configure how Purchase Order automation is handled.</h6>
+														</div>
+														<div class="card-body">
+															<div class="row">
+																<div class="col-sm-12">
+																	<div class="form-group mt-2">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="productType"><strong>Auto Generate Purchase Orders</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<small>Indicate whether purchase orders should be auto generated based on stock level counts. In 
+													   					cases where a SKU has a stock threshold defined, a Purchase Order will be created when that threshold is reached. 
+													   					Otherwise Purchase Orders will be automatically created based on backorder count.</small> 
+													   					<div class="input-group input-group-sm">
+														   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="autoGenPOs" id="autoGenPOs" ng-value="true" ng-model="globalConfig.autoGenPOs"
+										 										ng-change="setParameter('autoGenPOs', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="autoGenPOs" id="autoGenPOs" ng-value="false" ng-model="globalConfig.autoGenPOs"
+										 										ng-change="setParameter('autoGenPOs', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																			</div>
+																		</div>
+													   				</div>
+																</div>
+																<div class="col-sm-12">
+																	<div class="form-group mt-2">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="productType"><strong>Supplier Selection</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<small>In cases where the SKU is supplied by a single vendor that vendor will be used for the Purchase Order. In other
+													   					cases there may be more than one vendor in which case indicate below the rules for auto selection.</small> 
+													   					<div class="input-group input-group-sm">
+														   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="vendorSelection" id="vendorSelection" value="FASTEST" ng-model="globalConfig.vendorSelection"
+										 										ng-change="setParameter('vendorSelection', 'FASTEST')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Fastest</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="vendorSelection" id="vendorSelection" value="CHEAPEST" ng-model="globalConfig.vendorSelection"
+										 										ng-change="setParameter('vendorSelection', 'CHEAPEST')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Lowest Cost</label>
+																			</div>
+																		</div>
+													   				</div>
+																</div>
+															</div>
+											   				
+					  									</div>
+				  									</div>
+			  									</div>
+			  									
+			  									<div class="col-sm-6 mt-2">
+				  									<div class="card h-100">
+				  										<div class="card-header">
+															<span class=""><strong>Communications</strong></span>			
+															<h6>Configure how communications for purchase orders are handled by the system.</h6>
+														</div>
+														<div class="card-body">
+															<div class="row">
+																<div class="col-sm-12">
+																	<div class="form-group mt-2">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="productType"><strong>Auto Email Purchase Orders</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<small>Enable feature to auto email purchase orders to supplier when it is "Issued".</small> 
+													   					<div class="input-group input-group-sm">
+														   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="autoSendPOs" id="autoSendPOs" ng-value="true" ng-model="globalConfig.autoSendPO"
+										 										ng-change="setParameter('autoSendPO', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="autoSendPOs" id="autoSendPOs" ng-value="false" ng-model="globalConfig.autoSendPO"
+										 										ng-change="setParameter('autoSendPO', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																			</div>
+																		</div>
+													   				</div>
+																</div>
+																
+															</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  									<div class="col-sm-6 mt-2">
+				  									<div class="card h-100">
+				  										<div class="card-header">
+															<span class=""><strong>Purchase Order Invoicing</strong></span>			
+															<h6>Configure how invoicing ans costs are calculated on Purchase Orders.</h6>
+														</div>
+														<div class="card-body">
+															<div class="row">
+																<div class="col-sm-12">
+																	<div class="form-group mt-2">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="productType"><strong>Require Invoice Prior to Receiving</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<small>Require a supplier invoice to be added before allowing items to be received.</small> 
+													   					<div class="input-group input-group-sm">
+														   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="poRequireInvoice" id="poRequireInvoice" ng-value="true" ng-model="globalConfig.poRequireInvoice"
+										 										ng-change="setParameter('poRequireInvoice', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="poRequireInvoice" id="poRequireInvoice" ng-value="false" ng-model="globalConfig.poRequireInvoice"
+										 										ng-change="setParameter('poRequireInvoice', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																			</div>
+																		</div>
+													   				</div>
+																</div>
+																<div class="col-sm-12"> <!-- Only visible if QBO enabled -->
+																	<div class="form-group mt-2">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="productType"><strong>Landed Cost Execution</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<small>Configure when and if landed costs are calculated and recorded in your QuickBooks COGs account.</small> 
+													   					<div class="input-group input-group-sm">
+														   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="landedCostExecution" id="landedCostExecution" value="NONE" ng-model="globalConfig.landedCostExecution"
+										 										ng-change="setParameter('landedCostExecution', 'NONE')">
+										 										<label class="form-check-label" for="inlineCheckbox1">None</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="landedCostExecution" id="landedCostExecution" value="ONINVOICE" ng-model="globalConfig.landedCostExecution"
+										 										ng-change="setParameter('landedCostExecution', 'ONINVOICE')">
+										 										<label class="form-check-label" for="inlineCheckbox1">On Receipt of Invoice</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="landedCostExecution" id="landedCostExecution" value="ONSALE" ng-model="globalConfig.landedCostExecution"
+										 										ng-change="setParameter('landedCostExecution', 'ONSALE')">
+										 										<label class="form-check-label" for="inlineCheckbox1">At Time of Sale</label>
+																			</div>
+																		</div>
+													   				</div>
+																</div>
+																<div class="col-sm-12">
+																	<div class="form-group mt-2">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="productType"><strong>Landed Cost Application</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<small>Configure how landed costs are applied across items in a Purchase Order.</small> 
+													   					<div class="input-group input-group-sm">
+														   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="landedCostCalculation" id="landedCostCalculation" value="WEIGHT" ng-model="globalConfig.landedCostCalculation"
+										 										ng-change="setParameter('landedCostCalculation', 'WEIGHT')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Weight</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="landedCostCalculation" id="landedCostCalculation" value="QUANTITY" ng-model="globalConfig.landedCostCalculation"
+										 										ng-change="setParameter('landedCostCalculation', 'QUANTITY')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Quantity</label>
+																			</div>
+																			<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="landedCostCalculation" id="landedCostCalculation" value="VALUE" ng-model="globalConfig.landedCostCalculation"
+										 										ng-change="setParameter('landedCostCalculation', 'VALUE')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Value</label>
+																			</div>
+																		</div>
+													   				</div>
+																</div>
+															</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  									
+			  									
+		  									</div>
+		  								</div>
+		  							</div>
+		  						</div>
+		  						<div class="tab-pane fade show" id="templates" role="tabpanel" aria-labelledby="templates-tab">
+		  							
+		  							<div class="card mt-2">
+		  								<div class="card-header">
+		  									<h6><strong>Purchase Order Templates</strong></h6>
+		  									<p>Add, edit and view templates for email communications and printing on Purchase Orders. Instructions for using the template 
+		  									language can be found in the help documentation under "Template Design".</p>
+		  								</div>
+		  								<div class="card-body" id="accordian">
+			  								<div class="row mt-1" ng-repeat="item in templates">
+			  									<div class="col-sm-12">
+			  										<div class="card h-100">
+				  										<div class="card-header">
+															<span class=""><strong>{{item.name}}</strong></span>
+															<span data-bs-toggle="collapse" data-bs-target="#{{item.entity}}"><i class="fas fa-caret-down float-end fa-lg"></i></span>
+															<span class="me-3 small float-end">Last Modified: {{item.lastModifiedDate | date: 'mediumDate'}}</span>		
+															<h6>{{item.description}}</h6>
+														</div>
+														<div class="card-body collapse" data-bs-parent="#accordian" id="{{item.entity}}">
+															<div class="row mb-2">
+																<div class="col-sm-12">
+																	<h6>Enter the template text in the textarea below. </h6>
+												   					<div class=form-group col-sm-12">		   					
+												   						<textarea rows="20" class="form-control form-control-sm" ng-model="item.content"></textarea>
+												   					</div> 
+												            	</div>
+															</div>
+															<div class="row mt-5">
+																<div class="col-sm-12">
+																	<button type="button" class="btn btn-sm btn-outline-success float-end m-1" ng-click="saveTemplate(item)">Save</button>
+																	<button type="button" class="btn btn-sm btn-outline-success float-end m-1">Preview</button>
+																</div>
+															</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  								</div>
+			  							</div>
+			  						</div>
+		  						</div>
+		  					</div>
+  						</div>
+  					</div>
+  				</div>
+  			</div>
+  		</div>
+  		
+	    <!-- Toast messaging: set messaging, set whether danger or success -->
+		<div ng-include="'/include/components/toast-message.html'"></div>
+  	</div>
+</section>

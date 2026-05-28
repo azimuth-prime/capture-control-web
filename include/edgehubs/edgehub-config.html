@@ -1,0 +1,92 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="configController" ng-init="findGlobalConfig()">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/edgehubs">Edgehubs</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Configure</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="col-sm-12 mt-2">
+								<div class="card h-100">
+									<form name="rfidForm" id="rfidForm">
+										<div class="card-header">
+											<span class=""><strong>RFID Tag Printing</strong></span>
+											<h6>Setup the printing configuration for RFID Tags. RFID Printing requires an Edgehub device assigned to a physical warehouse. 
+												If an inventory lot belongs to a physical warehouse that does not have an Edgehub device then RFID tag printing will be disabled.
+											</h6>
+										</div>
+										<div class="card-body">
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="price"><strong>Use Custom RFID Tag Template</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<small>Enable the use of a custom RFID Tag. If 'Yes' then the ZPL II code is required below.</small>
+								   					<div class="input-group">
+								   						<div class="form-check form-check-inline">
+															<input class="form-check-input" type="radio" id="singleSku" ng-value="true" ng-model="globalConfig.customRFIDTag"
+															ng-change="setParameter('customRFIDTag', 'true')">
+															<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+														</div>
+														<div class="form-check form-check-inline">
+															<input class="form-check-input" type="radio" id="singleSku" ng-value="false" ng-model="globalConfig.customRFIDTag"
+															ng-change="setParameter('customRFIDTag', 'false')">
+															<label class="form-check-label" for="inlineCheckbox2">No</label>
+														</div>
+								   					</div>
+								   				</div>
+							  				</div>
+											<div class="col-sm-12">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="price"><strong>RFID Tag Template</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<small>The Edgehub integrates with the Zebra line of RFID printers and uses the ZPL II code language for printing. Enter your
+								   					ZPL II code in the below text area to use your own template for printing. If left blank then the default Edgehub template will be used. 
+								   					The default Edgehub template can be viewed within the Edgehub Admin Interface. </small>
+								   					<textarea ng-required="globalConfig.customRFIDTag" ng-disabled="!globalConfig.customRFIDTag" class="form-control form-control-sm" rows="5"  name="tagTemplate" id="tagTemplate" ng-model="globalConfig.rfidTagTemplate"></textarea>
+								   				</div>
+											</div>
+										</div>
+										<div class="row mt-5 mb-2">
+											<div class="col-sm-12">
+												<button class="btn btn-outline-success btn-sm float-end me-2" ng-click="setParameter('rfidTagTemplate', globalConfig.rfidTagTemplate)">Save RFID Template</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+			   		</div>
+			   	</div>
+			</div>
+		</div>
+		<!-- Toast messaging: set messaging, set whether danger or success -->
+		<div ng-include="'/include/components/toast-message.html'"></div>
+		
+		<div class="modal fade" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

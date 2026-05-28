@@ -1,0 +1,210 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="edgehubController" ng-init="findAll(); findAllPhysicalWarehouses();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item active" aria-current="page">EdgeHubs</li>
+				</ol>  
+			</nav>
+			<div class="row">
+				<div class="card col-xs-12 col-sm-12 col-md-12">
+					<div class="card-body">
+						<div class="card mt-2">
+							<div class="card-header">
+								<div class="row">
+									<div class="col-sm-6">
+										<h5>
+											<span class=""><strong>Capture Edgehubs</strong></span>	
+											<span class="ms-2 badge bg-dark">{{ edgehubs.length == undefined ? 0 : edgehubs.length }}</span>
+										</h5>
+										<small>Select an Edgehub from the list below to view and manage.</small>
+									</div>
+									<div class="col-sm-6">
+										<button class="btn btn-outline-success float-end btn-sm me-2" data-bs-toggle="modal" data-bs-target="#newHubModal">Add Edgehub</button>
+									</div>
+								</div>
+							</div>
+				   			<div class="card-body">
+				   				<div class="row">
+				   					
+				   					<div class="col-sm-12 small">
+				   						<table class="table table-striped table-hover table-sm">
+						   					<thead>
+						   						<tr>
+						   							<th>Name</th>
+						   							<th>Description</th>
+						   							<th>URL</th>
+						   							<th>State</th>
+						   							<th>Physical Warehouse</th>
+						   						</tr>
+						   					</thead>
+						   					<tbody>
+						   						<tr ng-repeat="item in edgehubs" ng-click="viewEdgehub(item.id)">
+						   							<td>{{item.name}}</td>
+						   							<td>{{item.description}}</td>
+						   							<td>{{item.url}}</td>
+						   							<td>{{item.state}}</td>
+						   							<td>{{item.physicalWarehouse.name}}</td>
+						   						</tr>
+						   					</tbody>
+						   				</table>
+				   					</div>
+				   				</div>
+				   				
+				   			</div>
+				   		</div>
+					</div>
+				</div>
+			</div>
+	    </div>	
+	    <!-- Toast messaging: set messaging, set whether danger or success -->
+		<div ng-include="'/include/components/toast-message.html'"></div>
+			
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="newHubModal" role="dialog">
+	    	<div class="modal-dialog modal-lg" role="document">
+	    		<div class="modal-content">
+	    			<div class="card card-body">
+						<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+						<form name="hubForm" id="hubForm" novalidate>
+						<div class="row">
+							<div class="col-sm-6">
+								<div class="form-group">
+				   					<div class="input-group">
+				   						<label class="pe-2" for="id"><strong>Name</strong></label>
+				   						<div class="input-group-append">
+		            						<span class="text-danger">*</span>
+		            					</div>
+				   					</div>
+				   					<small>Give the Edgehub a name for display purposes.</small>
+				   					<input required class="form-control form-control-sm" type="text" name="name" id="name" ng-model="edgehub.name"
+				   					ng-class="{'is-invalid': hubForm.name.$touched && hubForm.name.$invalid, 'is-valid': hubForm.name.$touched && hubForm.name.$valid }"/>
+				   				</div>
+				   			</div>
+				   			<div class="col-sm-6">
+								<div class="form-group">
+				   					<div class="input-group">
+				   						<label class="pe-2" for="id"><strong>URL</strong></label>
+				   						<div class="input-group-append">
+		            						<span class="text-danger">*</span>
+		            					</div>
+				   					</div>
+				   					<small>Enter the URL for the Edgehub. Include the protocol (HTTP or HTTPS) as well as any port number if
+				   					a alternative port is being used.</small>
+				   					<input required class="form-control form-control-sm" type="text" name="url" id="url" ng-model="edgehub.url"
+				   					ng-class="{'is-invalid': hubForm.url.$touched && hubForm.url.$invalid, 
+				   					'is-valid': hubForm.url.$touched && hubForm.url.$valid }"/>
+				   				</div>
+				   			</div>
+				   			<div class="col-sm-12">
+				   				<div class="form-group">
+				   					<div class="input-group">
+				   						<label class="pe-2" for="description"><strong>Description</strong></label>
+				   						<div class="input-group-append">
+		            						<span class="text-danger"></span>
+		            					</div>
+				   					</div>
+				   					<small>Add an Edgehub description if applicable.</small>
+				   					<textarea class="form-control form-control-sm" name="description" id="description" rows="5" ng-model="edgehub.description">
+				   					</textarea>
+				   				</div>
+				   			</div>
+				   			<div class="col-sm-12">
+	   							<div class="form-group mt-2">
+				   					<div class="input-group">
+				   						<label class="pe-2" for="size"><strong>Physical Warehouse</strong></label>
+				   						<div class="input-group-append">
+		            						<span class="text-danger">*</span>
+		            					</div>
+				   					</div>
+				   				</div>
+				   				<p><small>Select the physical warehouse where this Edgehub device is located. A physical warehouse can only have a single Edgehub.</small></p>
+				   				<div class="input-group mb-3">
+									<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Warehouse</button>
+									<ul class="dropdown-menu">
+										<li ng-repeat="item in warehouses">
+											<a class="dropdown-item" href="" ng-click="setWarehouse(item);">
+												{{item.name}}
+											</a>
+										</li>
+									</ul>
+									<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="warehouse" 
+									id="warehouse" ng-model="edgehub.physicalWarehouse.name" /> 
+								</div>
+	   						</div>
+				   		</div>
+				   		<div class="row">
+				   			<div class="col-sm-12">
+				   				<div class="card card-body">
+				   					<div class="row">
+				   						<div class="col-sm-12">
+				   							<strong>Client Credentials</strong>
+							   					<p class="small">
+							   						Enter the client id and client secret for this edgehub. The credentials must exists and be active
+							   						in the Edgehub system in order to save this connection.
+							   					</p>
+				   						</div>
+				   					</div>
+				   					<div class="row">
+				   						<div class="col-sm-6">
+											<div class="form-group">
+							   					<div class="input-group">
+							   						<label class="pe-2" for="id"><strong>Client Id</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger">*</span>
+					            					</div>
+							   					</div>
+							   					<small>The name for the product.</small>
+							   					<input required class="form-control form-control-sm" type="text" name="clientId" id="clientId" ng-model="edgehub.clientId"
+							   					ng-class="{'is-invalid': hubForm.clientId.$touched && hubForm.clientId.$invalid, 
+							   					'is-valid': hubForm.clientId.$touched && hubForm.clientId.$valid }"/>
+							   				</div>
+							   			</div>
+							   			<div class="col-sm-6">
+											<div class="form-group">
+							   					<div class="input-group">
+							   						<label class="pe-2" for="id"><strong>Client Secret</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger">*</span>
+					            					</div>
+							   					</div>
+							   					<small>The name for the product.</small>
+							   					<input required class="form-control form-control-sm" type="text" name="clientSecret" id="clientSecret" ng-model="edgehub.clientSecret"
+							   					ng-class="{'is-invalid': hubForm.clientSecret.$touched && hubForm.clientSecret.$invalid, 
+							   					'is-valid': hubForm.clientSecret.$touched && hubForm.clientSecret.$valid }"/>
+							   				</div>
+				   						</div>
+				   					</div>
+				   				</div>
+				   			</div>
+				   		</div>
+						<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+								<button type="button" class="btn btn-outline-success m-1 btn-sm" ng-click="createEdgehub()">Create Edgehub</button>
+							</div>
+						</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>

@@ -1,0 +1,1813 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="orderController" 
+		ng-init="findById(); findApplicableTaxesByOrderId(); findAllCarriers(); findGlobalConfig(); findAllPhysicalWarehouses(); findAllSalesUsers();">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="configController" ng-init="findAllPaymentConfigData()">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/order">Sales Orders</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Order Details: {{order.id}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="row">
+								<div class="col-sm-4">
+									<h5 class="ms-2">
+										<span class="me-3"><strong>{{order.customer.name}}: </strong></span>
+										<span>
+											<strong ng-class="{'text-success': order.state != 'CANCELLED', 'text-danger': order.state === 'CANCELLED'}">
+												{{order.state}}
+											</strong>
+										</span>									
+									</h5>		
+									<span ng-if="order.state === 'QUOTE' && order.quoteDate != undefined" class="small ms-2 text-success fw-bold">Quote Sent: {{order.quoteDate | date:'mediumDate'}}</span>						
+								</div>
+								<div class="col-sm-4 text-center">
+									<div ng-show="order.suborders.length > 0">
+										<strong>This Order consists of multiple SubOrders:</strong>
+										<ul class="small list-group-flush list-group">
+											<li class="list-group-item" ng-repeat="item in order.suborders">
+												Order #: <a href="#/order/{{item.id}}">{{item.id}} - {{item.state}}</a> 
+											</li>
+										</ul>	
+									</div>
+									<div ng-show="order.parentOrderId != undefined">
+										<strong>This Order is part of a set of orders:</strong>
+										<ul class="small list-group-flush list-group">
+											<li class="list-group-item">
+												Parent Order #: <a href="#/order/{{order.parentOrderId}}">{{order.parentOrderId}}</a> 
+											</li>
+										</ul>	
+									</div>				
+								</div>
+								<div class="col-sm-4 text-end">
+									<h5 class="me-5">
+										<span class="">
+											<strong class="me-3" ng-class="{'text-success': order.state != 'CANCELLED', 'text-danger': order.state === 'CANCELLED'}">Total: <span ng-bind-html="order.price.total | supercurrency"></span></strong>
+										</span>
+									</h5>
+									<div class="me-5" ng-show="order.invoice != undefined && hasRole(['SALESMANAGER','ADMIN'])">
+										<span class="me-3" ><strong>Invoice #: <a href="#/invoice/{{order.invoice.id}}">{{order.invoice.id}}</a></strong></span>
+									</div>
+								</div>
+							</div>
+							<hr />
+							<div class="card card-body">
+								<ul class="nav nav-tabs">
+									<li class="nav-item">
+										<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#main" href="">Main</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-bs-toggle="tab" data-bs-target="#address" href="" ng-show="order.suborders.length == 0">Addresses</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-bs-toggle="tab" data-bs-target="#payment" href="" ng-show="order.suborders.length == 0">Payment</a>
+									</li>
+								</ul>
+								<div class="tab-content" id="tab">
+									<div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+										<div class="card m-1">
+											<div class="card-header">
+												<span class=""><strong>Order Actions</strong> </span>	
+												<span ng-show="order.suborders.length == 0">
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="order.state == 'QUOTE'">Send Quote</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#emailDialog" ng-click="prepEmail('SALESQUOTE')">
+																Email to Customer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'SALESQUOTE')">
+																Download PDF
+															</a>
+															<!--  
+															<a class="dropdown-item" href="/capture/order/pdf/{{order.id}}">
+																Download PDF
+															</a>
+															-->
+														</li>
+													</ul>
+													
+													<button type="button" ng-show="order.state != 'QUOTE' && order.items.length > 0" ng-click="prepEmail('SALESORDER')" data-bs-toggle="modal" data-bs-target="#emailDialog"
+													class="btn btn-outline-primary m-1 btn-sm float-end align-middle">Email Sales Order</button>
+													<button type="button" ng-show="order.state == 'QUOTE' && order.items.length > 0" ng-click="bookOrder(order.id)"
+													class="btn btn-outline-success m-1 btn-sm float-end align-middle">Book Sales Order</button>
+													<button type="button" ng-show="order.state != 'QUOTE' && order.state != 'SHIPPED' && order.state != 'CANCELLED' && order.state != 'INVOICED' && order.state != 'COMPLETE'" ng-click="changeOrderState(order.id, 'QUOTE')"
+													class="btn btn-outline-warning m-1 btn-sm float-end">Edit Sales Order</button>
+													<button type="button" ng-click="pickOrder(order.id);" ng-show="order.state === 'BOOKED' || order.state === 'PICKING'" 
+													class="btn btn-outline-success m-1 btn-sm float-end">Pick Sales Order</button>
+													
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="order.state === 'PICKING' || order.state === 'PICKED' || order.state === 'PACKING' || order.state === 'PACKED'
+													 	|| order.state === 'SHIPPED' || order.state === 'PARTIAL_SHIP' || order.state === 'INVOICED' || order.state === 'COMPLETE'">Packing Slip</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'PACK')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+													<button type="button" data-bs-toggle="modal" data-bs-target="#returnDialog" 
+													ng-show="order.state === 'COMPLETE' || order.state === 'SHIPPED' || order.state === 'INVOICED'" 
+													class="btn btn-outline-warning m-1 btn-sm float-end" ng-click="buildRMA(order.id)">Return Sales Order</button>
+													<button type="button" ng-click="packOrder(order.id)" ng-show="order.state === 'PICKED' || order.state === 'PACKING'" 
+													class="btn btn-outline-success m-1 btn-sm float-end">Pack Sales Order</button>
+													<button type="button" ng-show="order.state == 'PACKED'" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="shipOrder(order.id)">Ship Sales Order</button>
+													<button type="button" ng-show="showInvoiceBtn"class="btn btn-outline-success m-1 btn-sm float-end"
+													ng-click="generateInvoiceByOrderId(order.id)">Invoice Sales Order</button>
+													<button type="button" ng-show="(order.state != 'SHIPPED' && order.state != 'CANCELLED' && order.state != 'INVOICED' && order.state != 'COMPLETE')" 
+													class="btn btn-outline-danger m-1 btn-sm float-end" ng-click="changeOrderState(order.id, 'CANCELLED')">Cancel Sales Order</button>
+													
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false">Print Sales Order</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'ORDER'">
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'SALESORDER')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+													
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="(order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'COMPLETE')
+													 && (order.shipToAddress.country != order.warehouse.address.country)">Commercial Invoice</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'COMINVOICE'">
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'COMINVOICE')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+												
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="(order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'COMPLETE') 
+													 && (order.shipToAddress.country != order.warehouse.address.country)">Commercial Packing Slip</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'COMPACK'">
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'COMPACKING')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+													
+													<p><small>The actions to the right can be performed on the current order based on its current state. As the state changes
+													actions will be available and unavailable based on the sales order state value.</small></p>
+												</span>
+											</div>
+											<div class="card-body">
+												<div class="row">
+													<div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Sales Order Id</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>Order's id value.</small></p>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="order.id"/>
+										   				</div>
+													</div>
+													<div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Sales Order State</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>The current state that the order is in.</small></p>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="name" id="name" ng-model="order.state"
+										   					ng-class="{'is-invalid': productForm.name.$touched && productForm.name.$invalid, 
+										   					'is-valid': productForm.name.$touched && productForm.name.$valid }"/>
+										   				</div>
+										   			</div>
+									   				<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="creationDate"><strong>Requested Ship By Date</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>If required, set a requested ship by date.</small></p>
+										   					<input ng-disabled="order.state != 'QUOTE'" class="form-control form-control-sm" type="date" name="requestedShipDate" id="requestedShipDate" ng-model="order.requestedShipDate"/>
+										   				</div>
+										   			</div>
+									   				<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="creationDate"><strong>Submitted Date</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>Auto generated date for when the order was first created within the system.</small></p>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="submittedDate" id="submittedDate" ng-model="order.submittedDate"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="availabilityDate"><strong>Shipped Date</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>The date that the order was shipped.</small></p>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="shippedDate" id="shippedDate" ng-model="order.shippedDate"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="lastModifiedDate"><strong>Last Modified Date</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>Auto generated date for when the order was last updated within the system.</small></p>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="order.lastModifiedDate"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6"> 
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="lastModifiedDate"><strong>Purchase Order Number</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>Enter customer's Purchase Order Number.</small></p>
+										   					<input class="form-control form-control-sm" ng-disabled="order.state != 'QUOTE'" type="text" name="poNumber" id="poNumber" ng-model="order.poNumber"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+							   							<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="size"><strong>Warehouse</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   				</div>
+										   				<p><small>The warehouse selected for this order's fulfillment.</small></p>
+										   				<div class="input-group mb-3">
+															<input ng-disabled="true" type="text" class="form-control form-control-sm" name="warehouse" id="warehouse" ng-model="order.warehouse.name" /> 
+														</div>
+							   						</div>
+							   						<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="salesRep"><strong>Sales Representative</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>Select the sales representative for this sales order.</small></p>
+										   					<div class="input-group mb-3">
+																<button ng-disabled="order.state != 'QUOTE'" class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Sales Rep</button>
+																<ul class="dropdown-menu">
+																	<li ng-repeat="item in salesusers">
+																		<a class="dropdown-item" href="" ng-click="setSalesRep(item);">
+																			{{item.name}}
+																		</a>
+																	</li>
+																</ul>
+																<input ng-disabled="true" type="text" class="form-control form-control-sm" name="salesRep" id="salesRep" ng-model="order.soldBy.name" /> 
+															</div>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-12"> 
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="instructions"><strong>Special Instructions</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<p><small>Enter any special instructions.</small></p>
+										   					<textarea class="form-control form-control-sm" ng-disabled="order.state != 'QUOTE'" rows="5" name="instructions" id="instructions" ng-model="order.instructions">
+										   					</textarea>
+										   				</div>
+										   			</div>
+												</div>
+												<div class="row mt-3">
+													<div class="col-sm-12">
+														<button type="button" class="btn btn-outline-success float-end me-2 btn-sm" ng-click="updateOrder()" 
+														ng-show="order.state == 'QUOTE'">Save Sales Order</button>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- If is a parent order then add each of the suborders. Items cannot be editted in this screen -->
+										<div class="row" ng-repeat="suborder in order.suborders" ng-if="order.suborders.length > 0">
+											<div class="col-sm-12">
+												<div class="card m-1">
+													<div class="card-header">
+														<span class=""><strong>Sales Order SubOrder #: {{suborder.id}}</strong> </span>
+														<span class="float-end" ng-show="suborder.invoice != undefined"><strong>Invoice #: <a href="#/invoice/{{suborder.invoice.id}}">{{suborder.invoice.id}}</a></strong></span>
+														<p class="fw-bold small">{{suborder.state}}</p>
+													</div>
+													<div class="card-body">
+														<table class="table table-sm table-striped small">
+															<thead>
+																<tr>
+																	<th class="">Line</th>
+																	<th class="">Id</th>
+																	<th class="">Name</th>
+																	<th class="">SKU Id</th>
+																	<th class="">Sales Terms</th>
+																	<!-- Not used until packing state -->
+																	<th class="text-center" ng-if="order.state != 'QUOTE'">Lot/Serial</th>
+																	<!-- End -->
+																	<th class="text-center">Quantity</th>
+																	<th class="text-center">Price</th>
+																	<th class="text-center">Tax</th>
+																	<th class="text-center">Amount</th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr class="" ng-repeat="citem in suborder.items | orderBy:'+lineNumber'">
+																	<td class="align-text-top">{{$index + 1}}</td>
+																	<td class="align-text-top">{{citem.sku.productId}}</td>
+																	<td class="align-text-top">{{citem.sku.productName}}
+																		<span ng-if="citem.sku.description != undefined" class="small fw-light">
+																			<br />{{citem.sku.description}}
+																		</span>
+																	</td>
+																	<td class="align-text-top">{{citem.sku.id}}</td>
+																	<td class="align-text-top">{{citem.salesTerms}}</td>
+																	<!-- These are not used until packing -->
+																	<td class="align-text-top" ng-if="order.state != 'QUOTE'">{{citem.inventory.lotSerial</td>
+																	<!-- End -->
+																	<td class="align-text-top text-center">
+																			{{citem.quantityOrdered | number}} 
+																			<span class="text-danger small fw-bold" ng-if="citem.inventoryType == 'DROPSHIP'"><br />This is a dropship item.</span>
+																	</td>
+																	<td class="align-text-top text-center"><span ng-bind-html="citem.unitPrice | supercurrency"></span></td>
+																	<td class="align-text-top text-center">{{citem.tax}}</td>
+																	<td class="align-text-top text-center"><span ng-bind-html="(citem.unitPrice * citem.quantityOrdered) | supercurrency"></span></td>
+																</tr>
+															</tbody>	
+														</table>
+														<table class="table table-striped table-sm small">		
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td></td>
+																	<td></td>
+																	<td></td>
+																	<td></td>
+																	<td></td>
+																	<td></td>
+																	<td></td>
+																	<td></td>
+																	<td class="text-end">
+																		
+																	</td>
+																	<td class="text-end">
+																		<strong class="me-3">Item Subtotal:</strong><strong class="me-2">
+																			<span ng-bind-html="calculateRawSubtotal(suborder.id, true) | supercurrency : suborder.price.currency.symbol"></span> 
+																		</strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small" ng-show="suborder.price.discounts.length > 0">
+															<tbody>	
+																<tr class="bg-light">
+																	<td class="text-start">
+																		<strong>Discounts</strong>
+																	</td>
+																	<td class="text-end">
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light" ng-repeat="item in suborder.price.discounts">
+																	<td class="text-end">
+																		
+																	</td>
+																	<td class="text-end">
+																		<strong class="me-3">{{item.name}} <span ng-if="item.type == 'PERCENT'">(-{{item.amount}} %)</span>: </strong> <strong class="me-2">- <span ng-bind-html="item.savings | supercurrency : suborder.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Subtotal:</strong><strong class="me-2"><span ng-bind-html="suborder.price.subtotal | supercurrency : suborder.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="bg-light">
+																	<td class="text-start">
+																		<strong>Taxes</strong>
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light" ng-repeat="item in suborder.price.taxes | orderBy: '+name'">
+																	<td class="text-end">
+																		<strong class="me-3">{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</strong><strong class="me-2"><span ng-bind-html="item.amount | supercurrency : suborder.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small" ng-show="suborder.price.shipInfo.carrier != undefined">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-end align-middle" ng-show="true">
+																		<strong class="me-3" ng-show="suborder.state == 'SHIPPED' || suborder.state == 'INVOICED' || suborder.state == 'PARTIAL_SHIP'
+																		|| suborder.state == 'COMPLETE' || suborder.state == 'RETURNED'">Shipped Via: </strong>
+																		<strong class="me-3" ng-show="suborder.state == 'SHIPPED' || suborder.state == 'INVOICED' || suborder.state == 'PARTIAL_SHIP'
+																		|| suborder.state == 'COMPLETE' || suborder.state == 'RETURNED'">Ship Via: </strong>
+																		<span class="align-middle me-2"  ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="suborder.price.shipInfo.carrier.name == 'Canada Post'" />
+												   						<strong class="ms-2 me-3" ng-show="suborder.state == 'SHIPPED' || suborder.state == 'INVOICED' || suborder.state == 'PARTIAL_SHIP'
+																		|| suborder.state == 'COMPLETE' || suborder.state == 'RETURNED'">Shipping Total: </strong>
+												   						<strong class="me-2" ng-show="suborder.state == 'SHIPPED' || suborder.state == 'INVOICED' || suborder.state == 'PARTIAL_SHIP'
+																		|| suborder.state == 'COMPLETE' || suborder.state == 'RETURNED'"><span ng-bind-html="suborder.price.shipInfo.amount : suborder.price.currency.symbol"></span> </strong>
+												   						<p ng-show="order.state == 'SHIPPED' || suborder.state == 'INVOICED' || suborder.state == 'PARTIAL_SHIP'
+																		|| suborder.state == 'COMPLETE' || suborder.state == 'RETURNED'">
+												   							<strong>Tracking #: <a href="">{{suborder.price.shipInfo.trackingNumber}}</a></strong>
+												   						</p>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Total:</strong><strong class="me-2"><span ng-bind-html="suborder.price.total | supercurrency : suborder.price.currency.symbol"></span> {{suborder.price.currency.code}}</strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Suborder Summary -->
+										<div class="row" ng-if="order.suborders.length > 0">
+											<div class="col-sm-12">
+												<div class="card m-1">
+													<div class="card-header">
+														<span class=""><strong>Sales Order #: {{order.id}}</strong></span>
+													</div>
+													<div class="card-body">
+														<!-- Now The entire order -->
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Total Discounts:</strong><strong class="me-2">- <span ng-bind-html="order.price.discountTotal | supercurrency : order.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Sales Order Subtotal:</strong><strong class="me-2"><span ng-bind-html="order.price.subtotal | supercurrency : order.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="mt-2 bg-light" ng-repeat="item in order.price.taxes | orderBy: '+name'">
+																	<td class="text-end" >
+																		<strong class="me-3" ng-if="$first">Taxes:</strong>
+																		<strong class="me-3">{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</strong><strong class="me-2"><span ng-bind-html="item.amount | supercurrency : order.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Shipping Total:</strong><strong class="me-2"><span ng-bind-html="order.price.shipInfo.amount | supercurrency : order.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Sales Order Total:</strong><strong class="me-2"><span ng-bind-html="order.price.total | supercurrency : order.price.currency.symbol"></span> {{order.price.currency.code}}</strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Single Order -->
+										<div class="row" ng-if="order.suborders.length == 0">
+											<div class="col-sm-12">
+												<div class="card m-1">
+														<div class="card-header">
+															<span class=""><strong>Sales Order Items</strong> <span class="ms-2 badge bg-dark">{{order.items.length}}</span></span>	
+															<button class="btn btn-outline-success float-end btn-sm" ng-click="saveOrderItems()" 
+															ng-show="order.state == 'QUOTE'">Save Items To Sales Order</button>										
+															<h6>Update or add items below. To remove an item set the quantity to "0" and save.</h6>
+														</div>
+													<div class="card-body">
+														<table class="table table-striped table-sm table-striped table-hover small">
+															<thead>
+																<tr>
+																	<th width="5%" class="">Line</th>
+																	<th width="15%">Product Id</th>
+																	<th width="15%">Product Name</th>
+																	<th width="10%">SKU Id</th>
+																	<th width="7%">Sales Terms</th>
+																	<!-- Not used until packing state -->
+																	<th width="15%" class="text-center" ng-if="order.state != 'QUOTE'">Lot/Serial</th>
+																	<!-- End -->
+																	<th width="8%" class="text-center">Quantity</th>
+																	<th width="8%" class="text-center">Price</th>
+																	<th width="7%" class="text-center">Tax</th>
+																	<th width="10%" class="text-end me-1">Amount</th>
+																</tr>
+															</thead>
+															<tbody>
+																<tr class="" ng-repeat="citem in citemArray | orderBy:'+lineNumber' track by $index">
+																	<td class="align-text-top">{{$index + 1}}</td>
+																	<td class="align-text-top">{{citem.sku.productId}}</td>
+																	<td class="align-text-top">{{citem.sku.productName}}
+																		<span ng-if="citem.sku.description != undefined" class="small fw-light">
+																			<br />{{citem.sku.description}}
+																		</span>
+																	</td>
+																	<td class="align-text-top">
+																		{{citem.sku.id}}
+																		<span class="text-danger small fw-bold" ng-if="citem.dropship"><br />This is a dropship item.</span>
+																	</td>
+																	<td class="align-text-top">
+																		<select ng-if="order.state == 'QUOTE'" class="form-select form-select-sm" ng-model="citem.salesTerms" id="salesTerms" name="salesTerms">
+																			<option value="OUTRIGHT">Outright</option>
+																			<option value="EXCHANGE">Exchange</option>
+																		</select>
+																		<span ng-if="order.state != 'QUOTE'">{{citem.salesTerms}}</span>
+																	</td>
+																	<!-- These are not used until packing -->
+																	<td class="align-text-top text-center" ng-if="order.state != 'QUOTE'">
+																		<span ng-repeat="lot in citem.inventoryLots">
+																			{{lot.inventory.lotSerial}} <span ng-if="!$first && !$last">,</span>
+																		</span>					
+																	</td>
+																	<!-- End -->
+																	<td class="align-text-top text-center">
+																		<span ng-if="order.state == 'QUOTE'">
+																			<input class="form-control form-control-sm" ng-change="repriceOrder()" ng-model="citem.quantity" type="number" id="itemQuantity" 
+																			name="itemQuantity">
+																			<span class="text-danger small fw-bold" ng-show="citem.backordered > 0">{{citem.backordered}} items are backordered</span>
+																			<span class="text-danger small fw-bold" ng-if="citem.inventoryType == 'DROPSHIP'">This is a dropship item.</span>
+																		</span>
+																		<span ng-if="order.state != 'QUOTE'">
+																			{{citem.quantityOrdered | number}} 
+																		</span>
+																	</td>
+																	<td class="align-text-top text-center">
+																		<span ng-if="order.state == 'QUOTE'">
+																			<div class="input-group input-group-sm">	
+																				<span class="input-group-text">$</span>	   					
+														   						<input class="form-control form-control-sm" required
+														   						ng-model="citem.price" type="number" step="any" id="itemPrice" name="itemPrice" ng-change="repriceOrder()" >			   						 
+														   					</div> 
+														   				</span>
+														   				<span ng-if="order.state != 'QUOTE'" ng-bind-html="citem.unitPrice | supercurrency : order.price.currency.symbol"></span>
+																	</td>
+																	<td class="align-text-top text-center">  					
+												   						<select ng-if="order.state == 'QUOTE'" class="form-select form-select-sm" ng-model="citem.tax" id="itemTax" name="itemTax" ng-disabled="order.state != 'QUOTE'">
+																			<option ng-repeat="item in taxes" value="{{item.name}}">{{item.name}}</option>
+																		</select>
+																		<span ng-if="order.state != 'QUOTE'" ng-repeat="item in citem.priceInfo.taxes">
+																			<small>{{item.name}}<span ng-if="$middle">,</span></small>
+																		</span>
+																	</td>
+																	<td class="align-text-top text-end me-1">
+																		<div class="input-group input-group-sm" ng-if="order.state == 'QUOTE'">	
+																			<span class="input-group-text">{{order.price.currency.symbol}}</span>	   					
+													   						<input ng-disabled="true" class="form-control" ng-value="calculate(citem.quantity,citem.price)"
+													   						ng-model="citem.subtotal" type="number" type="number" id="subtotal" name="subtotal">			   						 
+													   					</div> 
+													   					<span ng-if="order.state != 'QUOTE'" ng-bind-html="citem.priceInfo.subtotal | supercurrency : order.price.currency.symbol"></span>
+																	</td>
+																</tr>
+																<tr ng-repeat-end ng-if="order.state == 'QUOTE'">
+																	<td class="align-middle" colspan="9">
+																		<div class="input-group input-group-sm" style="width:200px;">		   					
+													   						<input  class="form-control " required type="text" placeholder="Product Id" id="productId" name="productId">
+												   							<button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#findProductModal">
+												   								<i class="fa fa-search"></i>
+												   							</button>		   						 
+													   					</div> 
+																	</td>
+																</tr>
+																<tr>
+																	<td ng-if="order.state != 'QUOTE'" colspan="9"></td>
+																	<td ng-if="order.state == 'QUOTE'" colspan="8"></td>
+																	<td class="text-end me-1">
+																		<span><strong>Subtotal: </strong><strong><span ng-bind-html="order.price.subtotal | supercurrency : order.price.currency.symbol"></span></strong> </span>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm mt-2 small">
+															<tbody>
+																<tr class="bg-light">
+																	<td colspan="2">
+																		<span class=""><strong>Discounts</strong> <span class="ms-2 badge bg-dark">{{order.price.discounts.length}}</span></span>
+																		<button class="btn btn-outline-success float-end btn-sm" ng-click="setDiscountEmpty();" data-bs-toggle="modal" data-bs-target="#discountDialog" 
+																		ng-show="order.state == 'QUOTE'">Add Discount</button>		
+																		<p>Manage discounts on the sales order. Click the Add Discount button to create a new discount.</p>
+																	</td>
+																</tr>
+																<tr class="m-0" ng-repeat="item in order.price.discounts" ng-click="findDiscountById(item.id)" data-bs-toggle="modal" data-bs-target="#discountDialog">
+																	<td class="text-end">
+																		
+																	</td>
+																	<td class="text-end">
+																		<strong class="me-3">{{item.name}} <span ng-if="item.type == 'PERCENT'">(-{{item.amount}} %)</span>: </strong> <strong class="me-2">- <span ng-bind-html="item.savings | supercurrency : order.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>													
+														<table class="table table-sm small">
+															<tbody>
+																<tr class="bg-light">
+																	<td colspan="2">
+																		<span class=""><strong>Taxes</strong></span>		
+																		<p>A list of the taxes applied to the sales order.</p>
+																	</td>
+																</tr>
+																<tr class="" ng-repeat="item in order.price.taxes | orderBy: '+name'">
+																	<td class="text-end" >
+																		<span>
+																			<strong class="me-3">{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</strong>
+																			<strong class="me-2"><span ng-bind-html="item.amount | supercurrency : order.price.currency.symbol"></span> </strong>
+																		</span>
+																	</td>
+																</tr>
+															</tbody>
+														</table>  
+														
+														<table class="table table-sm small" ng-if="order.price.shipInfo.carrier.name == 'Pickup'">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-start align-bottom" width="33%">
+																		<div class="form-group mt-2" ng-show="order.state != 'SHIPPED' && order.state != 'INVOICED' && order.state != 'PARTIAL_SHIP'
+																		&& order.state != 'COMPLETE' && order.state != 'RETURNED'">
+																			<div class="form-group mt-2">
+															 					<div class="input-group">
+															 						<label class="pe-2" for="size"><strong>Carrier</strong></label>
+															 						<div class="input-group-append">
+														        						<span class="text-danger">*</span>
+														        					</div>
+															 					</div>
+															 				</div>
+														 					<p><small>Select the carrier for shipment</small></p>
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" 
+																				ng-disabled="order.state != 'QUOTE'" aria-expanded="false">Select Carrier</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="item in carriers">
+																						<a class="dropdown-item" href="" ng-click="setCarrier(item);">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="shipper" id="shipper" 
+																				ng-model="order.price.shipInfo.carrier.name" /> 
+																			</div>
+																		</div>
+																	</td>
+																	<td class="text-start align-bottom" width="33%">
+																		<div class="form-group mt-2">
+														 					<div class="input-group">
+														 						<label class="pe-2" for="size"><strong>Pickup Location</strong></label>
+														 						<div class="input-group-append">
+														        						<span class="text-danger">{{(warehouses.length > 1 ? '*' : '')}}</span>
+														        					</div>
+														 					</div>
+														 				</div>
+													 					<p><small>Select a store or warehouse location for pickup of this sales order.</small></p>
+													 					<div class="input-group mb-3">
+																			<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Location</button>
+																			<ul class="dropdown-menu">
+																				<li ng-repeat="item in warehouses">
+																					<a class="dropdown-item" href="" ng-click="setPickupWarehouse(item);">
+																						{{item.name}}
+																					</a>
+																				</li>
+																			</ul>
+																			<input ng-required="warehouses.length > 1" ng-disabled="true" type="text" class="form-control form-control-sm" name="pickupLocation" id="pickupLocation" 
+																			ng-model="order.price.shipInfo.pickupLocation.name" /> 
+																		</div>
+																	</td>
+																	<td class="text-end align-middle" ng-show="order.state == 'QUOTE' || order.state == 'BOOKED' || order.state == 'PACKED'
+																		|| order.state == 'PICKED' || order.state == 'PICKING'">
+																		<strong class="me-3">Ship Via: </strong>
+																		<span class="align-middle me-2" ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="order.price.shipInfo.carrier.name == 'Canada Post'" />
+												   						
+																	</td>
+																	<td class="text-end" ng-show="order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'PARTIAL_SHIP'
+																		|| order.state == 'COMPLETE' || order.state == 'RETURNED'">
+																		<strong class="me-3">Shipped Via: </strong>
+																		<span ng-if="order.price.shipInfo.carrier.logo != undefined" class="align-middle me-2" ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+												   						<span ng-if="order.price.shipInfo.carrier.logo == undefined" class="align-middle me-2">{{order.price.shipInfo.carrier.name}}</span> 
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="order.price.shipInfo.carrier.name == 'Canada Post'" />
+												   						<strong class="ms-2 me-3">Shipping: </strong>
+												   						<strong class="me-2"><span ng-bind-html="order.price.shipInfo.amount | supercurrency : order.price.currency.symbol "></span> </strong>
+												   						<br />
+												   						<strong>Tracking #: <a href="">{{order.price.shipInfo.trackingNumber}}</a></strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														
+														<table class="table table-sm small" ng-if="order.price.shipInfo.carrier.name != 'Pickup'">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-start align-bottom" width="33%">
+																		<div class="form-group mt-2" ng-show="order.state != 'SHIPPED' && order.state != 'INVOICED' && order.state != 'PARTIAL_SHIP'
+																		&& order.state != 'COMPLETE' && order.state != 'RETURNED'">
+																			<div class="form-group mt-2">
+															 					<div class="input-group">
+															 						<label class="pe-2" for="size"><strong>Carrier</strong></label>
+															 						<div class="input-group-append">
+														        						<span class="text-danger">*</span>
+														        					</div>
+															 					</div>
+															 				</div>
+														 					<p><small>Select the carrier for shipment</small></p>
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" 
+																				ng-disabled="order.state != 'QUOTE'" aria-expanded="false">Select Carrier</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="item in carriers">
+																						<a class="dropdown-item" href="" ng-click="setCarrier(item);">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="shipper" id="shipper" 
+																				ng-model="order.price.shipInfo.carrier.name" /> 
+																			</div>
+																		</div>
+																	</td>
+																	<td class="text-start align-bottom" width="33%">
+																		<div ng-show="(order.price.shipInfo.carrier.name != 'Self Delivery' && order.price.shipInfo.carrier.name != 'Pickup') && 
+																			(order.state != 'SHIPPED' && order.state != 'INVOICED' && order.state != 'PARTIAL_SHIP' && order.state != 'COMPLETE' && order.state != 'RETURNED')">
+																			<div class="form-group mt-2">
+															 					<div class="input-group">
+															 						<label class="pe-2" for="size"><strong>Account Number</strong></label>
+															 						<div class="input-group-append">
+															        						<span class="text-danger"></span>
+															        					</div>
+															 					</div>
+															 				</div>
+														 					<p><small>Enter customer carrier account number if applicable.</small></p>
+														 					<div class="input-group mb-3">
+														 						<input ng-disabled="order.state != 'QUOTE'" type="text" class="form-control form-control-sm" name="accountNumber" id="accountNumber" ng-model="order.price.shipInfo.accountNumber" />
+														 						<button ng-disabled="order.state != 'QUOTE'" class="btn btn-outline-secondary btn-sm" type="button" ng-click="setCarrier(order.price.shipInfo.carrier)">Set Account</button>
+														 					</div>
+														 				</div>
+																	</td>
+																	<td class="text-end align-middle" ng-show="order.state == 'QUOTE' || order.state == 'BOOKED' || order.state == 'PACKED'
+																		|| order.state == 'PICKED' || order.state == 'PICKING'">
+																		<strong class="me-3">Ship Via: </strong>
+																		<span ng-if="order.price.shipInfo.carrier.logo != undefined" class="align-middle me-2" ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+												   						<span ng-if="order.price.shipInfo.carrier.logo == undefined" class="align-middle me-2">{{order.price.shipInfo.carrier.name}}</span>  
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="order.price.shipInfo.carrier.name == 'Canada Post'" />
+												   						
+																	</td>
+																	<td class="text-end" ng-show="order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'PARTIAL_SHIP'
+																		|| order.state == 'COMPLETE' || order.state == 'RETURNED'">
+																		<strong class="me-3">Shipped Via: </strong>
+																		<span ng-if="order.price.shipInfo.carrier.logo != undefined" class="align-middle me-2" ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+												   						<span ng-if="order.price.shipInfo.carrier.logo == undefined" class="align-middle me-2">{{order.price.shipInfo.carrier.name}}</span> 
+												   						
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="order.price.shipInfo.carrier.name == 'Canada Post'" />
+												   						<strong class="ms-2 me-3">Shipping: </strong>
+												   						<strong class="me-2"><span ng-bind-html="order.price.shipInfo.amount | supercurrency : order.price.currency.symbol"></span> </strong>
+												   						<br />
+												   						<strong>Tracking #: <a href="">{{order.price.shipInfo.trackingNumber}}</a></strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														
+														<table class="table table-sm mt-2 small">
+															<tbody>
+																<tr class="bg-light">
+																	<td colspan="2">
+																		<span class=""><strong>Summary</strong></span>		
+																		<p>The cost summary breakdown for the sales order.</p>
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Discounts:</strong><strong class="me-2"> - <span ng-bind-html="(order.price.discountTotal == undefined ? 0.00 : order.price.discountTotal) | supercurrency : order.price.currency.symbol"></span> </strong>
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Subtotal:</strong><strong class="me-2"><span ng-bind-html="order.price.subtotal | supercurrency : order.price.currency.symbol "></span> </strong>
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Taxes:</strong><strong class="me-2"><span ng-bind-html="order.price.taxTotal | supercurrency : order.price.currency.symbol "></span> </strong>
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end align-center">
+																		<div class="" ng-if="order.state == 'QUOTE'">
+																			<input class="form-control form-control-sm float-end" ng-blur="setShipAmount()" style="max-width:75px;" ng-model="order.price.shipInfo.amount" step=".01" type="number" id="shipAmount" name="shipAmount">
+																			<span class="float-end me-2"><strong>Shipping: </strong></span>
+																		</div>
+																		
+																		<div ng-if="order.state != 'QUOTE'">
+																			<strong class="me-3">Shipping:</strong><strong class="me-2"><span ng-bind-html="order.price.shipInfo.amount | supercurrency : order.price.currency.symbol "></span> </strong>
+																		</div>
+																	</td>
+																</tr>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Total:</strong><strong class="me-2"><span ng-bind-html="order.price.total | supercurrency : order.price.currency.symbol "></span> {{order.price.currency.code}}</strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>	
+													</div>
+												</div>
+												<div class=""></div>
+											</div>
+										</div>
+										<div class="card m-1">
+											<div class="card-header">
+												<span class=""><strong>Order Actions</strong> </span>	
+												<span ng-show="order.suborders.length == 0">
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="order.state == 'QUOTE'">Send Quote</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#emailDialog" ng-click="prepEmail('SALESQUOTE')">
+																Email to Customer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'SALESQUOTE')">
+																Download PDF
+															</a>
+															<!--  
+															<a class="dropdown-item" href="/capture/order/pdf/{{order.id}}">
+																Download PDF
+															</a>
+															-->
+														</li>
+													</ul>
+													
+													<button type="button" ng-show="order.state != 'QUOTE' && order.items.length > 0" ng-click="prepEmail('SALESORDER')" data-bs-toggle="modal" data-bs-target="#emailDialog"
+													class="btn btn-outline-primary m-1 btn-sm float-end align-middle">Email Sales Order</button>
+													<button type="button" ng-show="order.state == 'QUOTE' && order.items.length > 0" ng-click="bookOrder(order.id)"
+													class="btn btn-outline-success m-1 btn-sm float-end align-middle">Book Sales Order</button>
+													<button type="button" ng-show="order.state != 'QUOTE' && order.state != 'SHIPPED' && order.state != 'CANCELLED' && order.state != 'INVOICED' && order.state != 'COMPLETE'" ng-click="changeOrderState(order.id, 'QUOTE')"
+													class="btn btn-outline-warning m-1 btn-sm float-end">Edit Sales Order</button>
+													<button type="button" ng-click="pickOrder(order.id);" ng-show="order.state === 'BOOKED' || order.state === 'PICKING'" 
+													class="btn btn-outline-success m-1 btn-sm float-end">Pick Sales Order</button>
+													
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="order.state === 'PICKING' || order.state === 'PICKED' || order.state === 'PACKING' || order.state === 'PACKED'
+													 	|| order.state === 'SHIPPED' || order.state === 'PARTIAL_SHIP' || order.state === 'INVOICED' || order.state === 'COMPLETE'">Packing Slip</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'PACK')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+													<button type="button" data-bs-toggle="modal" data-bs-target="#returnDialog" 
+													ng-show="order.state === 'COMPLETE' || order.state === 'SHIPPED' || order.state === 'INVOICED'" 
+													class="btn btn-outline-warning m-1 btn-sm float-end" ng-click="findRMAForOrderId(order.id)">Return Sales Order</button>
+													<button type="button" ng-click="packOrder(order.id)" ng-show="order.state === 'PICKED' || order.state === 'PACKING'" 
+													class="btn btn-outline-success m-1 btn-sm float-end">Pack Sales Order</button>
+													<button type="button" ng-show="order.state == 'PACKED'" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="shipOrder(order.id)">Ship Sales Order</button>
+													<button type="button" ng-show="showInvoiceBtn"class="btn btn-outline-success m-1 btn-sm float-end"
+													ng-click="generateInvoiceByOrderId(order.id)">Invoice Sales Order</button>
+													<button type="button" ng-show="(order.state != 'SHIPPED' && order.state != 'CANCELLED' && order.state != 'INVOICED' && order.state != 'COMPLETE')" 
+													class="btn btn-outline-danger m-1 btn-sm float-end" ng-click="changeOrderState(order.id, 'CANCELLED')">Cancel Sales Order</button>
+													
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false">Print Sales Order</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'ORDER'">
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'SALESORDER')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+													
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="(order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'COMPLETE')
+													 && (order.shipToAddress.country != order.warehouse.address.country)">Commercial Invoice</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'COMINVOICE'">
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'COMINVOICE')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+												
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false" ng-if="(order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'COMPLETE') 
+													 && (order.shipToAddress.country != order.warehouse.address.country)">Commercial Packing Slip</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'COMPACK'">
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadSalesOrderPDF(order.id, 'COMPACKING')">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+													
+													<p><small>The actions to the right can be performed on the current order based on its current state. As the state changes
+													actions will be available and unavailable based on the sales order state value.</small></p>
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="tab-pane fade show" id="address" role="tabpanel" aria-labelledby="address-tab" ng-show="order.suborders.length == 0">
+										<div class="row mt-3">
+											<div class="col-sm-6">
+												<form name="billToForm" id="billToForm" novalidate>
+												<strong>Bill To:</strong>
+												<div class="card card-body">
+													<div class="row">
+														<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="availabilityDate"><strong>Contact Name</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="billContactName" id="billContactName" ng-model="order.billToAddress.contactName"
+											   					ng-class="{'is-invalid': billForm.billToContactName.$invalid, 'is-valid': billToForm.billContactName.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="availabilityDate"><strong>Contact Email</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="email" name="billContactEmail" id="billContactEmail" ng-model="order.billToAddress.contactEmail"
+											   					ng-class="{'is-invalid': billToForm.billContactEmail.$invalid, 'is-valid': billToForm.billContactEmail.$valid }" 
+											   					ng-disabled="order.state != 'QUOTE'" ng-pattern="/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/"/>
+											   				</div>
+											   			</div>
+														<div class="col-lg-6">
+															<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Address 1</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   					<input required class="form-control form-control-sm" type="text" name="billAddress1" id="billAddress1" ng-model="order.billToAddress.address1"
+											   					ng-class="{'is-invalid': billToForm.billAddress1.$invalid, 'is-valid': billToForm.billAddress1.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+										   				</div>
+										   				<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Address 2</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="billAddress2" id="billAddress2" ng-model="order.billToAddress.address2"
+											   					ng-class="{'is-invalid': billToForm.billAddress2.$invalid, 'is-valid': billToForm.billAddress2.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+										   				</div>
+										   				<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Address 3</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="billAddress3" id="billAddress3" ng-model="order.billToAddress.address3"
+											   					ng-class="{'is-invalid': billToForm.billAddress3.$invalid, 'is-valid': billToForm.billAddress3.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>City</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   					<input required class="form-control form-control-sm" type="text" name="billCity" id="billCity" ng-model="order.billToAddress.city"
+											   					ng-class="{'is-invalid': billToForm.billCity.$invalid, 'is-valid': billToForm.billCity.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="size"><strong>Country</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   				</div>
+								   							<div class="input-group mb-3">
+																<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" ng-disabled="order.state === 'CANCELLED'" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+																<ul class="dropdown-menu">
+																	<li class="m-2">  
+																		<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+													   					<input class="form-control form-control-sm" type="text" name="bCountryFilter" id="bCountryFilter" ng-model="bCountryFilter"/>	
+																	</li>
+																	<li ng-repeat="item in countries | filter: bCountryFilter | orderBy: '+isoCode'" ng-class="{'disabled': order.state === 'CANCELLED'}">
+																		<a class="dropdown-item" href="" ng-click="order.state == 'QUOTE' && setOrderCountry(item.isoCode, 'bill')">
+																			{{item.name}}
+																		</a>
+																	</li>
+																</ul>
+																<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="bCountry" id="bCountry" 
+																ng-model="order.billToAddress.country" ng-class="{'is-invalid': billToForm.bCountry.$invalid, 'is-valid': billToForm.bCountry.$valid }"/> 
+															</div>
+								   						</div>
+								   						<div class="col-lg-6">
+								   							<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger" ng-show="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'">*</span>
+									            					</div>
+											   					</div>
+											   				</div>
+											   				<div class="input-group mb-3" ng-if="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'">
+																<button class="btn btn-outline-secondary dropdown-toggle btn-sm" ng-disabled="order.state === 'CANCELLED'" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+																<ul class="dropdown-menu">
+																	<li class="m-2">  
+																		<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+													   					<input class="form-control form-control-sm" type="text" name="bProvinceFilter" id="bProvinceFilter" ng-model="bProvinceFilter"/>	
+																	</li>
+																	<li ng-repeat="item in bCountry.provinces | filter: bProvinceFilter | orderBy: '+isoCode'" ng-class="{'disabled': order.state === 'CANCELLED'}">
+																		<a class="dropdown-item" href="" ng-click="order.state == 'QUOTE' && setOrderProvince(item.isoCode, 'bill')">
+																			{{item.name}}
+																		</a>
+																	</li>
+																</ul>
+																<input ng-required="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'" ng-disabled="true" type="text" class="form-control form-control-sm" name="billProvince" id="billProvince" 
+																ng-model="order.billToAddress.province" ng-class="{'is-invalid': billToForm.billProvince.$invalid, 'is-valid': billToForm.billProvince.$valid }"/> 
+															</div>
+															<div class="input-group mb-3" ng-if="order.billToAddress.country != 'CA' && order.billToAddress.country != 'US'">
+																<input type="text" class="form-control form-control-sm" name="billProvince" id="billProvince" ng-model="order.billToAddress.province"
+																ng-class="{'is-invalid': billToForm.billProvince.$invalid, 'is-valid': billToForm.billProvince.$valid }"/>
+															</div>
+								   						</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Postal Code</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger" ng-show="order.billToAddress.country != 'CA' && order.billToAddress.country != 'US'">*</span>
+									            					</div>
+											   					</div>
+											   					<input ng-required="order.billToAddress.country != 'CA' && order.billToAddress.country != 'US'" class="form-control form-control-sm" type="text" name="billPostalCode" id="billPostalCode" ng-model="order.billToAddress.postalCode"
+											   					ng-class="{'is-invalid': billToForm.billPostalCode.$invalid, 'is-valid': billToForm.billPostalCode.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Phone</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="billPhone" id="billPhone" ng-model="order.billToAddress.phone"
+											   					ng-class="{'is-invalid': billToForm.billPhone.$touched && billToForm.billPhone.$invalid, 'is-valid': billToForm.billPhone.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+									   				</div>
+									   				<div class="row mt-3">
+														<div class="col-sm-12 text-end">
+															<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-show="order.state == 'QUOTE'">Reset</button>
+															<button ng-disabled="billToForm.$invalid" ng-click="updateBillToAddress()" type="button" ng-show="order.state == 'QUOTE'"
+															class="btn btn-outline-success m-1 btn-sm" >Save Changes</button>
+														</div>
+													</div>
+												</div>
+												</form>
+											</div>
+											<div class="col-sm-6">
+												<form name="shipToForm" id="shipToForm" novalidate>
+												<strong>Ship To:</strong>
+												<div class="card card-body">
+													<div class="row">
+														<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="osContactName"><strong>Company Name</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   					<input required class="form-control form-control-sm" type="text" name="osCompanyName" id="osCompanyName" ng-model="order.shipToAddress.companyName"
+											   					ng-class="{'is-invalid': orderForm.osCompanyName.$invalid, 'is-valid': orderForm.osCompanyName.$valid }"/>
+											   				</div>
+											   			</div>
+														<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="availabilityDate"><strong>ATTN</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="shipContactName" id="shipContactName" ng-model="order.shipToAddress.contactName"
+											   					ng-class="{'is-invalid': shipToForm.shipContactName.$invalid, 'is-valid': shipToForm.shipContactName.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+														<div class="col-lg-6">
+															<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Address 1</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   					<input required class="form-control form-control-sm" type="text" name="shipAddress1" id="shipAddress1" ng-model="order.shipToAddress.address1"
+											   					ng-class="{'is-invalid': shipToForm.shipAddress1.$invalid, 'is-valid': shipToForm.shipAddress1.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+										   				</div>
+										   				<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Address 2</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="shipAddress2" id="shipAddress2" ng-model="order.shipToAddress.address2"
+											   					ng-class="{'is-invalid': shipToForm.shipAddress2.$invalid, 'is-valid': shipToForm.shipAddress2.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+										   				</div>
+										   				<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Address 3</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="shipAddress3" id="shipAddress3" ng-model="order.shipToAddress.address3"
+											   					ng-class="{'is-invalid': shipToForm.shipAddress3.$invalid, 'is-valid': shipToForm.shipAddress3.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>City</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   					<input required class="form-control form-control-sm" type="text" name="shipCity" id="shipCity" ng-model="order.shipToAddress.city"
+											   					ng-class="{'is-invalid': shipToForm.shipCity.$invalid, 'is-valid': shipToForm.shipCity.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="size"><strong>Country</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger">*</span>
+									            					</div>
+											   					</div>
+											   				</div>
+								   							<div class="input-group mb-3">
+																<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" ng-disabled="order.state === 'CANCELLED'" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+																<ul class="dropdown-menu">
+																	<li class="m-2">  
+																		<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+													   					<input class="form-control form-control-sm" type="text" name="sCountryFilter" id="sCountryFilter" ng-model="sCountryFilter"/>	
+																	</li>
+																	<li ng-repeat="item in countries | filter: sCountryFilter | orderBy: '+isoCode'" ng-class="{'disabled': order.state === 'CANCELLED'}">
+																		<a class="dropdown-item" href="" ng-click="order.state == 'QUOTE' && setOrderCountry(item.isoCode, 'ship')">
+																			{{item.name}}
+																		</a>
+																	</li>
+																</ul>
+																<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="sCountry" id="sCountry" 
+																ng-model="order.shipToAddress.country" ng-class="{'is-invalid': shipToForm.sCountry.$invalid, 'is-valid': shipToForm.sCountry.$valid }"/> 
+															</div>
+								   						</div>
+								   						<div class="col-lg-6">
+								   							<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger" ng-show="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'">*</span>
+									            					</div>
+											   					</div>
+											   				</div>
+											   				<div class="input-group mb-3" ng-if="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'">
+																<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" ng-disabled="order.state === 'CANCELLED'" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+																<ul class="dropdown-menu">
+																	<li class="m-2">  
+																		<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+													   					<input class="form-control form-control-sm" type="text" name="sProvinceFilter" id="sProvinceFilter" ng-model="sProvinceFilter"/>	
+																	</li>
+																	<li ng-repeat="item in sCountry.provinces | filter: sProvinceFilter | orderBy: '+isoCode'" ng-class="{'disabled': order.state === 'CANCELLED'}">
+																		<a class="dropdown-item" href="" ng-click="order.state == 'QUOTE' && setOrderProvince(item.isoCode, 'ship')">
+																			{{item.name}}
+																		</a>
+																	</li>
+																</ul>
+																<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="sProvince" id="sProvince" 
+																ng-model="order.shipToAddress.province" ng-class="{'is-invalid': shipToForm.sProvince.$invalid, 'is-valid': shipToForm.sProvince.$valid }"/> 
+															</div>
+															<div class="input-group mb-3" ng-if="order.shipToAddress.country != 'CA' && order.shipToAddress.country != 'US'">
+																<input type="text" class="form-control form-control-sm" name="sProvince" id="sProvince" ng-model="order.shipToAddress.province"
+																ng-class="{'is-invalid': shipToForm.sProvince.$invalid, 'is-valid': shipToForm.sProvince.$valid }"/>
+															</div>
+								   						</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Postal Code</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger" ng-show="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'">*</span>
+									            					</div>
+											   					</div>
+											   					<input ng-required="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'" class="form-control form-control-sm" type="text" name="shipPostalCode" id="shipPostalCode" ng-model="order.shipToAddress.postalCode"
+											   					ng-class="{'is-invalid': shipToForm.shipPostalCode.$invalid, 'is-valid': shipToForm.shipPostalCode.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+											   			<div class="col-lg-6">
+											   				<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="id"><strong>Phone</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   					<input class="form-control form-control-sm" type="text" name="shipPhone" id="shipPhone" ng-model="order.shipToAddress.phone"
+											   					ng-class="{'is-invalid': shipToForm.shipPhone.$invalid, 'is-valid': shipToForm.shipPhone.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+											   				</div>
+											   			</div>
+									   				</div>
+									   				<div class="row mt-3">
+														<div class="col-sm-12 text-end">
+															<button type="button" ng-show="order.state == 'QUOTE'" class="btn btn-outline-danger m-1 btn-sm">Reset</button>
+															<button ng-disabled="shipToForm.$invalid" ng-click="updateShipToAddress()" type="button" 
+															class="btn btn-outline-success m-1 btn-sm" ng-show="order.state == 'QUOTE'">Save Changes</button>
+														</div>
+													</div>
+												</div>
+												</form>
+											</div>
+										</div>
+									</div>
+									<div class="tab-pane fade show" id="payment" role="tabpanel" aria-labelledby="payment-tab">
+										<div class="row mt-2">
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="paymentMethod"><strong>Preferred Payment Method</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<div class="input-group mb-3">
+														<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Payment Method</button>
+														<ul class="dropdown-menu">
+															<li ng-repeat="item in paymentConfigData.paymentMethods">
+																<a class="dropdown-item" href="" ng-click="setOrderPaymentInfo(item, 'METHOD');">
+																	{{item}}
+																</a>
+															</li>
+														</ul>
+														<input ng-disabled="true" type="text" class="form-control form-control-sm" name="paymentMethod" id="paymentMethod" ng-model="order.price.paymentMethod" /> 
+													</div>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="paymentMethod"><strong>Payment Terms</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<div class="input-group mb-3">
+														<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Payment Term</button>
+														<ul class="dropdown-menu">
+															<li ng-repeat="item in paymentConfigData.paymentTerms">
+																<a class="dropdown-item" href="" ng-click="setOrderPaymentInfo(item, 'TERMS');">
+																	{{item}}
+																</a>
+															</li>
+														</ul>
+														<input ng-disabled="true" type="text" class="form-control form-control-sm" name="paymentTerm" id="paymentTerm" ng-model="order.price.paymentTerm" /> 
+													</div>
+								   				</div>									   			
+								   			</div>
+										</div>
+										
+										<div class="row mt-3">
+											<div class="col-sm-12">
+												<button type="button" ng-show="order.state == 'QUOTE'" class="btn btn-sm btn-outline-success float-end me-2" 
+												ng-click="saveOrderPaymentInfo()">Save Payment Information</button>
+											</div>
+										</div>
+									</div>
+									
+								</div>		
+							</div>
+						</div>	
+					</div>	
+				</div>
+			</div>
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+		</div>
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal" id="discountDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body">
+	                	<div class="row">
+	    					<div class="col-sm-12">
+	    						<strong>Add Discount</strong>
+	    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times text-danger"></i></span>
+	    						<p><small>Add a discount to the Sales Order.</small></p>
+	    					</div>
+	    				</div>
+						<form name="discountForm" id="discountForm">
+							<div class="row">
+								<div class="col-sm-12">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="availabilityDate"><strong>Name</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter a name for the discount. The name will appear on invoices and sales orders.</small></p>
+					   					<input required class="form-control form-control-sm" type="text" name="discountName" id="discountName" ng-model="discount.name"
+					   					ng-class="{'is-invalid': discountForm.discountName.$touched && discountForm.discountName.$invalid, 
+					   					'is-valid': discountForm.discountName.$touched && discountForm.discountName.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+					   				</div>
+								</div>
+								<div class="col-sm-12">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="availabilityDate"><strong>Type</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Select a discount type either "Percent" or "Flat". A percent discount will apply 
+					   					equally across all items in the order. A flat discount will be subtracted from the order total.</small></p>
+					   					<select class="form-select form-select-sm" name="discountType" id="discountType" ng-model="discount.type"
+					   					ng-class="{'is-invalid': discountForm.discountType.$touched && discountForm.discountType.$invalid, 
+					   					'is-valid': discountForm.discountType.$touched && discountForm.discountType.$valid }" ng-disabled="order.state != 'QUOTE'">
+					   						<option value="PERCENT">Percent</option> 
+					   						<option value="FLAT">Flat</option>
+					   					</select>
+					   				</div>
+								</div>
+								<div class="col-sm-12">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="availabilityDate"><strong>Amount</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter an amount either percentage for "Percent" discounts or a dollar amount for flat discounts.</small></p>
+					   					<input required class="form-control form-control-sm" type="number" step=".01" name="discountAmount" id="discountAmount" ng-model="discount.amount"
+					   					ng-class="{'is-invalid': discountForm.discountAmount.$touched && discountForm.discountAmount.$invalid, 
+					   					'is-valid': discountForm.discountAmount.$touched && discountForm.discountAmount.$valid }" ng-disabled="order.state != 'QUOTE'"/>
+					   				</div>
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col-sm-12">
+									<button type="button" class="btn btn-outline-success btn-sm float-end me-2" ng-disabled="discountForm.$invalid || order.state != 'QUOTE'" data-bs-dismiss="modal" ng-click="saveDiscount()">Save Discount</button>
+									<button type="button" class="btn btn-outline-danger btn-sm float-end me-2" data-bs-dismiss="modal" ng-show="discount.id != undefined" ng-click="deleteDiscount(discount.id)">Delete Discount</button>
+								</div>	
+							</div>
+						</form>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="findProductModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<strong>Select SKU</strong>
+	    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times text-danger"></i></span>
+	    						<p><small>Type in a product id, product name or SKU id. As you type the results will update below. To select and SKU, click
+	    						on the entry in the results.</small></p>
+	    					</div>
+	    				</div>
+		    			<div class="row mt-1">
+		    				<div class="col-sm-12">
+		                        <form name="searchForm" id="searchForm">
+				   					<div class="input-group input-group-sm">		   					
+				   						<input class="form-control form-control-sm" minlength="3" required ng-change="findSkuByKeyword()"
+				   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword">
+			   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+			   								<i class="fa fa-search"></i>
+			   							</button>			   						 
+				   					</div>    		
+				            	</form>
+		    				</div>
+		    			</div>
+		    			<div class="row">
+		    				<div class="col-sm-12">
+		    					<div class="row mt-2" ng-show="searchResults != undefined">
+									<div class="col-sm-12">
+										<div class="float-end">
+											<ul class="pagination">
+												<li class="page-item">
+													<button type="button" class="btn btn-link page-link btn-sm" ng-click="findSkuByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+												</li>
+												<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+													<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link me-1 btn-sm" ng-click="findSkuByKeyword($index)">{{$index + 1}}</button>
+												</li>
+												<li>
+													<button type="button" class="btn btn-link page-link btn-sm" ng-click="findSkuByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+												</li>
+											</ul>
+										</div>
+									</div>		
+								</div>
+								<div class="row mt-2">
+									<div class="col-sm-12">
+										<span class="ms-1"><strong><small>Results:</small></strong></span>
+										<span class="ms-2 badge bg-dark">{{ searchResults.totalResults }}</span>
+				    					<table class="table table-hover table-small small">
+				    						<thead>
+				    							<tr>
+				    								<th>Product Id</th>
+				    								<th>Name</th>
+				    								<th>SKU Id</th>
+				    								<th class="text-center">OnHand</th>
+				    								<th class="text-center">Available</th>
+				    							</tr>
+				    						</thead>
+				    						<tbody>
+				    							<!-- If the product is in the current order item list then disable the ng-click functionality and grey out line item -->
+				    							<tr ng-repeat="result in searchResults.results | orderBy: [productId, warehouseName]" ng-class="{'text-decoration-line-through': orderContainsItem(result)}"
+				    							ng-click="!orderContainsItem(result.id) && setItemProduct($index)">
+				    								<td>{{result.productId}}</td>
+				    								<td>{{result.productName + (result.size != undefined ? " - " + result.size : "") + (result.color != undefined ? " - " + result.color : "")}}</td>
+				    								<td>{{result.id}}</td>
+				    								<td class="text-center">
+				    									<span ng-if="result.inventoryType == 'DROPSHIP' || result.inventoryType == 'INFINITE'"><i class='fas fa-infinity'></i></span>
+				    									<span ng-if="result.inventoryType == 'INVENTORIED'">{{result.onhand}}</span>
+				    									
+				    								</td>
+				    								<td class="text-center">
+				    									<span ng-if="result.inventoryType == 'DROPSHIP' || result.inventoryType == 'INFINITE'"><i class='fas fa-infinity'></i></span>
+				    									<span ng-if="result.inventoryType == 'INVENTORIED'">{{result.available}}</span>
+				    									
+				    								</td>
+				    							</tr>
+				    						</tbody>
+				    					</table>    
+				    				</div>
+				    			</div>	
+				    			<div class="row mt-2" ng-show="searchResults != undefined">
+									<div class="col-sm-12">
+										<div class="float-end">
+											<ul class="pagination">
+												<li class="page-item">
+													<button type="button" class="btn btn-link page-link btn-sm" ng-click="findSkuByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+												</li>
+												<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+													<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link me-1 btn-sm" ng-click="findSkuByKeyword($index)">{{$index + 1}}</button>
+												</li>
+												<li>
+													<button type="button" class="btn btn-link page-link btn-sm" ng-click="findSkuByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+												</li>
+											</ul>
+										</div>
+									</div>		
+								</div>			
+		    				</div>
+		    			</div>
+	    			</div>		
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="printDialog" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="printForm" id="printForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="vendor"><strong><small>Print Quantity</small></strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p class="small">
+					   						This request will print to the system printer defined within the System Configuration section. If you 
+					   						do not have access to that printer then select the download PDF option for a local copy.
+					   					</p>
+					   					<input required class="form-control form-control-sm" type="number" step="1" name="qty" id="qty" ng-model="print.qty"/>
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="printForm.$invalid" ng-click="printPDF()">Print</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal" id="emailDialog" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+	    				<form id="emailForm" name="emailForm">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<div class="card card-body">
+	    							<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailTo"><strong>To:</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the email to value. Add multiple email addresses separated by commas with no spaces.</small></p>
+					   					<input required class="form-control form-control-sm" type="text" name="emailTo" id="emailTo" ng-model="email.to"
+					   					ng-class="{'is-invalid': emailForm.emailTo.$touched && emailForm.emailTo.$invalid, 
+								   		'is-valid':emailForm.emailTo.$touched && emailForm.emailTo.$valid }" ng-change="validateEmails(email.to, 'to')"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailCc" ><strong>Copy:</strong> </label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the email copy value. Add multiple email addresses separated by commas with no spaces.</small></p>
+						   				<input class="form-control form-control-sm" type="text" name="emailCc" id="emailCc" ng-model="email.cc"
+						   				ng-class="{'is-invalid': emailForm.emailCc.$touched && emailForm.emailCc.$invalid, 
+								   		'is-valid':emailForm.emailCc.$touched && emailForm.emailCc.$valid }" ng-change="validateEmails(email.cc, 'cc')"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailBcc"><strong>BCC:</strong> </label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the email bcc value. Add multiple email addresses separated by commas with no spaces.</small></p>
+						   				<input class="form-control form-control-sm" type="text" name="emailBcc" id="emailBcc" ng-model="email.bcc"
+						   				ng-class="{'is-invalid': emailForm.emailBcc.$touched && emailForm.emailBcc.$invalid, 
+								   		'is-valid':emailForm.emailBcc.$touched && emailForm.emailBcc.$valid }" ng-change="validateEmails(email.bcc, 'bcc')"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailBcc"><strong>Subject:</strong> </label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter a custom subject or leave the default subject.</small></p>
+						   				<input required class="form-control form-control-sm" type="text" name="emailSubject" id="emailSubject" ng-model="email.subject"
+						   				ng-class="{'is-invalid': emailForm.emailSubject.$touched && emailForm.emailSubject.$invalid, 
+								   		'is-valid':emailForm.emailSubject.$touched && emailForm.emailSubject.$valid }"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailContent"><strong>Message:</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Add an optional message. If left blank, the template will use the default content.</small></p>
+					   					<!-- <textarea class="form-control form-control-sm" rows="5" name="emailContent" id="emailContent" ng-model="email.content"></textarea> -->
+					   					<div id="emailContent">
+											
+										</div>
+					   				</div>
+	    						</div>
+	    					</div>
+	    				</div>
+	    				<div class="row mt-3">
+	    					<div class="col-sm-12">
+	    						<button type="button" class="btn btn-sm btn-outline-primary float-end m-2" ng-disabled="emailForm.$invalid" ng-click="sendEmail()">Send Email</button>
+	    						<button type="button" class="btn btn-sm btn-outline-danger float-end m-2" data-bs-dismiss="modal">Cancel</button>
+	    					</div>
+	    				</div>
+	    				</form>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal" id="returnDialog" role="dialog" ng-controller="rmaController" ng-init="findAllReasons()">
+	    	<div class="modal-dialog modal-xl" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12 mb-2">
+								<strong>RMA: Sales Order #: {{order.id}}</strong>
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+	    				<form id="returnForm" name="returnForm">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<div class="card">
+	    							<div class="card-header">
+	    							<p class="small">
+	    								Select the items in the list of returnable items below. If the sales order contains final sale items
+	    								they will not appear in the list below. After selecting the items to be returned, set the quantity of each
+	    								or click on "Entire Order" to return everything.
+	    							</p>
+	    							</div>
+	    							<div class="card-body">
+	    								<div class="row small">
+	    									<div class="col-sm-6">
+	    										<div class="form-group">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="returnByDate"><strong>Return By Date:</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="date" name="expectedReturnDate" id="expectedReturnDate" ng-model="rma.expectedReturnDate"/>
+								   				</div>
+	    									</div>
+	    									<div class="col-sm-6">
+	    										<div class="form-group">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="customerName"><strong>Customer:</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="customerName" id="customerName" 
+								   					ng-model="rma.customerName"/>
+								   				</div>
+	    									</div>
+	    								</div>
+	    								<div class="row mt-3 small">
+	    									<div class="col-sm-12">
+	    										<table class="table table-sm">
+	    											<thead>
+	    												<tr>
+	    													<th width="5%" class="text-center">Select</th>
+	    													<th width="14%">Name</th>
+	    													<th width="25%">Description</th>
+	    													<th width="10%">SKU</th>
+	    													<th width="10%" class="text-center">Lot/Serial</th>
+	    													<th width="8%" class="text-center">Max Quantity</th>
+	    													<th width="8%" class="text-center">Quantity</th>
+	    													<th width="20%">Reason</th>
+	    												</tr>
+	    											</thead>
+	    											<tbody>
+	    												<tr ng-repeat="item in rma.items | orderBy:'+lineNumber' track by $index">
+	    													<td class="text-center align-middle">
+	    														<div class="form-check">
+																	<input class="form-check-input" type="checkbox" id="selected" ng-checked="item.selected" ng-value="true" ng-click="toggleSelect(item)">
+																</div>
+	    													</td>
+	    													<td class="align-middle">{{item.inventory.productName}}</td>
+	    													<td class="align-middle">{{item.inventory.productDescription}}</td>
+	    													<td class="align-middle">{{item.inventory.skuId}}</td>
+	    													<td class="text-center align-middle">{{item.inventory.lotSerial}}</td>
+	    													<td class="text-center align-middle">
+	    														<input ng-disabled="true" class="form-control form-control-sm" ng-model="item.maxQuantity" type="number" 
+	    														id="maxQuantity" name="maxQuantity" />
+	    													</td>
+	    													<td class="text-center align-middle">
+	    														<input ng-required="item.selected" min="1" max="{{item.maxQuantity}}" ng-disabled="!item.selected" class="form-control form-control-sm" ng-model="item.quantityReturned" 
+	    														type="number" id="itemQuantity" name="itemQuantity" />
+	    													</td>
+	    													<td class="align-middle">
+	    														<select ng-required="item.selected" class="form-select form-select-sm" ng-model="item.reasonId" id="reason" name="reason" ng-disabled="!item.selected">
+																	<option ng-repeat="item in reasonCodes | orderBy:'+title'" value="{{item.id}}">{{item.title}}</option>
+																</select>
+	    													</td>
+	    												</tr>
+	    											</tbody>
+	    										</table>
+	    									</div>
+	    								</div>
+		    						</div>
+		    					</div>
+	    					</div>
+	    				</div>
+	    				<div class="row mt-3">
+	    					<div class="col-sm-12">
+	    						<button type="button" class="btn btn-sm btn-outline-primary float-end m-2" ng-disabled="returnForm.$invalid" ng-click="createRMA()">Create RMA</button>
+	    						<button type="button" class="btn btn-sm btn-outline-danger float-end m-2" data-bs-dismiss="modal">Cancel</button>
+	    					</div>
+	    				</div>
+	    				</form>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>

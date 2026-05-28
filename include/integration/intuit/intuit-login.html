@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<script>
+			  function launchPopup(path) {
+			    var win;
+			    var checkConnect;
+			    var parameters = "location=1,width=800,height=650";
+			    parameters += ",left=" + (screen.width - 800) / 2 + ",top=" + (screen.height - 650) / 2;
+			    // Launch Popup
+			    win = window.open(path, 'connectPopup', parameters);
+			  }
+		</script>
+	</head>
+	<body>
+		<b>Sign In With Intuit</b><br />
+		  <a class="imgLink" onclick="launchPopup('http://cbh.globalairparts.ca/integration/intuit/signInWithIntuit');" href="#">
+		    Sign In
+		  </a>
+	
+	</body>
+</html>

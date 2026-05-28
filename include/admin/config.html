@@ -1,0 +1,155 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ml-0 mr-0 pl-0 pr-0" ng-controller="configController" ng-init="getLoggingLevel()">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="userController" ng-init="init()">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item active" aria-current="page">System Administration</li>
+				</ol>  
+			</nav>
+			
+			<div class="card">
+				<div class="card-body">
+					<ul class="nav nav-tabs nav-fill ">
+	  					<li class="nav-item" ng-show="currentUser.id == 'ab59ece3-1cde-4125-a646-7ed71d6c059g'">
+	    					<a class="nav-link active" data-bs-toggle="tab" role="tab" data-bs-target="#password">Password</a>
+	  					</li>
+	  					<li class="nav-item">
+	    					<a class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#logging">Logging</a>
+	  					</li>
+					</ul>
+					<div class="tab-content">
+		  				<div class="tab-pane active" role="tabpanel" id="password" ng-show="currentUser.id == 'ab59ece3-1cde-4125-a646-7ed71d6c059g'">
+		  					<form name="apForm" id="apForm" novalidate>
+		  						<div class="row">
+		  							<div class="col-sm-12 mt-2">
+			  							<div class="card h-100">
+			  								<div class="card-header">
+			  									<h6>
+			  										Change Admin Password
+												</h6>
+												<p class="small">
+													To change the password fill in the two fields below and click on the Save button. The password will be reset and you will be logged 
+			  										out and redirected back to the Login screen. Enter your new password when you login. Doing a factory reset will change the password
+			  										back to the initial admin account password.
+												</p>
+			  								</div>
+			  								<div class="card-body">
+			  									<div class="alert alert-success alert-dismissible" id="passwordSuccessAlert" role="alert" ng-show="alert.show">
+			  										<a href="" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+													{{alert.message}}
+												</div>
+			  									<div class="form-group">
+			  										<div class="input-group">
+								   						<label class="pe-2" for="password">Password</label>
+								   						<div class="input-group-append">
+							           						<span class="text-danger">*</span>
+							           					</div>
+							   						</div>
+							   						<input required class="form-control form-control-sm" type="password" ng-minlength="8" ng-maxlength="20" name="password" id="password" ng-model="af.password"
+								   					ng-class="{'is-invalid': apForm.password.$touched && apForm.password.$invalid }"/>
+								   					<span class="invalid-feedback" ng-show="apForm.password.$touched && (apForm.password.$error.minlength || apForm.password.$error.maxlength)">
+								   						Password must be between 8 and 20 characters in length.
+								   					</span>
+			  									</div>
+			  									<div class="form-group">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="confirmpassword">Confirm Password</label>
+								   						<div class="input-group-append">
+							           						<span class="text-danger">*</span>
+							           					</div>
+								   					</div>
+								   					<input required class="form-control form-control-sm" type="password" value-matches="af.password" name="confirmPassword" id="confirmPassword" ng-model="af.confirmPassword"
+				   									ng-class="{'is-invalid': apForm.confirmPassword.$touched && apForm.confirmPassword.$invalid }"/>
+				   									<span class="invalid-feedback" ng-show="(apForm.password.$touched && (af.confirmPassword != af.password))">Confirm Password must match Password.</span>
+								   				</div>
+								   				<div class="form-group mt-5">
+								   					<button type="button" class="btn btn-outline-success me-2 float-end btn-sm" ng-click="saveAdminPassword()" ng-disabled="apForm.$invalid">Save</button>
+								   				</div>	
+			  								</div>
+					   					</div>
+					   				</div>
+				   				</div>
+			  				</form>
+			  			</div>
+	  					
+	  					<div class="tab-pane fade" role="tabpanel" id="logging" >
+	  						<div class="row">
+	  							<div class="col-sm-12 mt-2">
+			  						<div class="card h-100">
+		  								<div class="card-header">
+				  							<h6>
+					  							Application Logging
+				  							</h6>
+				  							<p class="small">
+				  								Current logging level is {{adminInfo.logLevel}}. Use the selections below to change the log level output. Note*: setting the log level to
+					  							info or debug will result is large file sizes and should only be set to those values for a short period of time.
+				  							</p>
+				  						</div>
+				  						<div class="card-body">
+				  							<div class="form-check form-check-inline btn-sm">
+		  										<input class="form-check-input" type="radio" ng-change="setLoggingLevel()" name="logLevel1" id="logLevel1" value="DEBUG" ng-model="logging.configuredLevel">
+		  										<label class="form-check-label" for="inlineCheckbox1">Debug</label>
+											</div>
+											<div class="form-check form-check-inline btn-sm">
+		  										<input class="form-check-input" type="radio" ng-change="setLoggingLevel()" id="logLevel2" name="logLevel2" value="INFO" ng-model="logging.configuredLevel">
+		  										<label class="form-check-label" for="inlineCheckbox2">Info</label>
+											</div>
+											<div class="form-check form-check-inline btn-sm">
+		  										<input class="form-check-input" type="radio" ng-change="setLoggingLevel()" id="logLevel3" name="logLevel3" value="WARN" ng-model="logging.configuredLevel">
+		  										<label class="form-check-label" for="inlineCheckbox3">Warn</label>
+											</div>
+											<div class="form-check form-check-inline btn-sm">
+		  										<input class="form-check-input" type="radio" ng-change="setLoggingLevel()" id="logLevel4" name="logLevel4" value="ERROR" ng-model="logging.configuredLevel">
+		  										<label class="form-check-label" for="inlineCheckbox4">Error</label>
+											</div>
+				  						</div>
+			  						</div>
+			  					</div>
+			  				</div>
+			  				<div class="row">
+			  					<div class="col-sm-12 mt-2">
+			  						<div class="card h-100">
+		  								<div class="card-header">
+		  									<div class="row">
+		  										<div class="col-sm-6">
+		  											<span>
+								  						<h6>
+								  							Application Log
+							  							</h6>
+							  							<p class="small">
+							  								Click the button Refresh button to display the latest log information. Hit the Refresh button again to update the displayed results.
+							  							</p>
+							  						</span>
+		  										</div>
+		  										<div class="col-sm-6">
+		  											<button type="button" class="btn btn-outline-success float-end btn-sm" ng-click="getLog()">Refresh</button>
+		  										</div>
+		  									</div>
+				  						</div>
+				  						<div class="card-body">
+				  							<textarea class="form-control form-control-sm" ng-model="logOutput" ng-show="logOutput != undefined" rows="20"></textarea>
+				  						</div>
+			  						</div>		
+			  					</div>					
+		  					</div>
+	  					</div>
+					</div>
+				</div>
+			</div>		
+		</div>
+		
+		<div class="modal fade" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

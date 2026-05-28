@@ -1,0 +1,220 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="inventoryReportController" ng-init="findAllPhysicalWarehouses()">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb" class="d-print-none">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href="#/reporting">Reporting</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Inventory Spot Count</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<!-- keyword search box -->
+					<div class="card d-print-none">
+						<div class="card-header">
+							<small class="float-inline mr-auto">Select a physical warehouse, the quantity of records to spot check and
+							whether you want to check by location or by product. Click the generate report button
+							to update the listing results. Click the print button to print a copy of the report.</small>
+						</div>
+			   			<div class="card-body">
+			   				<form name="searchForm" id="searchForm">
+			   					<div class="row">
+			   						<div class="col-sm-12">
+			   							<table class="table table-sm table-borderless table-responsive">
+			   								<tr>
+			   									<td width="33%">
+			   										<div class="input-group">
+								   						<label class="pe-2" for="submittedDate"><strong>Physical Warehouse</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Select the physical warehouse for the inventory spot check.</small></p>
+			   									</td>
+			   									<td width="33%">
+			   										<div class="input-group">
+								   						<label class="pe-2" for="submittedDate"><strong>Check Type</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Select whether you want to perform a by location or by product spot check.</small></p>
+			   									</td>
+			   									<td width="33%">
+			   										<div class="input-group">
+								   						<label class="pe-2" for="submittedDate"><strong>Quantity</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Enter the to date for the inventory spot count report. The records will be randomly selected from 
+								   					the database.</small></p>
+			   									</td>
+			   								</tr>
+			   								<tr>
+			   									<td width="33%">
+			   										<div class="form-group">
+									   					<select class="form-select form-select-sm" name="warehouseId" id="warehouseId" ng-model="spotCheck.warehouseId">
+									   						<option ng-repeat="item in warehouses" value="{{item.id}}">{{item.name}}</option>
+									   					</select>
+									   				</div>
+			   									</td>
+			   									<td width="33%">
+			   										<div class="form-group ">
+									   					<select class="form-select form-select-sm" name="checkType" id="checkType" ng-model="spotCheck.type">
+									   						<option value="location">By Location</option>
+									   						<option value="product">By Product</option>
+									   					</select>
+									   				</div>
+			   									</td>
+			   									<td width="33%">
+			   										<div class="form-group">
+									   					<input class="form-control form-control-sm" type="number" step="1" name="quantity" id="quantity" ng-model="spotCheck.quantity"/>
+									   				</div>
+			   									</td>
+			   								</tr>
+			   							</table>
+						   				
+						   			</div>
+			   					</div>    
+			   					<div class="row">
+			   						<div class="col-sm-12">
+			   							<button type="button" class="btn btn-sm btn-outline-primary m-2 float-end" ng-click="findSpotCheck()">Generate Report</button>
+			   						</div>
+			   					</div>  		
+			            	</form>
+			   			</div>
+			   		</div>
+			   		
+					<div class="card mt-2">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-sm-12">
+									<h5>
+										<span class="d-none d-print-block"><strong>Inventory Spot Check - {{getCurrentDate() | date:'mediumDate'}}</strong></span>
+										<span class="d-print-none"><strong>Results - {{getCurrentDate() | date:'mediumDate'}}</strong></span>	
+										<span class="ms-2 badge bg-dark d-print-none">{{ results.length }}</span>
+										<button class="btn btn-sm btn-outline-success float-end me-2 d-print-none" onclick="window.print()" type="button">Print</button>
+									</h5>
+								</div>
+							</div>
+						</div>
+			   			<div class="card-body">		   			
+			   				
+			   				<!-- If type of sheet is defined as location use this section -->
+			   				<table class="table table-sm small" ng-if="spotCheckType == 'location'">
+			   					<thead>
+			   						<tr>
+			   							<th class="text-center" width="5%">Item #</th>
+			   							<th class="text-center" width="10%">Location</th>
+			   							<th class="text-center" width="85%"></th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-repeat="item in results">
+			   							<td class="text-center"><strong>{{$index + 1}}</strong></td>
+			   							<td class="text-center"><strong>{{item.location}}</strong></td>
+			   							<td class="text-center">
+			   								<table class="table table-sm table-borderless">
+			   									<thead>
+			   										<tr>
+			   											<th>Product</th>
+			   											<th>SKU Id</th>
+			   											<th>Color / Size</th>
+			   											<th>Lot/Serial</th>
+			   											<th>Stock Unit</th>
+			   											<th>System Qty</th>
+			   											<th>Actual Qty</th>
+			   										</tr>
+			   									</thead>
+			   									<tbody>
+			   										<tr ng-repeat="inventory in item.inventory">
+			   											<td class="text-center">
+							   								<strong>{{inventory.productId}}</strong><br />
+							   								<strong>{{inventory.productName}}</strong>
+							   								<p class="font-weight-light small">{{inventory.productDescription}}</p>
+							   							</td>
+			   											<td class="text-center">{{inventory.skuId}}</td>
+			   											<td class="text-center">{{inventory.color}} {{inventory.size}}</td>
+			   											<td class="text-center">{{inventory.lotSerial}}</td>
+			   											<td class="text-center">{{inventory.stockUnit}}</td>
+			   											<td class="text-center">{{inventory.onhand | number}}</td>
+			   											<td class="align-bottom"><hr style="border-top: 1px solid black;"/></td>
+			   										</tr>
+			   									</tbody>
+			   								</table>
+			   							</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   				<!-- End of location section -->
+			   				<!-- If sheet type is product based then use this section -->
+			   				<table class="table table-sm small" ng-if="spotCheckType == 'product'">
+			   					<thead>
+			   						<tr>
+			   							<th class="text-center" width="5%">Item #</th>
+			   							<th class="text-center" width="20%">Product</th>
+			   							<th class="text-center" width="75%"></th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-repeat="item in results">
+			   							<td class="text-center"><strong>{{$index + 1}}</strong></td>
+			   							<td class="text-center">
+			   								<strong>{{item.productId}}</strong><br />
+			   								<strong>{{item.productName}}</strong>
+			   								<p class="font-weight-light small">{{item.productDescription}}</p>
+			   							</td>
+			   							<td class="text-center">
+			   								<table class="table table-sm table-borderless">
+			   									<thead>
+			   										<tr>
+			   											<th class="text-center" width="15%">SKU Id</th>
+			   											<th class="text-center" width="15%">Color / Size</th>
+			   											<th class="text-center" width="15%">Lot/Serial</th>
+			   											<th class="text-center" width="15%">Locations</th>
+			   											<th class="text-center" width="10%">Stock Unit</th>
+			   											<th class="text-center" width="10%">System Qty</th>
+			   											<th class="text-center" width="10%">Actual Qty</th>
+			   										</tr>
+			   									</thead>
+			   									<tbody>
+			   										<tr ng-repeat="inventory in item.inventory">
+			   											<td class="text-center">{{inventory.skuId}}</td>
+			   											<td class="text-center">{{inventory.color}} {{inventory.size}}</td>
+			   											<td class="text-center">{{inventory.lotSerial}}</td>
+			   											<td class="text-center">{{inventory.locations}}</td>
+			   											<td class="text-center">{{inventory.stockUnit}}</td>
+			   											<td class="text-center">{{inventory.onhand | number}}</td>
+			   											<td class="align-bottom"><hr style="border-top: 1px solid black;"/></td>
+			   										</tr>
+			   									</tbody>
+			   								</table>
+			   							</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   				<!-- End of product section -->
+			   			</div>
+			   		</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</section>

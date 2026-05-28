@@ -1,0 +1,1216 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="organizationController" ng-init="findById();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/crm">Organizations</a></li>
+					<li class="breadcrumb-item active" aria-current="page">{{organization.name}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<ul class="nav nav-tabs">
+								<li class="nav-item">
+									<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#main" href="">Main</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#addresses" href="">Addresses</a>
+								</li>
+								<li class="nav-item" >
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#credit" href="">Credit / Payment / Notes</a>
+								</li>
+								<li class="nav-item" ng-show="organization.type === 'CUSTOMER'" ng-click="findOrdersByCustomerId(); findInvoicesByCustomerId();">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#orders" href="">Sales Orders / Invoices</a>
+								</li>
+								<!-- 
+								<li class="nav-item" ng-show="organization.type === 'CUSTOMER'">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#pricelists" href="">Price Lists</a>
+								</li>
+								 -->
+								<li class="nav-item" ng-show="organization.type === 'SUPPLIER'" ng-click="findPOsBySupplier();">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#pos" href="">Purchase Orders</a>
+								</li>
+							</ul>
+							<div class="tab-content" id="tab">
+								<div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+									
+									<div class="row" ng-if="organization.type == 'CUSTOMER' && hasRole(['CRMMANAGER','ADMIN'])">
+										<div class="col-sm-4 mt-2">
+											<div class="card card-body h-100">
+												<div class="row">
+													<div class="col-sm-6 text-center">
+														<span><strong class="">Average Order Size</strong></span>
+														<p>
+															<h2 class="text-success">
+																<strong><span ng-bind-html="customerStats.orderStats.averageOrderValue | supercurrency"></span> <small><small>CAD</small></small></strong>
+															</h2>
+														</p>
+													</div>
+													<div class="col-sm-6 text-center">
+														<span><strong class="">Total Orders</strong></span>
+														<p class="">
+															<h2 class="text-success">
+																<strong>{{customerStats.orderStats.totalLifeTimeOrders | number}}</strong>
+															</h2>
+														</p>
+													</div>
+												</div>
+												
+											</div>
+										</div>
+										<div class="col-sm-4 mt-2">
+											<div class="card card-body h-100">
+												<span><strong class="">Customer Lifetime Value</strong></span>
+												<p>
+													<h2 class="text-success"><strong><span ng-bind-html="customerStats.orderStats.totalLifeTimeOrderValue | supercurrency"></span> <small><small>CAD</small></small></strong></h2>  
+													<!-- Since January 3, 2021  -->
+												</p>
+											</div>
+										</div>
+										<div class="col-sm-4 mt-2">
+											<div class="card card-body h-100">
+												<div class="row">
+													<div class="col-sm-6 text-center">
+														<span><strong class="">Invoicing - Total</strong></span>
+														<p>
+															<h2 class="text-success"><strong><span ng-bind-html="customerStats.invoiceStats.owing | supercurrency"></span> <small><small>CAD</small></small></strong></h2>
+														</p>
+													</div>
+													<div class="col-sm-6 text-center">
+														<span><strong class="">Invoicing - Balance</strong></span>
+														<p>
+															<h2 class="text-success">
+																<strong>
+																	<span ng-class="{ 'text-danger': (customerStats.invoiceStats.owing - customerStats.invoiceStats.paid) > 0 }" 
+																	ng-bind-html="(customerStats.invoiceStats.owing - customerStats.invoiceStats.paid) | supercurrency"></span> 
+																	<small ng-class="{ 'text-danger': (customerStats.invoiceStats.owing - customerStats.invoiceStats.paid) > 0 }"><small>CAD</small></small>
+																</strong>
+															</h2>
+														</p>
+													</div>
+												</div>
+												
+											</div>
+										</div>
+									</div>
+									
+									<div class="row" ng-if="organization.type == 'SUPPLIER' && hasRole(['CRMMANAGER','ADMIN'])">
+										<div class="col-sm-4 mt-2">
+											<div class="card card-body h-100">
+												<div class="row">
+													<div class="col-sm-6">
+														<span><strong class="">Supplier Performance</strong></span>
+														<p>
+															<h2 class="text-success">
+																<strong>Pie Chart</strong>
+															</h2>
+														</p>
+													</div>
+												</div>
+												
+											</div>
+										</div>
+										<div class="col-sm-4 mt-2">
+											<div class="card card-body h-100">
+												<span><strong class="">Accuracy/Delivery</strong></span>
+												<p>
+													<h2 class="text-success"><strong>Pie Chart</strong></h2>  
+													<!-- Since January 3, 2021  -->
+												</p>
+											</div>
+										</div>
+										<div class="col-sm-4 mt-2">
+											<div class="card card-body h-100">
+												<div class="row">
+													<div class="col-sm-6 text-center">
+														<span><strong class="">Invoicing - Total</strong></span>
+														<p>
+															<h2 class="text-success"><strong><span ng-bind-html="12.91 | supercurrency"></span> <small><small>{{organization.creditInfo.currency}}</small></small></strong></h2>
+															
+														</p>
+													</div>
+													<div class="col-sm-6 text-center">
+														<span><strong class="">Invoicing - Balance</strong></span>
+														<p>
+															<h2 class="text-success"><strong><span ng-bind-html="5.95 | supercurrency"></span> <small><small>{{organization.creditInfo.currency}}</small></small></strong></h2>
+															
+														</p>
+													</div>
+												</div>
+												
+											</div>
+										</div>
+									</div>
+									
+									<form name="orgForm" id="orgForm" novalidate>
+										<div class="row mt-2">
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="id"><strong>Org Id</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Organization's id value autogenerated by the system.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="organization.id"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="id"><strong>Name</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<p><small>The organization's name. This will appear on invoices and purchase orders.</small></p>
+								   					<input required class="form-control form-control-sm" type="text" name="name" id="name" ng-model="organization.name"
+								   					ng-class="{'is-invalid': orgForm.name.$touched && orgForm.name.$invalid, 
+								   					'is-valid': orgForm.name.$touched && orgForm.name.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6" ng-if="organization.type == 'SUPPLIER'">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="id"><strong>Name On Cheque</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>The organization name that will be printed on cheques.</small></p>
+								   					<input class="form-control form-control-sm" type="text" name="nameOnCheque" id="nameOnCheque" ng-model="organization.nameOnCheque"/>
+								   				</div>
+								   			</div>
+											<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="lastModifiedDate"><strong>Type</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Select whether this organization is a customer or a supplier.</small></p>
+								   					<div class="form-check form-check-inline">
+														<input class="form-check-input" type="radio" ng-disabled="true" name="type1" id="type1" value="CUSTOMER" ng-model="organization.type">
+														<label class="form-check-label" for="type1">
+															Customer
+														</label>
+													</div>
+													<div class="form-check form-check-inline">
+														<input class="form-check-input" ng-disabled="true" type="radio" name="type2" id="type2" value="SUPPLIER" ng-model="organization.type">
+														<label class="form-check-label" for="type2">
+															Supplier
+														</label>
+													</div>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="availabilityDate"><strong>Contact Name</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>The organization's contact person.</small></p>
+								   					<input class="form-control form-control-sm" type="text" name="orgContactname" id="orgContactname" ng-model="organization.contactName"
+								   					ng-class="{'is-invalid': orgForm.orgContactname.$touched && orgForm.orgContactname.$invalid, 
+								   					'is-valid': orgForm.orgContactname.$touched && orgForm.orgContactname.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="availabilityDate"><strong>Contact Email</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>The organization's main email address.</small></p>
+								   					<div class="input-group input-group-sm">	
+														<span class="input-group-text"><i class="fas fa-envelope"></i></span>	   					
+								   						<input class="form-control form-control-sm" type="email" name="orgContactEmail" id="orgContactEmail" ng-model="organization.contactEmail"
+								   					ng-class="{'is-invalid': orgForm.orgContactEmail.$touched && orgForm.orgContactEmail.$invalid, 
+								   					'is-valid': orgForm.orgContactEmail.$touched && orgForm.orgContactEmail.$valid }"/>	   						 
+									   				</div>	
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="availabilityDate"><strong>Website</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>The organization's website URL.</small></p>
+								   					<input class="form-control form-control-sm" type="text" name="orgWebsite" id="orgWebsite" ng-model="organization.website"
+								   					ng-class="{'is-invalid': orgForm.orgWebsite.$touched && orgForm.orgWebsite.$invalid, 
+								   					'is-valid': orgForm.orgWebsite.$touched && orgForm.orgWebsite.$valid }"
+								   					ng-pattern="/^(http[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="creationDate"><strong>Creation Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date for when the organization was first created within the system.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="organization.creationDate"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="lastModifiedDate"><strong>Last Modified Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date for when the product was last updated within the system.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="organization.lastModifiedDate"/>
+								   				</div>
+								   			</div>
+										</div>
+										<div class="row mt-3">
+											<div class="col-sm-12 text-end">
+												<button type="button" class="btn btn-outline-danger m-1 btn-sm">Reset</button>
+												<button type="button" class="btn btn-outline-success m-1 btn-sm" ng-disabled="orgForm.$invalid" ng-click="saveOrganization()">Save Changes</button>
+											</div>
+										</div>
+									</form>
+								</div>
+								<div class="tab-pane fade" id="addresses" role="tabpanel" aria-labelledby="address-tab">									
+									<div class="row mt-2">
+										<div class="col-sm-12">
+											<div class="card card-body mx-auto">
+												<form name="contactForm" id="contactForm" novalidate>
+													<div class="row">
+														<div class="col-sm-12">
+															<table class="table table-sm small table-borderless">
+																<thead>
+																	<tr>
+																		<th class="" width="30%">Name</th>
+																		<th class="" width="30%">Email</th>
+																		<th class="" width="30%">Contact Type</th>
+																		<th class="" width="10%"></th>
+																	</tr>
+																</thead>
+																<tbody>
+																	<tr ng-repeat="contact in organization.contacts">
+																		<td class="">
+																			<div class="input-group input-group-sm ">
+																				<input required type="text" ng-model="contact.name" id="contactName{{$index}}" name="contactName{{$index}}" class="form-control form-control-sm"
+																				ng-class="{'is-invalid': contactForm.contactName{{$index}}.$touched && contactForm.contactName{{$index}}.$invalid, 
+								   												'is-valid': contactForm.contactName{{$index}}.$touched && contactForm.contactName{{$index}}.$valid }" />
+																			</div>
+																		</td>
+																		<td class="">
+																			<div class="input-group input-group-sm ">
+																				<div class="input-group input-group-sm">	
+																					<span class="input-group-text"><i class="fas fa-envelope"></i></span>	   					
+															   						<input required class="form-control form-control-sm" type="email" name="contactEmail{{$index}}" id="contactEmail{{$index}}" ng-model="contact.email"
+															   						ng-class="{'is-invalid': contactForm.contactEmail{{$index}}.$touched && contactForm.contactEmail{{$index}}.$invalid, 
+								   													'is-valid': contactForm.contactEmail{{$index}}.$touched && contactForm.contactEmail{{$index}}.$valid }" />	   						 
+																   				</div>
+																			</div>
+																		</td>
+																		<td class="">
+																			<div class="input-group input-group-sm ">
+																				<select required class="form-select form-select-sm" ng-model="contact.type" name="contactType{{$index}}" id="contactType{{$index}}"
+																				ng-class="{'is-invalid': contactForm.contactType{{$index}}.$touched && contactForm.contactType{{$index}}.$invalid, 
+								   												'is-valid': contactForm.contactType{{$index}}.$touched && contactForm.contactType{{$index}}.$valid }">
+																					<option value="" disabled selected hidden>Select Category</option>
+																					<option value="PURCHASEORDER">Purchase Orders</option>
+																					<option value="SALESINVOICE">Sales Order Invoicing</option>
+																					<option value="SERVICEORDER">Service Orders</option>
+																					<option value="DROPSHIP">Dropship Sales Orders</option>
+																					<option value="GENERAL">General</option>
+																				</select>
+																			</div>
+																		</td>
+																		<td class="border-0 bg-white text-center"><i class="fas fa-times-circle ms-2 me-2 text-danger" ng-click="removeContact($index)"></i></td>
+																	</tr>
+																</tbody>
+															</table>
+														</div>
+													</div>
+													<div class="row mt-3">
+														<div class="col-sm-12">
+															<button type="button" class="btn btn-sm btn-outline-success float-end me-2" ng-disabled="contactForm.$invalid" ng-click="saveContacts()">Save Contacts</button>
+															<button type="button" class="btn btn-sm btn-outline-primary float-end me-2" ng-click="addContact()">Add Contact</button>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>
+										
+										<div class="col-sm-12 mt-2">
+											<form name="billToForm" id="billToForm" novalidate>
+											<div class="card card-body">
+												<strong><span ng-show="organization.type == 'CUSTOMER'">BillTo </span>Address</strong>
+												<div class="row">
+													<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="availabilityDate"><strong>Contact Name</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToContactName" id="billToContactName" ng-model="organization.billToAddress.contactName"
+										   					ng-class="{'is-invalid': billToForm.billToContactName.$invalid, 'is-valid': billToForm.billToContactName.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="availabilityDate"><strong>Contact Email</strong></label> 
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<div class="input-group input-group-sm">	
+																<span class="input-group-text"><i class="fas fa-envelope"></i></span>	   					
+										   						<input class="form-control form-control-sm" type="email" name="billToContactEmail" id="billToContactEmail" 
+											   					ng-model="organization.billToAddress.contactEmail"
+											   					ng-class="{'is-invalid': billToForm.billToContactEmail.$invalid, 'is-valid': billToForm.billToContactEmail.$valid }"
+											   					ng-pattern="/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/"/>		   						 
+											   				</div>								   					
+										   				</div>
+										   			</div>
+													<div class="col-lg-3 col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Address 1</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   					<input required class="form-control form-control-sm" type="text" name="billToAddress1" id="billToAddress1" ng-model="organization.billToAddress.address1"
+										   					ng-class="{'is-invalid': billToForm.billToAddress1.$invalid, 'is-valid': billToForm.billToAddress1.$valid }"/>
+										   				</div>
+									   				</div>
+									   				<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Address 2</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToAddress2" id="billToAddress2" ng-model="organization.billToAddress.address2"
+										   					ng-class="{'is-invalid': billToForm.billToAddress2.$invalid, 'is-valid': billToForm.billToAddress2.$valid }"/>
+										   				</div>
+									   				</div>
+									   				<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Address 3</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToAddress3" id="billToAddress3" ng-model="organization.billToAddress.address3"
+										   					ng-class="{'is-invalid': billToForm.billToAddress3.$invalid, 'is-valid': billToForm.billToAddress3.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>City</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   					<input required class="form-control form-control-sm" type="text" name="billToCity" id="billToCity" ng-model="organization.billToAddress.city"
+										   					ng-class="{'is-invalid': billToForm.billToCity.$invalid, 'is-valid': billToForm.billToCity.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="size"><strong>Country</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   				</div>
+							   							<div class="input-group mb-3">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+															<ul class="dropdown-menu">
+																<li class="m-2">  
+																	<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+												   					<input class="form-control form-control-sm" type="text" name="countryFilter" id="countryFilter" ng-model="countryFilter"/>	
+																</li>
+																<li ng-repeat="item in countries | filter: countryFilter | orderBy: '+isoCode'">
+																	<a class="dropdown-item" href="" ng-click="setCountry(item.isoCode, 'bill')">
+																		{{item.name}}
+																	</a>
+																</li>
+															</ul>
+															<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="bCountry" id="bCountry" ng-model="organization.billToAddress.country" 
+															ng-class="{'is-invalid': billToForm.bCountry.$invalid, 'is-valid': billToForm.bCountry.$valid }"/> 
+														</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6" >
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"><span ng-show="organization.billToAddress.country == 'CA' || organization.billToAddress.country == 'US'">*</span></span>
+								            					</div>
+										   					</div>
+										   				</div>
+										   				<div class="input-group mb-3" ng-if="organization.billToAddress.country == 'CA' || organization.billToAddress.country == 'US'">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+															<ul class="dropdown-menu">
+																<li class="m-2">  
+																	<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+												   					<input class="form-control form-control-sm" type="text" name="provinceFilter" id="provinceFilter" ng-model="provinceFilter"/>	
+																</li>
+																<li ng-repeat="item in bCountry.provinces | filter: provinceFilter | orderBy: '+isoCode'">
+																	<a class="dropdown-item" href="" ng-click="setProvince(item.isoCode, 'bill')">
+																		{{item.name}}
+																	</a>
+																</li>
+															</ul>
+															<input ng-required="organization.billToAddress.country == 'CA' || organization.billToAddress.country == 'US'" ng-disabled="true" type="text" 
+															class="form-control form-control-sm" name="bProvince" id="bProvince" ng-model="organization.billToAddress.province"
+															ng-class="{'is-invalid': billToForm.bProvince.$invalid, 'is-valid': billToForm.bProvince.$valid }"/> 
+														</div>
+														<div class="input-group mb-3" ng-if="organization.billToAddress.country != 'CA' && organization.billToAddress.country != 'US'">
+															<input ng-required="organization.billToAddress.country == 'CA' || organization.billToAddress.country == 'US'" type="text" class="form-control form-control-sm" 
+															name="bProvince" id="bProvince" ng-model="organization.billToAddress.province" ng-class="{'is-invalid': billToForm.bProvince.$invalid, 'is-valid': billToForm.bProvince.$valid }"/>
+														</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Postal Code</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"><span ng-show="organization.billToAddress.country == 'CA' || organization.billToAddress.country == 'US'">*</span></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToPostalCode" id="billToPostalCode" ng-model="organization.billToAddress.postalCode"
+										   					ng-class="{'is-invalid': billToForm.billToPostalCode.$invalid, 'is-valid': billToForm.billToPostalCode.$valid }"
+										   					ng-required="organization.billToAddress.country == 'CA' || organization.billToAddress.country == 'US'"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Phone</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<div class="input-group input-group-sm">	
+																<span class="input-group-text"><i class="fas fa-phone"></i></span>	   					
+										   						<input class="form-control form-control-sm" type="text" name="billToPhone" id="billToPhone" ng-model="organization.billToAddress.phone"
+												   					ng-class="{'is-invalid': billToForm.billToPhone.$invalid, 'is-valid': billToForm.billToPhone.$valid }"/>			   						 
+											   				</div>
+										   				</div>									   			
+										   			</div>
+								   				</div>
+								   				<div class="row mt-3">
+													<div class="col-sm-12 text-end">
+														<button type="button" class="btn btn-outline-danger m-1 btn-sm">Reset</button>
+														<button type="button" class="btn btn-outline-success m-1 btn-sm" ng-disabled="billToForm.$invalid" ng-click="saveBillToAddress()">Save Billing Address</button>
+													</div>
+												</div>
+											</div>
+											</form>
+										</div>
+									</div>
+									<div class="row mt-2">
+										<div class="col-sm-12">
+											<div class="card card-body">
+												<strong>ShipTo Addresses</strong>
+												<div class="row mt-2">
+													<div class="col-sm-3" ng-repeat="sAddress in organization.shipToAddresses">
+														<div class="card">
+															<div class="card-block p-4">
+																<h4 class="card-title"><strong>{{sAddress.nickname}}</strong></h4>
+																<h6 class="card-subtitle text-muted"><strong>Company Name:</strong> {{sAddress.companyName}}</h6>
+																<h6 class="card-subtitle text-muted"><strong>P:</strong> {{sAddress.phone | tel}}</h6>
+																<p class="card-text mt-2">
+																	{{sAddress.address1}}
+																	{{(sAddress.address2 == null || sAddress.address2 == '') ? "" : ", " + sAddress.address2}}
+																	{{(sAddress.address3 == null || sAddress.address3 == '') ? "" : ", " + sAddress.address3}} <br />
+																	{{sAddress.city}}, {{sAddress.province}}, {{sAddress.country}} <br />
+																	{{sAddress.postalCode}} <br />
+																	{{sAddress.contactName}}
+																</p>
+																<a data-bs-toggle="modal" data-bs-target="#shipToModal" ng-click="setShipTo(sAddress)" class="float-end me-2"><i class="fas fa-edit"></i></a>
+																<a data-bs-toggle="modal" data-bs-target="#deleteConfirm" class="float-end me-2"><i class="fas fa-trash-alt" ng-click="setShipToDelete(sAddress.id)"></i></a>
+															</div>
+														</div>
+														
+													</div>
+												
+												</div>
+												<div class="row mt-5">
+													<div class="col-sm-12 text-end">
+														<button type="button" ng-click="shipTo = {}" data-bs-toggle="modal" data-bs-target="#shipToModal" class="btn btn-outline-success m-1 btn-sm">Add ShipTo Address</button>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="tab-pane fade" id="credit" role="tabpanel" aria-labelledby="credit-tab" ng-controller="configController" ng-init="findAllPaymentConfigData()">
+									<div class="card card-body mt-2">
+										<form name="paymentConfigForm" id="paymentConfigForm">
+											<div class="row">
+												<div class="col-lg-3 col-sm-6" ng-show="organization.type === 'CUSTOMER'">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="creditLimit"><strong>Credit Limit</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<div class="input-group input-group-sm">	
+															<span class="input-group-text">$</span>	   					
+									   						<input class="form-control form-control-sm" type="number" step=".01" name="creditLimit" id="creditLimit" ng-model="organization.creditInfo.creditLimit"
+											   					ng-class="{'is-invalid': paymentConfigForm.creditLimit.$touched && paymentConfigForm.creditLimit.$invalid, 
+											   					'is-valid': paymentConfigForm.creditLimit.$touched && paymentConfigForm.creditLimit.$valid }"/>			   						 
+										   				</div>
+									   				</div>									   			
+									   			</div>
+									   			<div class="col-lg-3 col-sm-6">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="id"><strong>Payment Terms</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger">*</span>
+							            					</div>
+									   					</div>
+									   					<div class="input-group mb-3">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Payment Term</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="item in paymentConfigData.paymentTerms">
+																	<a class="dropdown-item" href="" ng-click="(organization.creditInfo.paymentTerms = item)">
+																		{{item}}
+																	</a>
+																</li>
+															</ul>
+															<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="terms" id="terms" ng-model="organization.creditInfo.paymentTerms" /> 
+														</div>
+									   				</div>									   			
+									   			</div>
+									   			<div class="col-lg-3 col-sm-6">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="paymentMethod"><strong>Preferred Payment Method</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<div class="input-group mb-3">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Payment Method</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="item in paymentConfigData.paymentMethods">
+																	<a class="dropdown-item" href="" ng-click="(organization.creditInfo.paymentMethod = item)">
+																		{{item}}
+																	</a>
+																</li>
+															</ul>
+															<input ng-disabled="true" type="text" class="form-control form-control-sm" name="paymentMethod" id="paymentMethod" ng-model="organization.creditInfo.paymentMethod" /> 
+														</div>
+									   				</div>									   			
+									   			</div>
+									   			<div class="col-lg-3 col-sm-6">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="currency"><strong>Currency</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger">*</span>
+							            					</div>
+									   					</div>
+									   					<div class="input-group mb-3">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Currency</button>
+															<ul class="dropdown-menu">
+																<li class="m-2">  
+																	<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+												   					<input class="form-control form-control-sm" type="text" name="cFilter" id="cFilter" ng-model="cFilter"/>	
+																</li>
+																<li ng-repeat="item in paymentConfigData.currencies | filter: cFilter | orderBy: '+code'">
+																	<a class="dropdown-item" href="" ng-click="(organization.creditInfo.currency = item.code)">
+																		{{item.code}}
+																	</a>
+																</li>
+															</ul>
+															<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="currency" id="currency" 
+															ng-model="organization.creditInfo.currency" /> 
+														</div>
+									   				</div>									   			
+									   			</div>
+									   			<div class="col-lg-3 col-sm-6" ng-show="organization.type === 'CUSTOMER'">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="creditHold"><strong>Credit Hold</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<p><small>Select whether this organization is a customer or a supplier.</small></p>
+									   					<div class="form-check form-check-inline">
+															<input class="form-check-input" type="radio" name="creditHold" id="creditHold" ng-value="true" ng-model="organization.creditInfo.creditHold">
+															<label class="form-check-label" for="creditHold">
+																Yes
+															</label>
+														</div>
+														<div class="form-check form-check-inline">
+															<input class="form-check-input" type="radio" name="creditHold" id="creditHold" ng-value="false" ng-model="organization.creditInfo.creditHold">
+															<label class="form-check-label" for="creditHold">
+																No
+															</label>
+														</div>
+									   				</div>									   			
+									   			</div>
+											</div>
+											<div class="row mt-5">
+												<div class="col_sm-12">
+													<button class="btn btn-outline-success btn-sm float-end me-2" ng-click="saveCreditInfo()">Save Credit Info</button>
+												</div>
+											</div>
+										</form>
+									</div>
+									
+									
+									<div class="card mt-2">
+										<div class="card-header">
+											<h6>
+												<span class="fw-bold">Notes / Comments</span> 
+												<span class="ms-2 badge bg-dark">{{ organization.notes.length }}</span>
+												<button type="button" class="btn btn-outline-dark btn-sm p-1 float-end"
+													ng-click="" data-bs-toggle="collapse" data-bs-target="#commentTextArea" aria-controls="commentTextArea">Add Note
+												</button>
+											</h6>
+										</div>
+										<div class="card-body">
+									
+											<div class="row">
+												<div class="col-sm-12 m-0">
+													<div class="collapse" id="commentTextArea" aria-expanded="false">
+														<div class="card card-body" >
+											   				<form id="noteForm" name="noteForm" novalidate ng-submit="saveNote()">
+												   				<div class="card card-body">
+												   					<div><p><small>Add your notes and details up to a maximum of 1,000 characters.</small></p></div> 
+											   						<div class="m2">
+											   							<textarea required ng-minlength="10" name="content" id="content" class="form-control" rows="5" ng-model="note.content"></textarea>
+											   							<span class="invalid-feedback" ng-show="noteForm.content.$touched && noteForm.content.$invalid">Content must be between 10 and 1,000 characters in length.</span>
+											   						</div>
+												   					<div class="m-2">
+												   						<button type="submit" class="btn btn-outline-dark btn-sm float-end" ng-disabled="noteForm.$invalid">Save</button>
+												   					</div>
+												   				</div>
+												   			</form>	
+											   			</div>
+										   			</div>
+										   			<div class="card card-body m-1 small" ng-repeat="item in organization.notes | orderBy: '-creationDate'">
+								   						<div class="mb-2">
+								   							<span class="fw-bold">Posted By:</span> {{item.createdBy.name}}
+								   							<span class="float-end"><span class="fw-bold">Posted Date:</span> {{item.creationDate | date:'medium'}}</span>
+								   						</div>
+								   						<div>
+								   							{{item.content}}
+								   						</div>
+									   				</div>
+										   		</div>
+											</div>
+										</div>
+									</div>
+									
+								</div>
+								<div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="order-tab" ng-show="organization.type == 'CUSTOMER'">
+									<div class="card mt-2">
+										<div class="card-header">
+											<span class=""><strong>Invoices</strong> <span class="ms-2 badge bg-dark">{{invoicesSearchResult.totalResults | number}}</span></span>			
+											<p class="small">Click on an invoice below to direct to the details page.</p>
+										</div>
+										<div class="card-body">
+											<div class="row mt-2" ng-show="invoicesSearchResult != undefined">
+												<div class="col-sm-12">
+													<div class="">
+														<ul class="pagination">
+															<li class="page-item">
+																<button type="button" class="btn btn-link page-link" ng-click="findInvoicesByCustomerId($scope.organization.id, invoicesSearchResult.page - 1)" ng-disabled="invoicesSearchResult.hasPrevious == false">Previous</button>
+															</li>
+															<li class="page-item" ng-repeat="x in [].constructor(invoicesSearchResult.pages) track by $index">
+																<button type="button" ng-disabled="$index == invoicesSearchResult.page" class="btn btn-link page-link" ng-click="findInvoicesByCustomerId($scope.organization.id, $index)">{{$index + 1}}</button>
+															</li>
+															<li>
+																<button type="button" class="btn btn-link page-link" ng-click="findInvoicesByCustomerId($scope.organization.id, invoicesSearchResult.page + 1)" ng-disabled="invoicesSearchResult.hasNext == false">Next</button>
+															</li>
+														</ul>
+													</div>
+												</div>		
+											</div>
+											
+											<table class="table table-striped table-sm table-striped table-hover small">
+												<thead>
+													<tr>
+														<th class="">Id</th>
+														<th class="">Order #</th>
+														<th class="">Invoice Date</th>
+														<th class="">Due Date</th>
+														<th class="text-center">State</th>
+														<th class="text-end">Amount</th>
+														<th class="text-end">Amount Paid</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr class="mt-2" ng-repeat="item in invoicesSearchResult.results" ng-click="viewInvoice(item.id)">
+														<td class="align-middle">{{item.id}}</td>
+														<td class="align-middle">{{item.orderId}}</td>
+														<td class="align-middle">{{item.invoiceDate | date}}</td>
+														<td class="align-middle">{{item.dueDate | date}}</td>
+														<td class="align-middle text-center text-danger">{{item.status}}</td>
+														<td class="align-middle text-end pe-3"><span ng-bind-html="item.totalAmount | supercurrency"></span></td>
+														<td class="align-middle text-end pe-3"><span ng-bind-html="item.amountPaid | supercurrency"></span></td>
+													</tr>
+													
+													<tr class="mt-2 bg-light">
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td class="text-end">
+															<hr />
+															<strong>Net Sales:</strong></td>
+														<td class="text-end pe-3">
+															<hr />
+															<strong><span ng-bind-html="invoicesSearchResult.total | supercurrency"></span></strong>
+														</td>
+														<td class="text-end pe-3">
+															<hr />
+															<strong><span ng-bind-html="invoicesSearchResult.paid | supercurrency"></span></strong>
+														</td>
+													</tr>
+													<tr class="mt-2 bg-light">
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td class="text-end">
+															<strong>Balance:</strong>
+														</td>
+														<td class="text-center">
+															
+														</td>
+														<td class="text-end pe-3" ng-class="{'text-danger': invoicesSearchResult.paid < invoicesSearchResult.total}">
+															<strong><span ng-bind-html="(invoicesSearchResult.total - invoicesSearchResult.paid) | supercurrency"></span></strong>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+											<div class="row mt-2" ng-show="invoicesSearchResult != undefined">
+												<div class="col-sm-12">
+													<div class="">
+														<ul class="pagination">
+															<li class="page-item">
+																<button type="button" class="btn btn-link page-link" ng-click="findInvoicesByCustomerId($scope.organization.id, invoicesSearchResult.page - 1)" ng-disabled="invoicesSearchResult.hasPrevious == false">Previous</button>
+															</li>
+															<li class="page-item" ng-repeat="x in [].constructor(invoicesSearchResult.pages) track by $index">
+																<button type="button" ng-disabled="$index == invoicesSearchResult.page" class="btn btn-link page-link" ng-click="findInvoicesByCustomerId($scope.organization.id, $index)">{{$index + 1}}</button>
+															</li>
+															<li>
+																<button type="button" class="btn btn-link page-link" ng-click="findInvoicesByCustomerId($scope.organization.id, invoicesSearchResult.page + 1)" ng-disabled="invoicesSearchResult.hasNext == false">Next</button>
+															</li>
+														</ul>
+													</div>
+												</div>		
+											</div>
+										</div>
+									</div>
+									
+									<div class="card mt-2">
+										<div class="card-header">
+											<span class=""><strong>Sales Orders</strong> <span class="ms-2 badge bg-dark">{{customerOrders.totalResults}}</span></span>			
+											<p class="small">Click on a Sales Order below to direct to the details page.</p>
+										</div>
+										<div class="card-body">
+											<div class="row mt-2" ng-show="customerOrders != undefined">
+												<div class="col-sm-12">
+													<div class="">
+														<ul class="pagination">
+															<li class="page-item">
+																<button type="button" class="btn btn-link page-link" ng-click="findOrdersByCustomerId(customerOrders.page - 1, $scope.organization.id)" ng-disabled="customerOrders.hasPrevious == false">Previous</button>
+															</li>
+															<li class="page-item" ng-repeat="x in [].constructor(customerOrders.pages) track by $index">
+																<button type="button" ng-disabled="$index == customerOrders.page" class="btn btn-link page-link" ng-click="findOrdersByCustomerId($index, $scope.organization.id)">{{$index + 1}}</button>
+															</li>
+															<li>
+																<button type="button" class="btn btn-link page-link" ng-click="findOrdersByCustomerId(customerOrders.page + 1, $scope.organization.id)" ng-disabled="customerOrders.hasNext == false">Next</button>
+															</li>
+														</ul>
+													</div>
+												</div>		
+											</div>
+										
+											<table class="table table-striped table-sm table-striped table-hover small">
+												<thead>
+													<tr>
+														<th class="">Order #</th>
+														<th class="">Order State</th>
+														<th class="">Creation Date</th>
+														<th class="">Shipped Date</th>
+														<th class="text-end pe-3">Amount</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr class="mt-2" ng-repeat="order in customerOrders.results" ng-click="viewOrder(order.id)">
+														<td class="align-middle">{{order.id}}</td>
+														<td class="align-middle">{{order.state}}</td>
+														<td class="align-middle">{{order.creationDate | date}}</td>
+														<td class="align-middle">{{order.shippedDate | date}}</td>
+														<td class="align-middle text-end pe-3"><span ng-bind-html="order.total | supercurrency : order.price.currency.symbol"></span> <small><small>{{order.price.currency.code}}</small></small></td>
+													</tr>
+													<tr class="mt-2 bg-light">
+														<td></td>
+														<td></td>
+														<td class="text-center"></td>
+														<td class="text-end">
+															<strong>Total Sales:</strong>
+														</td>
+														<td class="text-end text-success pe-3">
+															<strong><span ng-bind-html="customerOrders.total | supercurrency"></span> <small><small>{{organization.creditInfo.currency}}</small></small></strong>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+											<div class="row mt-2" ng-show="customerOrders != undefined">
+												<div class="col-sm-12">
+													<div class="">
+														<ul class="pagination">
+															<li class="page-item">
+																<button type="button" class="btn btn-link page-link" ng-click="findOrdersByCustomerId(customerOrders.page - 1, $scope.organization.id)" ng-disabled="customerOrders.hasPrevious == false">Previous</button>
+															</li>
+															<li class="page-item" ng-repeat="x in [].constructor(customerOrders.pages) track by $index">
+																<button type="button" ng-disabled="$index == customerOrders.page" class="btn btn-link page-link" ng-click="findOrdersByCustomerId($index, $scope.organization.id)">{{$index + 1}}</button>
+															</li>
+															<li>
+																<button type="button" class="btn btn-link page-link" ng-click="findOrdersByCustomerId(customerOrders.page + 1, $scope.organization.id)" ng-disabled="customerOrders.hasNext == false">Next</button>
+															</li>
+														</ul>
+													</div>
+												</div>		
+											</div>
+										</div>
+									</div>
+								</div>	
+								<div class="tab-pane fade" id="pricelists" role="tabpanel" aria-labelledby="pl-tab" ng-show="organization.type === 'CUSTOMER'">
+									Price list here
+								</div>
+								<div class="tab-pane fade" id="pos" role="tabpanel" aria-labelledby="po-tab" ng-show="organization.type === 'SUPPLIER'">
+									<div class="col-sm-12">
+										<div class="card m-1">
+											<div class="card-header">
+												<span class=""><strong>Purchase Orders</strong> <span class="ms-2 badge bg-dark">{{POSearchResult.totalResults | number}}</span></span>			
+												<p class="small">Click on a purchase order below to direct to the details page. A maximum of 20 pages will be displayed. For older Purchase Orders
+												search for them in the Purchase Order section.</p>
+											</div>
+											<div class="card-body">
+												<div class="row mt-2" ng-show="POSearchResult != undefined">
+													<div class="col-sm-12">
+														<div class="">
+															<ul class="pagination"> 
+																<li class="page-item">
+																	<button type="button" class="btn btn-link page-link" ng-click="findPOsBySupplier($scope.organization.id, POSearchResult.page - 1)" ng-disabled="POSearchResult.hasPrevious == false">Previous</button>
+																</li>
+																<li class="page-item" ng-repeat="x in [].constructor(POSearchResult.pages) track by $index">
+																	<button type="button" ng-disabled="$index == POSearchResult.page" class="btn btn-link page-link" ng-click="findPOsBySupplier($scope.organization.id, $index)">{{$index + 1}}</button>
+																</li>
+																<li>
+																	<button type="button" class="btn btn-link page-link" ng-click="findPOsBySupplier($scope.organization.id, POSearchResult.page + 1)" ng-disabled="POSearchResult.hasNext == false">Next</button>
+																</li>
+															</ul>
+														</div>
+													</div>		
+												</div>
+												<table class="table table-striped table-sm table-striped table-hover small">
+													<thead>
+														<tr>
+															<th class="">Id</th>
+															<th class="">Warehouse</th>
+															<th class="text-center">Issue Date</th>
+															<th class="text-center">Received Date</th>
+															<th class="text-center">State</th>
+															<th class="text-center">Amount</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr class="mt-2" ng-repeat="item in POSearchResult.results" ng-click="viewPO(item.id)">
+															<td class="align-middle">{{item.id}}</td>
+															<td class="align-middle">{{item.warehouseName}}</td>
+															<td class="align-middle text-center">{{item.issueDate | date}}</td>
+															<td class="align-middle text-center">{{item.receivedDate | date}}</td>
+															<td class="align-middle text-center">{{item.state}}</td>
+															<td class="align-middle text-center">
+																<span ng-class="{'text-decoration-line-through': item.state == 'CANCELLED'}" ng-bind-html="(item.total == undefined ? 0.00 : item.total) | supercurrency"></span>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+												<div class="row mt-2 " ng-show="POSearchResult != undefined">
+													<div class="col-sm-12">
+														<div class="">
+															<ul class="pagination"> 
+																<li class="page-item">
+																	<button type="button" class="btn btn-link page-link" ng-click="findPOsBySupplier($scope.organization.id, POSearchResult.page - 1)" ng-disabled="POSearchResult.hasPrevious == false">Previous</button>
+																</li>
+																<li class="page-item" ng-repeat="x in [].constructor(POSearchResult.pages) track by $index">
+																	<button type="button" ng-disabled="$index == POSearchResult.page" class="btn btn-link page-link" ng-click="findPOsBySupplier($scope.organization.id, $index)">{{$index + 1}}</button>
+																</li>
+																<li>
+																	<button type="button" class="btn btn-link page-link" ng-click="findPOsBySupplier($scope.organization.id, POSearchResult.page + 1)" ng-disabled="POSearchResult.hasNext == false">Next</button>
+																</li>
+															</ul>
+														</div>
+													</div>		
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>	
+							</div>			
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal" id="shipToModal" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+						<form name="shipToForm" id="shipToForm" novalidate>
+							<div class="row">
+								<div class="col-sm-12 text-center">
+									<h5><strong>Ship To</strong>
+			    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times text-danger"></i></span>
+			                        </h5>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="availabilityDate"><strong>Nickname</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<input class="form-control form-control-sm" type="text" name="shipToNickname" id="shipToNickname" ng-model="shipTo.nickname" 
+					   					ng-class="{'is-invalid': shipToForm.shipToNickname.$invalid, 'is-valid': shipToForm.shipToNickname.$valid }"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="availabilityDate"><strong>Company Name</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<input required class="form-control form-control-sm" type="text" name="shipToCompanyName" id="shipToCompanyName" ng-model="shipTo.companyName" 
+					   					ng-class="{'is-invalid': shipToForm.shipToCompanyName.$invalid, 'is-valid': shipToForm.shipToCompanyName.$valid }"/>
+					   				</div>
+									<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="availabilityDate"><strong>ATTN</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<input class="form-control form-control-sm" type="text" name="shipToContactName" id="shipToContactName" ng-model="shipTo.contactName"
+					   					ng-class="{'is-invalid': shipToForm.shipToContactName.$invalid, 'is-valid': shipToForm.shipToContactName.$valid }"/>
+					   				</div>
+								   			
+									<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Address 1</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<input required class="form-control form-control-sm" type="text" name="shipToAddress1" id="shipToAddress1" ng-model="shipTo.address1"
+					   					ng-class="{'is-invalid': shipToForm.shipToAddress1.$invalid, 'is-valid': shipToForm.shipToAddress1.$valid }"/>
+					   				</div>
+							   				
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Address 2</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<input class="form-control form-control-sm" type="text" name="shipToAddress2" id="shipToAddress2" ng-model="shipTo.address2"
+					   					ng-class="{'is-invalid': shipToForm.shipToAddress2.$invalid, 'is-valid': shipToForm.shipToAddress2.$valid }"/>
+					   				</div>
+							   				
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Address 3</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<input class="form-control form-control-sm" type="text" name="shipToAddress3" id="shipToAddress3" ng-model="shipTo.address3"
+					   					ng-class="{'is-invalid': shipToForm.shipToAddress3.$invalid, 'is-valid': shipToForm.shipToAddress3.$valid }"/>
+					   				</div>
+								   			
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>City</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<input required class="form-control form-control-sm" type="text" name="shipToCity" id="shipToCity" ng-model="shipTo.city"
+					   					ng-class="{'is-invalid': shipToForm.shipToCity.$invalid, 'is-valid': shipToForm.shipToCity.$valid }"/>
+					   				</div>
+								   		
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="size"><strong>Country</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   				</div>
+		   							<div class="input-group mb-3">
+		   								<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+										<ul class="dropdown-menu">
+											<li class="m-2">  
+												<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+							   					<input class="form-control form-control-sm" type="text" name="sCountryFilter" id="sCountryFilter" ng-model="aCountryFilter"/>	
+											</li>
+											<li ng-repeat="item in countries| filter: aCountryFilter | orderBy: '+isoCode'">
+												<a class="dropdown-item" href="" ng-click="setCountry(item.isoCode, 'ship')">
+													{{item.name}}
+												</a>
+											</li>
+										</ul>
+										<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="sCountry" id="sCountry" ng-model="shipTo.country" 
+										ng-class="{'is-invalid': shipToForm.sCountry.$invalid, 'is-valid': shipToForm.sCountry.$valid }"/> 
+									</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"><span ng-if="shipTo.country == 'CA' || shipTo.country == 'US'">*</span></span>
+			            					</div>
+					   					</div>
+					   				</div>
+					   				
+					   				<div class="input-group mb-3" ng-if="shipTo.country == 'CA' || shipTo.country == 'US'">
+										<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+										<ul class="dropdown-menu">
+											<li class="m-2">  
+												<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+							   					<input class="form-control form-control-sm" type="text" name="provinceFilter" id="provinceFilter" ng-model="provinceFilter"/>	
+											</li>
+											<li ng-repeat="item in sCountry.provinces | filter: provinceFilter | orderBy: '+isoCode'">
+												<a class="dropdown-item" href="" ng-click="setProvince(item.isoCode, 'ship')">
+													{{item.name}}
+												</a>
+											</li>
+										</ul>
+										<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="sProvince" id="sProvince" ng-model="shipTo.province"
+										ng-class="{'is-invalid': shipToForm.sProvince.$invalid, 'is-valid': shipToForm.sProvince.$valid }"/> 
+									</div>
+									<div class="input-group mb-3" ng-if="shipTo.country != 'CA' && shipTo.country != 'US'">
+										<input type="text" class="form-control form-control-sm" name="sProvince" id="sProvince" ng-model="shipTo.province"
+										ng-class="{'is-invalid': shipToForm.sProvince.$invalid, 'is-valid': shipToForm.sProvince.$valid }"/> 
+									</div>
+								   	
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Postal Code</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"><span ng-if="shipTo.country == 'CA' || shipTo.country == 'US'">*</span></span>
+			            					</div>
+					   					</div>
+					   					<input class="form-control form-control-sm" type="text" name="shipToPostalCode" id="shipToPostalCode" ng-model="shipTo.postalCode"
+					   					ng-class="{'is-invalid': shipToForm.shipToPostalCode.$invalid, 'is-valid': shipToForm.shipToPostalCode.$valid }"
+					   					ng-required="shipTo.country == 'CA' || shipTo.country == 'US'"/>
+					   				</div>
+								   	 
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Phone</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<div class="input-group input-group-sm mt-2">	
+											<span class="input-group-text"><i class="fas fa-phone"></i></span>	   					
+					   						<input required class="form-control" ng-model="shipTo.phone" type="text" id="shipToPhone" name="shipToPhone"
+						   						ng-class="{'is-invalid': shipToForm.shipToPhone.$invalid, 'is-valid': shipToForm.shipToPhone.$valid }">			   						 
+						   				</div>
+					   				</div>
+								</div>
+							</div>
+			   				<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="button" ng-disabled="shipToForm.$invalid" class="btn btn-outline-success m-1 btn-sm" ng-disabled="false" ng-click="saveShipToAddress()">Save Changes</button>
+								</div>
+							</div>
+				   		</form>		   				
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="deleteConfirm" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row">
+							<div class="col-sm-12 text-center">
+								<h5><strong>Delete ShipTo Address</strong>
+		    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times text-danger"></i></span>
+		                        </h5>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+	    						<p>Are you sure you would like to Delete?</p>
+	    					</div>
+	    				</div>
+	    			</div>
+	    			<div class="modal-footer">
+	    				<button type="button" class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">Cancel</button>
+	                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-dismiss="modal" ng-click="deleteShipToAddressById()">Delete</button>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	</section>
+</div>
+

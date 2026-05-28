@@ -1,0 +1,574 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="shippingController" ng-init="findAllCarriers(); findOrderById();" ng-keyup="keyup($event)">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="configController" ng-init="findGlobalConfig()">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li> 
+					<li class="breadcrumb-item"><a href="#/wms-dashboard">WMS</a></li>
+					<li class="breadcrumb-item"><a href="#/shipping">Shipping</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Shipping - {{order.id}}</li>
+				</ol>  
+			</nav>
+			<div data-barcode-scanner="barcodeScanned"></div>
+			<div class="row" >
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<h4 class="">
+									<span><strong>Sales Order #: {{order.id}}</strong></span>
+								</h4>								
+							</div>
+						</div>
+						<hr />
+						<div class="row">
+							<div class="col-sm-2"> 
+								<div class="vertical-text fw-bold text-uppercase"><h4><strong>Ship From</strong></h4></div>
+							</div>
+							<div class="col-sm-4 fw-bold text-uppercase">
+								<p>
+									{{globalConfig.companyName}} <br /> <!-- From Address is the warehouse address -->
+									{{order.warehouse.address.address1}} <br />
+									{{order.warehouse.address.city}}, {{order.warehouse.address.province}} <br />
+									{{order.warehouse.address.country}}, {{order.warehouse.address.postalCode}} <br />
+								</p>
+							</div>
+							<div class="col-sm-2">
+								<div class="vertical-text fw-bold text-uppercase"><h4><strong>Ship To</strong></h4></div>
+							</div>
+							<!-- 
+								The ship to address is based on shipping method. If the order uses pickup then
+								a warehouse must be selected and the ship to address updated. This should be done
+								by the order manager before it gets to the ship screen.
+							 -->
+							
+							<div class="col-sm-4 fw-bold text-uppercase">
+								<p>
+									{{order.customer.name}} <br />
+									{{order.shipToAddress.address1}} <br />
+									{{order.shipToAddress.city}}, {{order.shipToAddress.province}} <br />
+									{{order.shipToAddress.country}}, {{order.shipToAddress.postalCode}} <br />
+									ATTN: {{order.shipToAddress.contactName}}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-2">
+				<div class="col-sm-12">
+					<div class=" card card-body">		   		
+						<form name="shippingForm" id="shippingForm" novalidate>
+							<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="row mt-2">
+										<div class="col-sm-12">
+											<div class="card card-body w-75 mx-auto">
+												<table class="table table-sm table-borderless" ng-if="order.price.shipInfo.carrier.name != 'Pickup'">
+													<tbody>
+														<tr>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+																	<table class="table table-sm table-borderless">
+																		<tbody>
+																			<tr>
+																				<td class="align-middle" width="50%">
+																					<div class="input-group">
+																 						<label class="pe-2">
+																	 						<strong>Carrier:</strong>
+																 						</label>
+																 						<div class="input-group-append">
+															        						<span class="text-danger">*</span>
+															        					</div>
+																 					</div>
+																				</td>
+																				<td class="align-middle text-end" width="50%">
+																					<span class="me-2"  ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+																				</td>
+																			</tr>
+																		</tbody>
+																	</table>
+												 					<p><small>Select the carrier for shipment</small></p>
+																	<div class="input-group mb-3">
+																		<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" 
+																		 aria-expanded="false">Select Carrier</button>
+																		<ul class="dropdown-menu">
+																			<li ng-repeat="item in carriers">
+																				<a class="dropdown-item" href="" ng-click="setCarrier(item);">
+																					{{item.name}}
+																				</a>
+																			</li>
+																		</ul>
+																		<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="shipper" id="shipper" 
+																		ng-model="order.price.shipInfo.carrier.name" /> 
+																	</div>
+																</div>
+															</td>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+												 					<div class="input-group">
+												 						<label class="pe-2" for="size"><strong>Account Number</strong></label>
+												 						<div class="input-group-append">
+												        						<span class="text-danger"></span>
+												        					</div>
+												 					</div>
+												 				</div>
+											 					<p><small>Enter customer carrier account number if applicable.</small></p>
+											 					<div class="input-group mb-3">
+											 						<input type="text" class="form-control form-control-sm" name="accountNumber" id="accountNumber" ng-model="order.price.shipInfo.accountNumber" />
+											 					</div>
+															</td>
+								   						</tr>
+								   					</tbody>
+								   				</table>
+								   				
+								   				<table class="table table-sm table-borderless" ng-if="order.shipToAddress.country != order.warehouse.address.country"> 
+								   					<tbody>
+														<tr>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+												 					<div class="input-group">
+												 						<label class="pe-2" for="freightForwardCarrier"><strong>Freight Forwarding Carrier</strong></label>
+												 						<div class="input-group-append">
+												        						<span class="text-danger"></span>
+												        					</div>
+												 					</div>
+												 				</div>
+											 					<p><small>If different than the carrier above, enter the freight forwarding carrier.</small></p>
+											 					<div class="input-group mb-3">
+											 						<input type="text" class="form-control form-control-sm" name="freightForwardCarrier" id="freightForwardCarrier" ng-model="order.price.shipInfo.freightForwardCarrier" />									 						
+											 					</div>
+															</td>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+												 					<div class="input-group">
+												 						<label class="pe-2" for="freightForwardAccount"><strong>Freight Forwarding WayBill</strong></label>
+												 						<div class="input-group-append">
+												        						<span class="text-danger"></span>
+												        					</div>
+												 					</div>
+												 				</div>
+											 					<p><small>If applicable, enter a waybill number.</small></p>
+											 					<div class="input-group mb-3">
+											 						<input type="text" class="form-control form-control-sm" name="freightForwardAccount" id="freightForwardAccount" ng-model="order.price.shipInfo.freightForwardAccount" />
+											 					</div>
+															</td>
+														</tr>
+														<tr>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+												 					<div class="input-group">
+												 						<label class="pe-2" for="freightForwardCarrier"><strong>Port of Export</strong></label>
+												 						<div class="input-group-append">
+												        						<span class="text-danger"></span>
+												        					</div>
+												 					</div>
+												 				</div>
+											 					<p><small>Enter the port of export for the shipment.</small></p>
+											 					<div class="input-group mb-3">
+											 						<input type="text" class="form-control form-control-sm" name="portOfExport" id="portOfExport" ng-model="order.price.shipInfo.portOfExport" />									 						
+											 					</div>
+															</td>
+														</tr>
+														<tr>
+															<td class="text-start align-bottom" colspan="2">
+																<div class="form-group mt-2">
+												 					<div class="input-group">
+												 						<label class="pe-2" for="shippingMarks"><strong>Shipping Marks</strong></label>
+												 						<div class="input-group-append">
+												        						<span class="text-danger"></span>
+												        					</div>
+												 					</div>
+												 				</div>
+											 					<p><small>Add shipping marks if applicable.</small></p>
+											 					<div class="input-group mb-3">
+											 						<textarea class="form-control form-control-sm" name="shippingMarks" id="shippingMarks" ng-model="order.price.shipInfo.shippingMarks"></textarea>								 						
+											 					</div>
+															</td>
+														</tr>
+													</tbody>
+								   				</table>
+								   				
+								   				<table class="table table-sm table-borderless" ng-if="order.price.shipInfo.carrier.name == 'Pickup'">
+													<tbody>
+														<tr>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+																	<table class="table table-sm table-borderless">
+																		<tbody>
+																			<tr>
+																				<td class="align-middle" width="50%">
+																					<div class="input-group">
+																 						<label class="pe-2">
+																	 						<strong>Carrier:</strong>
+																 						</label>
+																 						<div class="input-group-append">
+															        						<span class="text-danger">*</span>
+															        					</div>
+																 					</div>
+																				</td>
+																				<td class="align-middle text-end" width="50%">
+																					<span class="me-2"  ng-bind-html="order.price.shipInfo.carrier.logo"></span> 
+																				</td>
+																			</tr>
+																		</tbody>
+																	</table>
+												 					<p><small>Select the carrier for shipment</small></p>
+																	<div class="input-group mb-3">
+																		<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" 
+																		 aria-expanded="false">Select Carrier</button>
+																		<ul class="dropdown-menu">
+																			<li ng-repeat="item in carriers">
+																				<a class="dropdown-item" href="" ng-click="setCarrier(item);">
+																					{{item.name}}
+																				</a>
+																			</li>
+																		</ul>
+																		<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="shipper" id="shipper" 
+																		ng-model="order.price.shipInfo.carrier.name" /> 
+																	</div>
+																</div>
+															</td>
+															<td class="text-start align-bottom" width="50%">
+																<div class="form-group mt-2">
+												 					<div class="input-group">
+												 						<label class="pe-2" for="size"><strong>Pickup Location</strong></label>
+												 						<div class="input-group-append">
+												        						<span class="text-danger">{{(warehouses.length > 1 ? '*' : '')}}</span>
+												        					</div>
+												 					</div>
+												 				</div>
+											 					<p><small>Select a store or warehouse location for pickup of this sales order.</small></p>
+											 					<div class="input-group mb-3">
+																	<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Location</button>
+																	<ul class="dropdown-menu">
+																		<li ng-repeat="item in warehouses">
+																			<a class="dropdown-item" href="" ng-click="setPickupWarehouse(item);">
+																				{{item.name}}
+																			</a>
+																		</li>
+																	</ul>
+																	<input ng-required="warehouses.length > 1" ng-disabled="true" type="text" class="form-control form-control-sm" name="pickupLocation" id="pickupLocation" 
+																	ng-model="order.price.shipInfo.pickupLocation.name" /> 
+																</div>
+															</td>
+								   						</tr>
+								   					</tbody>
+								   				</table>
+											</div>
+										</div>
+									</div>
+									<div class="row mt-2" ng-show="quote != undefined">
+										<div class="col-sm-12">
+											<div class="card card-body w-75 mx-auto">
+												<div class="mb-3">
+													<label for="exampleFormControlInput1" class="form-label fw-bold">PickUp Time</label>
+													<input type="date" class="form-control" name="pickUpDate" id="pickUpDate" />
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="card card-body w-75 mx-auto">
+										<div class="form-group mt-2">
+					   						<label class="pe-2" for="currency">
+						   						<strong class="align-middle me-3">Packaging: </strong>
+					   						</label>
+						   					<p><small>Select the packaging type</small></p>
+						   					<div class="input-group mb-3">
+												<button ng-disabled="order.state != 'PACKED'" class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Packaging</button>
+												<ul class="dropdown-menu">
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('ENVELOPE');">
+															Envelope
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('CARDBOARD BOX');">
+															Cardboard Box
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('CARDBOARD TUBE');">
+															Cardboard Tube
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('WODD CRATE');">
+															Wood Crate
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('PLASTIC CRATE');">
+															Plastic Crate
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('PLASTIC TUBE');">
+															Plastic Tube
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setPackageType('METAL CRATE');">
+															Metal Crate
+														</a>
+													</li>
+												</ul>
+												<input ng-disabled="true" type="text" class="form-control form-control-sm" name="packageType" id="packageType" 
+												ng-model="order.price.shipInfo.packageType" /> 
+											</div>
+						   				</div>
+									</div>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="card card-body w-75 mx-auto">
+										<form name="packageForm" id="packageForm" novalidate>
+										<table class="table table-sm">
+											<thead>
+												<tr>
+													<th class="small fw-bold">Package</th>
+													<th class="small fw-bold">Gross Weight per Package ({{ (globalConfig.measurementSystem == 'METRIC') ? 'kgs' : 'lbs' }})</th>
+													<th class="small fw-bold">Net Weight per Package ({{ (globalConfig.measurementSystem == 'METRIC') ? 'kgs' : 'lbs' }})</th>
+													<th class="small fw-bold text-center">Dimensions per Package ({{ (globalConfig.measurementSystem == 'METRIC') ? 'cms' : 'inches' }})</th>
+													<th class="border-0 bg-transparent"></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr ng-repeat="pitem in packageArray">
+													<td class="">
+														<div class="input-group input-group-sm mb-3">
+															<span class="input-group-text">#</span>
+															<input ng-disabled="true" type="number" class="form-control form-control-sm" value="{{$index + 1}}">
+														</div>
+													</td>
+													<td class="">
+														<div class="input-group input-group-sm mb-3">
+															<input type="number" step="any" ng-model="pitem.grossWeight" id="weight" name="weight" class="form-control form-control-sm" ng-disabled="order.state != 'PACKED'">
+															<span class="input-group-text">{{ (globalConfig.measurementSystem == 'METRIC') ? 'kgs' : 'lbs' }}</span>
+														</div>
+													</td>
+													<td class="">
+														<div class="input-group input-group-sm mb-3">
+															<input type="number" step="any" ng-model="pitem.netWeight" id="weight" name="weight" class="form-control form-control-sm" ng-disabled="order.state != 'PACKED'">
+															<span class="input-group-text">{{ (globalConfig.measurementSystem == 'METRIC') ? 'kgs' : 'lbs' }}</span>
+														</div>
+													</td>
+													<td class="">
+														<div class="row">
+															<div class="col-sm-4">
+																<div class="input-group input-group-sm mb-3">
+																	<input type="number" ng-model="pitem.length" step="any" id="length" name="length" class="form-control" ng-disabled="order.state != 'PACKED'">
+																	<span class="input-group-text">L</span>
+																</div>
+															</div>
+															<div class="col-sm-4">
+																<div class="input-group input-group-sm mb-3">
+																	<input type="number" ng-model="pitem.width" step="any" id="width" name="width" class="form-control" ng-disabled="order.state != 'PACKED'">
+																	<span class="input-group-text">W</span>
+																</div>
+															</div>
+															<div class="col-sm-4">
+																<div class="input-group input-group-sm mb-3">
+																	<input type="number" step="any" ng-model="pitem.height" id="height" name="height" class="form-control" ng-disabled="order.state != 'PACKED'">
+																	<span class="input-group-text">H</span>
+																</div>
+															</div>
+														</div>
+													</td>
+													<td class="border-0 bg-white "><i class="fas fa-times-circle ms-2 me-2 text-danger" ng-click="removePackaging(pitem.id)"></i></td>
+												</tr>
+											</tbody>
+										</table>
+										<a href="" class="link-success fw-bold" ng-click="addPackaging()"><i class="fas fa-plus-circle me-2"></i> Add Package</a>
+										</form>
+									</div>
+									
+								</div>
+							</div>
+							<div class="row mt-2" ng-show="quote.options.length > 0">
+								<div class="col-sm-12">
+									<div class="card card-body w-75 mx-auto">
+										<table class="table" ng-repeat="item in quote.options | orderBy:'arrivalDate'">
+											<tbody>
+												<tr>
+													<td class=""><h5 class="fw-bold">Arrives on {{item.arrivalDate | date}}</h5></td>
+													<td>
+														<table class="table mb-0">
+															<tbody>
+																<tr>
+																	<td>
+																		<input type="radio" class="form-check-input">
+																	</td>
+																	<td>
+																		<h5 class="fw-bold">Delivered By: </h5> <br />
+																		<h4>{{item.deliveryTime}}</h4>
+																		<h6>{{item.deliveryMethod}}</h6>
+																	</td>
+																	<td>
+																		<h4><span ng-bind-html="item.price | supercurrency"></h4>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="card card-body w-75 mx-auto">
+										<div class="mb-3">
+											<label for="exampleFormControlInput1" class="form-label fw-bold">Ship Date</label>
+											<input type="date" class="form-control" name="shipDate" id="shipDate" ng-model="order.shippedDate" ng-disabled="order.state != 'PACKED'" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="card card-body w-75 mx-auto">
+										<div class="row">
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="trackingNumber"><strong>Tracking Number</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>(Optional) Enter the shipment tracking number or numbers if applicable.</small></p>
+								   					<input ng-disabled="order.state != 'PACKED'" class="form-control form-control-sm" type="text" name="trackingNumber" id="trackingNumber" ng-model="order.price.shipInfo.trackingNumber"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="trackingNumber"><strong>Cost</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>(Optional) Enter a cost for shipping.</small></p>
+								   					<div class="input-group input-group-sm">
+						   								<span class="input-group-text"><strong>$</strong></span>
+									   					<input ng-disabled="order.state != 'PACKED'" class="form-control form-control-sm" type="number" step=".01" name="shipCost" id="shipCost" ng-model="order.price.shipInfo.amount"/>
+									   				</div>
+								   				</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col-sm-12">
+									<div class="card card-body w-75 mx-auto">
+										<div class="row">
+											<div class="col-sm-12">
+												<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+												 aria-expanded="false" ng-if="(order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'COMPLETE')
+												 && (order.shipToAddress.country != order.warehouse.address.country)">Commercial Invoice</button>
+												<ul class="dropdown-menu">
+													<li>
+														<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'COMINVOICE'">
+															Print To System Printer
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="/capture/invoice/pdf/commercial/{{order.id}}">
+															Download PDF
+														</a>
+													</li>
+												</ul>
+											
+												<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end" type="button" data-bs-toggle="dropdown" 
+												 aria-expanded="false" ng-if="(order.state == 'SHIPPED' || order.state == 'INVOICED' || order.state == 'COMPLETE') 
+												 && (order.shipToAddress.country != order.warehouse.address.country)">Commercial Packing Slip</button>
+												<ul class="dropdown-menu">
+													<li>
+														<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'COMPACK'">
+															Print To System Printer
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="/capture/packing/pdf/commercial/{{order.id}}">
+															Download PDF
+														</a>
+													</li>
+												</ul>
+											
+												<button type="button" ng-show="order.state == 'PACKED'" class="btn btn-sm btn-outline-success m-1 float-end" ng-disabled="shippingForm.$invalid || processing" 
+												ng-click="shipOrder()">Ship Order</button>
+												<button type="button" ng-show="order.state == 'PACKED'" class="btn btn-sm btn-outline-danger m-1 float-end">Cancel</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div class="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="printDialog" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="printForm" id="printForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="vendor"><strong><small>Print Quantity</small></strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p class="small">
+					   						This request will print to the system printer defined within the System Configuration section. If you 
+					   						do not have access to that printer then select the download PDF option for a local copy.
+					   					</p>
+					   					<input required class="form-control form-control-sm" type="number" step="1" name="qty" id="qty" ng-model="print.qty"/>
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="printForm.$invalid" ng-click="printPDF()">Print</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>

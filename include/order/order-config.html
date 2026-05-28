@@ -1,0 +1,584 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="configController" ng-init="findAllPaymentConfigData(); findGlobalConfig();">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="templateController">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/order">Sales Orders</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Configuration</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="row">
+								<div class="col-sm-12">
+									<ul class="nav nav-tabs">
+										<li class="nav-item">
+											<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#config" href="">Sales Order Configuration</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" ng-click="findTemplatesByCategory(['sales', 'invoice'])" data-bs-toggle="tab" data-bs-target="#templates" href="">Communications & Templates</a>
+										</li>
+									</ul>
+									<div class="tab-content" id="tab">
+										<div class="tab-pane fade show active" id="config" role="tabpanel" aria-labelledby="config-tab">
+						   					<div class="card mt-2">
+				  								<div class="card-header">
+				  									<h6><strong>Sales Order Configuration</strong></h6>
+				  									<p>Configure workflows and settings for Sales Orders.</p>
+				  								</div>
+				  								<div class="card-body">
+					  								<div class="row">
+														<div class="col-sm-6 mt-2">
+						  									<div class="card h-100">
+						  										<div class="card-header">
+																	<span class=""><strong>Sales Order Stock</strong></span>			
+																	<h6>Configure how stock is handled for Sales Orders</h6>
+																</div>
+																<div class="card-body">
+																	<div class="row">
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Back Orders</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether orders can contain back ordered items. If they cannot then items with 0 inventory will
+															   					not be available to add to orders.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="backorder" id="backorder" ng-value="true" ng-model="globalConfig.backorder"
+													 										ng-change="setParameter('backorder', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="backorder" id="backorder" ng-value="false" ng-model="globalConfig.backorder"
+													 										ng-change="setParameter('backorder', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Split Orders</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether orders can be split shipped, ie: ship some items if available, or an order must be 
+															   					complete before shipping.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="splitShip" id="splitShip" ng-value="true" ng-model="globalConfig.splitShip"
+													 										ng-change="setParameter('splitShip', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="splitShip" id="splitShip" ng-value="false" ng-model="globalConfig.splitShip"
+													 										ng-change="setParameter('splitShip', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Backorder Fulfillment</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether backordered items should be fulfilled immediately upon receipt or wait until the
+															   					entire backordered amount on the order is available.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="fulfillOnReceipt" id="fulfillOnReceipt" ng-value="true" ng-model="globalConfig.fulfillOnReceipt"
+													 										ng-change="setParameter('fulfillOnReceipt', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="fulfillOnReceipt" id="fulfillOnReceipt" ng-value="false" ng-model="globalConfig.fulfillOnReceipt"
+													 										ng-change="setParameter('fulfillOnReceipt', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Inventory Allocation</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>By default the system will allocate inventory based on FIFO (First In First Out) however you can select
+															   					alternative methods below such as by expiry date as well as by location counts.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="allocationMethod" id="allocationMethod" value="FIFO" ng-model="globalConfig.allocationMethod"
+													 										ng-change="setParameter('allocationMethod', 'FIFO')">
+													 										<label class="form-check-label" for="inlineCheckbox1">FIFO</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="allocationMethod" id="allocationMethod" value="EDFIFO" ng-model="globalConfig.allocationMethod"
+													 										ng-change="setParameter('allocationMethod', 'EDFIFO')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Expiry Date -> FIFO</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="allocationMethod" id="allocationMethod" value="LCFIFO" ng-model="globalConfig.allocationMethod"
+													 										ng-change="setParameter('allocationMethod', 'LCFIFO')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Lowest Location Count -> FIFO</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																	</div>
+													   				
+							  									</div>
+						  									</div>
+					  									</div>
+					  									
+					  									<div class="col-sm-6 mt-2">
+						  									<div class="card h-100">
+						  										<div class="card-header">
+																	<span class=""><strong>Sales Order Warehouse Fulfillment</strong></span>			
+																	<h6>Configure how warehouse fulfillment is handled.</h6>
+																</div>
+																<div class="card-body">
+																	<div class="row">
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Use Multiple Warehouses</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether sales orders should be fulfilled by multiple physical warehouses. Only applies if
+															   					more than one physical warehouse is defined within the system. When disabled the warehouse selected during the 
+															   					order process will be used for the entire sales order.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="multiWarehouse" id="multiWarehouse" ng-value="true" ng-model="globalConfig.multiWarehouse"
+													 										ng-change="setParameter('multiWarehouse', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="multiWarehouse" id="multiWarehouse" ng-value="false" ng-model="globalConfig.multiWarehouse"
+													 										ng-change="setParameter('multiWarehouse', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+															   				<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Geo Matching</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>When multiple warehouses are used the system will select the closest warehouse to the sales order shipping address
+															   					first then move outward to the next closest to fulfill the order.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="geoWarehouse" id="geoWarehouse" ng-value="true" ng-model="globalConfig.geoWarehouse"
+													 										ng-change="setParameter('geoWarehouse', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="geoWarehouse" id="geoWarehouse" ng-value="false" ng-model="globalConfig.geoWarehouse"
+													 										ng-change="setParameter('geoWarehouse', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+															   				<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Country Limited</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>When multiple warehouses are used the system will only use physical warehouses within the same national borders
+															   					of the sales order shipping address country.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="countryLimitedWarehouse" id="countryLimitedWarehouse" ng-value="true" 
+													 										ng-model="globalConfig.countryLimitedWarehouse" ng-change="setParameter('countryLimitedWarehouse', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="countryLimitedWarehouse" id="countryLimitedWarehouse" ng-value="false" 
+													 										ng-model="globalConfig.countryLimitedWarehouse" ng-change="setParameter('countryLimitedWarehouse', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																		
+																	</div>
+							  									</div>
+						  									</div>
+					  									</div>
+					  									
+					  									<div class="col-sm-6 mt-2">
+						  									<div class="card h-100">
+						  										<div class="card-header">
+																	<span class=""><strong>Invoicing</strong></span>			
+																	<h6>Configure how invoicing is handled by the system.</h6>
+																</div>
+																<div class="card-body">
+																	<div class="row">
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Invoice Creation</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether Invoices should be created for every Sales Order. If manually is selected an invoice will only
+															   					be created by explicitly clicking on the create invoice button on the Sales Order details
+															   					page.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="invoiceCreation" id="invoiceCreation" value="ALL" ng-model="globalConfig.invoiceCreation"
+													 										ng-change="setParameter('invoiceCreation', 'ALL')">
+													 										<label class="form-check-label" for="inlineCheckbox1">All</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="invoiceCreation" id="invoiceCreation" value="MANUAL" ng-model="globalConfig.invoiceCreation"
+													 										ng-change="setParameter('invoiceCreation', 'MANUAL')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Manually</label>
+																					</div>
+																				</div>
+															   				</div>
+															   				<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Invoice Submission</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether invoices should be automatically emailed to the billing address email once orders are shipped.
+															   					If manually is selected then invoices can be mailed by clicking the email invoice button in the Sales Order details
+															   					page.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="invoiceAutoSend" id="invoiceAutoSend" ng-value="true" ng-model="globalConfig.invoiceAutoSend"
+													 										ng-change="setParameter('invoiceAutoSend', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="invoiceAutoSend" id="invoiceAutoSend" ng-value="false" ng-model="globalConfig.invoiceAutoSend"
+													 										ng-change="setParameter('invoiceAutoSend', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Manually</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																		
+																	</div>
+							  									</div>
+						  									</div>
+					  									</div>
+					  									
+					  									<div class="col-sm-6 mt-2">
+						  									<div class="card h-100">
+						  										<div class="card-header">
+																	<span class=""><strong>Drop Ship</strong></span>			
+																	<h6>Configure how drop ship items and sales orders are handled by the system. Due to the nature of drop shipping the system
+																	processes are automated based on the selections below.</h6>
+																</div>
+																<div class="card-body">
+																	<div class="row">
+																		<div class="col-sm-12">
+																			<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Enable Drop Shipping</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether the system will support drop shipping. Note: Drop Ship availability is based on the SKU. If drop shipping id disabled 
+															   					the SKUs denoted as drop ship will not be available for sale.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="enableDropship" id="enableDropship" ng-value="true" ng-model="globalConfig.enableDropship"
+													 										ng-change="setParameter('enableDropship', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="enableDropship" id="enableDropship" ng-value="false" ng-model="globalConfig.enableDropship"
+													 										ng-change="setParameter('enableDropship', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+															   				<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="productType"><strong>Send Customer Direct</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<small>Indicate whether dropship suppliers should send direct to the customer or first send to your warehouse for final shipping. If this
+															   					is enabled the supplier will also receive a packing slip along with the Purchase Order for the dropship sales order. If disabled then dropship 
+															   					items will be backordered in the sales order until received.</small> 
+															   					<div class="input-group input-group-sm">
+																   					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input " type="radio" name="dropshipDirectShip" id="dropshipDirectShip" ng-value="true" ng-model="globalConfig.dropshipDirectShip"
+													 										ng-change="setParameter('dropshipDirectShip', 'true')">
+													 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																					</div>
+																					<div class="form-check form-check-inline btn-sm ms-3">
+													 										<input class="form-check-input" type="radio" name="dropshipDirectShip" id="dropshipDirectShip" ng-value="false" ng-model="globalConfig.dropshipDirectShip"
+													 										ng-change="setParameter('dropshipDirectShip', 'false')">
+													 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																					</div>
+																				</div>
+															   				</div>
+																		</div>
+																		
+																	</div>
+							  									</div>
+						  									</div>
+					  									</div>
+					  									
+					  									<div class="col-sm-6 mt-2">
+						  									<div class="card h-100">
+						  										<div class="card-header">
+																	<span class=""><strong>Currencies</strong></span>			
+																	<button class="btn btn-outline-success float-end btn-sm" ng-click="findCurrencyById(undefined)" data-bs-toggle="modal" data-bs-target="#currenciesDialog">New Currency</button>
+																	<h6>Add, edit or delete Currencies.</h6>
+																</div>
+																<div class="card-body">
+																	<div class="row mb-2"  ng-show="paymentConfigData.currencies.length > 10">
+																		<div class="col-sm-12">
+																			<h6>Enter text to filter the below list</h6>
+														   					<div class="input-group col-sm-12">		   					
+														   						<input class="form-control form-control-sm py-2" ng-focus="focusSearch" required 
+														   						ng-model="cKeyword" type="text" placeholder="Filter List" id="cKeyword" name="cKeyword" ng-init="focusField('cKeyword');">		   						 
+														   					</div> 
+														            	</div>
+																	</div>
+																	<div class="row">
+																		<table class="table table-sm table-striped table-hover">
+																			<thead>
+																				<tr>
+																					<th class="text-center">ISO Code</th>
+																					<th class="text-center">Country Code</th>
+																					<th class="text-center">Symbol</th>
+																				</tr>
+																			</thead>
+																			<tbody>
+																				<tr ng-repeat="item in paymentConfigData.currencies | filter: cKeyword" ng-click="findCurrencyById(item.code)" 
+																				data-bs-toggle="modal" data-bs-target="#currenciesDialog">
+																					<td class="text-center">{{item.code}}</td>
+																					<td class="text-center">{{item.country}}</td>
+																					<td class="text-center">{{item.symbol}}</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</div>
+							  									</div>
+						  									</div>
+					  									</div>
+				  									</div>
+				  								</div>
+				  							</div>
+				  						</div>
+				  						<div class="tab-pane fade" id="templates" role="tabpanel" aria-labelledby="templates-tab">
+				  							<div class="col-sm-12 mt-2">
+			  									<div class="card h-100">
+			  										<div class="card-header">
+														<span class=""><strong>Communications</strong></span>			
+														<h6>Configure communications with customers.</h6>
+													</div>
+													<div class="card-body">
+														<div class="row">
+															<div class="col-sm-12">
+																<div class="form-group mt-2">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="productType"><strong>Send Sales Order Confirmation Email</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<small>Indicate whether sales orders should be fulfilled by multiple physical warehouses. Only applies if
+												   					more than one physical warehouse is defined within the system. When disabled the warehouse selected during the 
+												   					order process will be used for the entire sales order.</small> 
+												   					<div class="input-group input-group-sm">
+													   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="confirmEmail" id="confirmEmail" ng-value="true" ng-model="globalConfig.sendOrderConfirmEmail"
+										 										ng-change="setParameter('sendOrderConfirmEmail', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																		</div>
+																		<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="confirmEmail" id="confirmEmail" ng-value="false" ng-model="globalConfig.sendOrderConfirmEmail"
+										 										ng-change="setParameter('sendOrderConfirmEmail', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																		</div>
+																	</div>
+												   				</div>
+												   				<div class="form-group mt-2">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="productType"><strong>Send Sales Order Shipped Email</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<small>When multiple warehouses are used the system will select the closest warehouse to the sales order shipping address
+												   					first then move outward to the next closest to fulfill the order.</small> 
+												   					<div class="input-group input-group-sm">
+													   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="shipEmail" id="shipEmail" ng-value="true" ng-model="globalConfig.sendOrderShippedEmail"
+										 										ng-change="setParameter('sendOrderShippedEmail', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																		</div>
+																		<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="shipEmail" id="shipEmail" ng-value="false" ng-model="globalConfig.sendOrderShippedEmail"
+										 										ng-change="setParameter('sendOrderShippedEmail', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																		</div>
+																	</div>
+												   				</div>
+															</div>
+															
+														</div>
+				  									</div>
+			  									</div>
+		  									</div>
+				  							
+				  							<div class="card mt-2">
+				  								<div class="card-header">
+				  									<h6><strong>Sales Order Templates</strong></h6>
+				  									<p>Add, edit and view templates for email communications and printing on Sales Orders. Instructions for using the template 
+				  									language can be found in the help documentation under "Template Design".</p>
+				  								</div>
+				  								<div class="card-body" id="accordian">
+					  								<div class="row mt-1" ng-repeat="item in templates">
+					  									<div class="col-sm-12">
+					  										<div class="card h-100">
+						  										<div class="card-header">
+																	<span class=""><strong>{{item.name}}</strong></span>
+																	<span data-bs-toggle="collapse" data-bs-target="#{{item.entity}}"><i class="fas fa-caret-down float-end fa-lg"></i></span>
+																	<span class="me-3 small float-end">Last Modified: {{item.lastModifiedDate | date: 'mediumDate'}}</span>		
+																	<h6>{{item.description}}</h6>
+																</div>
+																<div class="card-body collapse" data-bs-parent="#accordian" id="{{item.entity}}">
+																	<div class="row mb-2">
+																		<div class="col-sm-12">
+																			<h6>Enter the template text in the textarea below. </h6>
+														   					<div class=form-group col-sm-12">		   					
+														   						<textarea rows="20" class="form-control form-control-sm" ng-model="item.content"></textarea>
+														   					</div> 
+														            	</div>
+																	</div>
+																	<div class="row mt-5">
+																		<div class="col-sm-12">
+																			<button type="button" class="btn btn-sm btn-outline-success float-end m-1" ng-click="saveTemplate(item)">Save</button>
+																			
+																			
+																			<button ng-if="item.type == 'PDF'" type="button" class="btn btn-sm btn-outline-success float-end m-1" ng-click="previewPDF(item)">Preview</button>
+																		</div>
+																	</div>
+							  									</div>
+						  									</div>
+					  									</div>
+					  								</div>
+					  							</div>
+					  						</div>
+				  						</div>
+				  					</div>
+		  						</div>
+	  						</div>
+	  					</div>
+	  				</div>
+	  			</div>
+	  		</div>
+	  		<div class="modal fade" id="currenciesDialog" role="dialog">
+		    	<div class="modal-dialog modal-sm" role="document">
+		    		<form name="cForm" id="cForm">
+			    		<div class="modal-content">
+			    			<div class="modal-body">
+			    				<div class="row">
+									<div class="col-sm-12 text-center">
+										<h5><strong>Currency</strong>
+				    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times text-danger"></i></span>
+				                        </h5>
+									</div>
+								</div>
+								<div class="row mt-2">
+									<div class="col-sm-12">
+										<div class="form-group">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="code"><strong>ISO Code</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger">*</span>
+				            					</div>
+						   					</div>
+						   					<p><small>The 3 character ISO Code for the currency.</small></p>
+						   					<input required class="form-control form-control-sm" ng-maxlength="3" type="text" name="code" id="code" ng-model="currency.code"
+						   					ng-class="{'is-invalid': cForm.code.$touched && cForm.code.$invalid, 
+						   					'is-valid': cForm.code.$touched && cForm.code.$valid }"/>
+						   				</div>
+						   				<div class="form-group">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="country"><strong>Country Code</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger">*</span>
+				            					</div>
+						   					</div>
+						   					<p><small>The 2 character ISO Country Code.</small></p>
+						   					<input required class="form-control form-control-sm" ng-maxlength="2" type="text" name="country" id="country" ng-model="currency.country"
+						   					ng-class="{'is-invalid': cForm.country.$touched && cForm.country.$invalid, 
+						   					'is-valid': cForm.country.$touched && cForm.country.$valid }"/>
+						   				</div>
+						   				<div class="form-group">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="symbol"><strong>Currency Symbol</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger">*</span>
+				            					</div>
+						   					</div>
+						   					<p><small>The currency symbol.</small></p>
+						   					<input required class="form-control form-control-sm" type="text" name="symbol" id="symbol" ng-model="currency.symbol"
+						   					ng-class="{'is-invalid': cForm.symbol.$touched && cForm.symbol.$invalid, 
+						   					'is-valid': cForm.symbol.$touched && cForm.symbol.$valid }"/>
+						   				</div>
+									</div>
+								</div>
+			    			</div>
+			    			<div class="modal-footer">
+			    				<button type="button" class="btn btn-outline-success btn-sm" ng-disabled="cForm.$invalid" data-bs-dismiss="modal" ng-click="saveCurrency()">Save Currency</button>
+			    			</div>
+			    		</div>
+			    	</form>
+		    	</div>
+		    </div>
+		    <!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	  	</div>
+	  	<div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

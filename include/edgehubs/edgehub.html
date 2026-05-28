@@ -1,0 +1,635 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="edgehubController" ng-init="findById(); getHubStats();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/edgehubs">Edgehubs</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Edgehub Details: {{edgehub.id}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<ul class="nav nav-tabs">
+								<li class="nav-item">
+									<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#main" href="">Main</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#scanning" href="">Scan Hub</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#tags" href="">Search Tags</a>
+								</li>
+							</ul>
+							<div class="tab-content" id="tab">
+								<div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+									<div class="row mb-2 mt-2">
+										<div class="col-sm-4">
+											<div class="card text-white h-100">
+												<div class="card-body bg-light">
+													<div class="widget-yellow-dash">
+														<div class="stat-icon dib align-middle text-success border-success">
+															<i class="fas fa-tags"></i>
+														</div>
+														<div class="stat-content dib ml-5 align-bottom text-center">
+															<div class="stat-text">
+																Total Tags
+															</div>
+															<div class="stat-digit text-center">
+																{{ hubStats.totalTags | number }} <!-- <span class="text-danger font-weight-bold" style="font-size: 12px;">-24.1%</span>  -->
+															</div>
+														</div>
+													</div>					
+												</div>
+												<div class="card-footer text-center" style="border:none;color:#2F4F4F;">
+													Total RFID tags in the system in any current status. Includes New, Active, InActive and Missing tags.
+												</div>
+											</div>
+										</div>
+										
+										<div class="col-sm-4">
+											<div class="card text-white h-100" ng-click="" style="cursor: pointer;">
+												<div class="card-body bg-light">
+													<div class="widget-yellow-dash">
+														<div class="stat-icon dib align-middle text-warning border-warning">
+															<i class="fas fa-tags"></i>
+														</div>
+														<div class="stat-content dib ml-5 align-bottom text-center">
+															<div class="stat-text">
+																Total Inactive Tags
+															</div>
+															<div class="stat-digit text-center">
+																{{ hubStats.inactiveTags | number }}
+															</div>
+														</div>
+													</div>					
+												</div>
+												<div class="card-footer text-center" style="border:none;color:#2F4F4F;">
+													Total Inactive RFID tags still in the system. Tags marked InActive will remain in that state even when picked up in a scan by either the warehouse systems or the Capture GO handheld.
+													They may be made active again using the Tag section of Edgehub.
+												</div>
+											</div>
+										</div>
+										
+										<div class="col-sm-4">
+											<a href="#/tags/missing-tags" style="text-decoration : none">
+												<div class="card text-white h-100" style="cursor: pointer;">
+													<div class="card-body bg-light">
+														<div class="widget-yellow-dash">
+															<div class="stat-icon dib align-middle text-danger border-danger">
+																<i class="fas fa-tags"></i>
+															</div>
+															<div class="stat-content dib ml-5 align-bottom text-center">
+																<div class="stat-text">
+																	Missing Tags
+																</div>
+																<div class="stat-digit text-center">
+																	{{ hubStats.missingTags | number }}
+																</div>
+															</div>
+														</div>					
+													</div>
+													<div class="card-footer text-center" style="border:none;color:#2F4F4F;">
+														The total missing tag count based on the Capture data store and the latest location scan. Click to be directed
+														to a listing page with the missing tag details.
+													</div>
+												</div>
+											</a>
+										</div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-xs-12 col-sm-12 col-md-12">
+											<div class="card m-1 h-100">
+												<div class="card-body">
+													<form name="hubForm" id="hubForm" novalidate>
+														<div class="row">
+															<div class="col-sm-6">
+																<div class="form-group mt-1">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="id"><strong>Edgehub Id</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<p><small>The Edgehub's internal Id value.</small></p>
+												   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="edgehub.id"/>
+												   				</div>
+															</div>
+															<div class="col-sm-6">
+																<div class="form-group mt-1">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="id"><strong>Name</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<p><small>A name for the Edgehub.</small></p>
+												   					<input required class="form-control form-control-sm" type="text" name="name" id="name" ng-model="edgehub.name"/>
+												   				</div>
+															</div>
+															
+															<div class="col-sm-6">
+																<div class="form-group mt-1">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="id"><strong>URL</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger">*</span>
+										            					</div>
+												   					</div>
+												   					<p><small>The URL to be used to access the Edgehub. URLs require the protocol prepended. ie: http or https.</small></p>
+												   					<input required class="form-control form-control-sm" type="text" name="url" id="url" ng-model="edgehub.url"/>
+												   					
+												   				</div>
+												   			</div>
+											   				<div class="col-sm-6">
+																<div class="form-group mt-1">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="id"><strong>State</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger">*</span>
+										            					</div>
+												   					</div>
+												   					<p><small>The current state of the Edgehub. Either Active or InActive.</small></p>
+												   					<div class="input-group input-group-sm">
+													   					<div class="form-check form-check-inline btn-sm ms-3">
+									  										<input class="form-check-input" type="radio" name="state" id="state" value="ACTIVE" ng-model="edgehub.state">
+									  										<label class="form-check-label" for="inlineCheckbox1">Active</label>
+																		</div>
+																		<div class="form-check form-check-inline btn-sm ms-3">
+									  										<input class="form-check-input" type="radio" name="state" id="state" value="INACTIVE" ng-model="edgehub.state">
+									  										<label class="form-check-label" for="inlineCheckbox1">InActive</label>
+																		</div>
+																	</div>
+												   					
+												   				</div>
+												   			</div>
+											   				<div class="col-sm-6">
+												   				<div class="form-group mt-1">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="creationDate"><strong>Physical Warehouse</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<p><small>The physical warehouse where this Edgehub is located. Only one Edgehub can be assigned to a physical warehouse.</small></p>
+												   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="warehouse" id="warehouse" ng-model="edgehub.physicalWarehouse.name"/>
+												   				</div>
+												   			</div>
+												   			<div class="col-sm-12">
+																<div class="form-group mt-1">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="id"><strong>Description</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<p><small>A description for the Edgehub.</small></p>
+												   					<textarea class="form-control form-control-sm" rows="5" name="description" id="description" ng-model="edgehub.description"></textarea>
+												   				</div>
+															</div>
+												   		</div>	
+														<div class="row mt-3">
+															<div class="col-sm-12 text-end">
+																<button type="button" class="btn btn-outline-success me-2 float-end btn-sm">Save Changes</button>
+															</div>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="tab-pane fade show " id="scanning" role="tabpanel" aria-labelledby="scan-tab">
+									<div class="row mb-2 mt-2" ng-show="currentJob != undefined">
+										<div class="col-sm-12">
+											<div class="card">
+												<div class="row mb-2">
+													<div class="col-sm-12 text-center">{{currentJob.percentComplete | number : 1}}%</div>
+												</div>
+												<div class="row mb-2 p-2">
+													<div class="col-sm-12">
+														<div class="progress">
+															<div class="progress-bar bg-dark" role="progressbar" style="width: {{currentJob.percentComplete}}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+														</div>
+													</div>
+							                    </div>
+												<div class="row mb-2 p-2">
+													<div class="col-sm-12 text-left">{{currentJob.statusMessage}}</div>
+												</div>
+												<div class="row mb-2 p-2" ng-show="currentJob.subMessage != undefined && currentJob.subMessage != ''">
+													<div class="col-sm-12 text-left">{{currentJob.subMessage}}</div> 
+												</div>
+											</div>
+										</div>
+									</div>
+							        <div class="row mb-2 mt-2" ng-show="currentJob == undefined">
+										<div class="col-sm-12">
+											<div class="card p-2">
+												<div class="row mb-2">
+													<div class="col-sm-12 text-center">No Current Scan Operations</div>
+												</div>
+											</div>
+										</div>
+							        </div>
+								        
+							        <div class="row mb-2" ng-show="currentJob == undefined">
+							        	<div class="col-sm-12">
+							        		<div class="card p-2 text-center">
+							        			<button type="button" class="btn btn-outline-dark btn-sm" ng-click="scanEdgehub()">Scan Edgehub</button>
+							        		</div>
+							        	</div>
+							        </div>
+							        <div class="row mb-2" ng-show="scanMessage != undefined">
+							        	<div class="col-sm-12">
+							        		<div class="card p-2">
+							        			<span class="text-center text-danger">{{scanMessage}}</span>
+							        		</div>
+							        	</div>
+							        </div>
+										
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="card">
+												<div class="card-header">
+													<h5>
+														<span class="font-weight-bold">Past Activity</span><small><span class="ms-2 badge bg-dark">{{searchResult.totalResults | number }}</span></small>
+													</h5>
+												</div>
+												<div class="card-body">
+													<table class="table table-striped table-hover table-sm small">
+									   					<thead>
+									   						<tr>
+							                                    <th width="20%">Date</th>
+							                                    <th width="20%">Elapsed Time</th>
+									   							<th width="10%">Tags Found</th>
+									   							<th width="10%">Tags Missing</th>
+									   							<th width="15%">Status</th>
+									   							<th width="25%">Message</th>
+									   						</tr>
+									   					</thead>
+									   					<tbody>
+									   						<tr ng-repeat="item in searchResult.results | orderBy: 'startDate' : true" ng-class="{'font-weight-bold' : item.status == 'INPROGRESS'}">
+									   							<td>{{ item.startDate | date : 'medium' }}</td>
+							                                    <td><span ng-if="item.endDate != null">{{ ((item.endDate - item.startDate) / 1000 / 60) | number : 2 }} Mins.</span></td>
+							                                    <td>{{ item.foundTags | number : 0 }}</td>
+									   							<td>{{ item.missingTags | number : 0 }}</td>
+									   							<td>{{ item.status }}</td>
+									   							<td>{{ item.statusMessage }}</td>
+									   						</tr>
+									   					</tbody>
+									   				</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="tab-pane fade show " id="tags" role="tabpanel" aria-labelledby="tag-tab">
+									<div class="row mb-2 mt-2">
+										<div class="row">
+											<div class="card col-xs-12 col-sm-12 col-md-12">
+												<div class="card-body">
+													<!-- keyword search box -->
+													<div class="card">
+														<div class="card-header">
+															<small class="float-inline mr-auto">Type in a tag id, product id or product name value. As you type the list below will update accordingly. Click on an item in the list to direct to 
+															a tag details page. If there is only one result you will be automatically directed to the details page for that tag.</small>
+														</div>
+											   			<div class="card-body">
+											   				<form name="searchForm" id="searchForm">
+											   					<div class="input-group input-group-sm">		   					
+											   						<input class="form-control form-control-sm" ng-focus="focusSearch" required ng-change="findTagsByKeyword()"
+											   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');">
+										   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+										   								<i class="fa fa-search"></i>
+										   							</button>			   						 
+											   					</div> 
+											   					          		
+											            	</form>
+											   			</div>
+											   		</div>
+											   		
+											   		<div class="row mt-2" ng-show="searchResults != undefined">
+														<div class="col-sm-12">
+															<div class="">
+																<ul class="pagination">
+																	<li class="page-item">
+																		<button type="button" class="btn btn-link page-link" ng-click="findTagsByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+																	</li>
+																	<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+																		<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link me-1" ng-click="findTagsByKeyword($index)">{{$index + 1}}</button>
+																	</li>
+																	<li>
+																		<button type="button" class="btn btn-link page-link" ng-click="findTagsByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+																	</li>
+																</ul>
+															</div>
+														</div>		
+													</div>
+											   		
+													<div class="card mt-2">
+														<div class="card-header">
+															<div class="row">
+																<div class="col-sm-6">
+																	<h5>
+																		<span class=""><strong>Tags</strong></span>	
+																		<span class="ms-2 badge bg-dark">{{ searchResults.totalResults }}</span>
+																	</h5>
+																	<small>Select a tag from the list below to view and manage.</small>
+																</div>
+															</div>
+														</div>
+											   			<div class="card-body">		   			
+											   				<table class="table table-striped table-hover table-sm small">
+											   					<thead>
+											   						<tr>
+											   							<th>Tag Id</th>
+											   							<th>Product Id</th>
+											   							<th>Description</th>
+											   							<th>Location</th>
+											   							<th>Quantity</th>
+											   							<th>Status</th>
+											   						</tr>
+											   					</thead>
+											   					<tbody>
+											   						<tr ng-show="searchResults.results.length < 1 || searchResults.results == undefined">
+											   							<td colspan="8"><strong>No Results</strong></td>
+											   						</tr>
+											   						<tr ng-repeat="item in searchResults.results" ng-click="viewTag(item.id)" data-bs-toggle="modal" data-bs-target="#tagModal">
+											   							<td>{{item.id}}</td>
+											   							<td>{{item.productId}}</td>
+											   							<td>{{item.description}}</td>
+											   							<td>{{item.location}}</td>
+											   							<td>{{item.quantity}}</td>
+											   							<td>{{item.status}}</td>
+											   						</tr>
+											   					</tbody>
+											   				</table>
+											   			</div>
+											   		</div>
+											   		<div class="row mt-2" ng-show="searchResults != undefined"> <!-- x in [].constructor(searchResults.pages) -->
+														<div class="col-sm-12">
+															<div class="">
+																<ul class="pagination">
+																	<li class="page-item">
+																		<button type="button" class="btn btn-link page-link" ng-click="findTagsByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+																	</li>
+																	<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+																		<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link me-1" ng-click="findTagsByKeyword($index)">{{$index + 1}}</button>
+																	</li>
+																	<li>
+																		<button type="button" class="btn btn-link page-link" ng-click="findTagsByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+																	</li>
+																</ul>
+															</div>
+														</div>		
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>	
+	    
+	    <div class="modal fade" id="tagModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="card card-body">
+						<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times"></i></span>
+							</div>
+						</div>
+						<form name="tagForm" id="tagForm" novalidate">
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-borderless table-sm">
+									<thead>
+										<tr>
+											<th width="50%"></th>
+											<th width="50%"></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pe-2" for="id"><strong>Tag Id: </strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The tag id used by the Edgehub system. This id is used for searches and filtering of tags within the system.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="tag.id"/>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pe-2" for="status"><strong>Status</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The tag status. <span class="fw-bold">'NEW'</span> - The tag has been created but has not yet been found in a warehouse scan. <span class="fw-bold text-success">'ACTIVE'</span>
+							   					 - The tag is in the warehouse nad has been found by the latest warehouse scan. <span class="fw-bold text-danger">'MISSING'</span> - The tag was previously found in a scan making it ACTIVE but 
+							   					was not found in the last warehouse scan. <span class="fw-bold text-warning">'INACTIVE'</span> - The tag has been deactivated for reuse in the warehouse.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="status" id="status" ng-model="tag.status"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="location"><strong>Location</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The warehouse location of the tag. This value is set on creation of the tag.</small>
+							   				</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="onhand"><strong>Quantity</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The quantity entered when the tag was created. The tag quantity is the total amount on the inventory lot.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="location" id="location" ng-model="tag.location"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="number" name="quantity" id="quantity" ng-model="tag.quantity"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="receivedDate"><strong>Creation Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The date that the tag was created in the system.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="receivedDate"><strong>Last Modified Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The date of the last modification to the tag.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="tag.creationDate"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="tag.lastModifiedDate"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="poNumber"><strong>Last Found Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The last date that the tag was found in a warehouse scan.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="price"><strong>Capture Reader</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The physical reader that found the tag during the warehouse scan.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastFoundDate" id="lastFoundDate" ng-model="tag.lastFoundDate"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="reader" id="reader" ng-model="tag.reader"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="currency"><strong>RSSI</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>RSSI is the signal strength value. The lower the number the stronger the signal.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="condition"><strong>Antenna</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The antenna number that had the best signal performance. Usually, but not always, this is the closest antenna to the tag.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="rssi" id="rssi" ng-model="tag.rssi"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="antenna" id="antenna" ng-model="tag.antenna"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="reference"><strong>Phase</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The phase value provides an angle of degree to help in locating the tag based on the antenna. This only applied to linear
+							   					antennas.</small>
+											</td>
+											<td></td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="phase" id="phase" ng-model="tag.phase"/>
+											</td>
+											<td></td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pr-2" for="specifications"><strong>User Data Bank</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The data that is stored in the tag's user data bank. Data size is dependent on tag specs and capbilities.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<textarea ng-disabled="true" rows="5" class="form-control form-control-sm" id="userbank" name="userbank" ng-model="tag.userDataBank"></textarea>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="printRFIDTag(tag.id, tag.inventoryId)">Reprint RFID Tag</button>
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+							</div>
+						</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    <!-- Toast messaging: set messaging, set whether danger or success -->
+		<div ng-include="'/include/components/toast-message.html'"></div>
+			
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

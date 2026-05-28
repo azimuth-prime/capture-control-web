@@ -1,0 +1,415 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="skuController" ng-init="findSkuBundleById(); findSkuConfigInfo();">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href="#/products">Products</a></li>
+				<li class="breadcrumb-item"><a href="#/products/{{sku.productId}}">{{sku.productId}}</a></li>
+				<li class="breadcrumb-item active" aria-current="page">SKU Bundle Details: {{sku.id}}</li>
+			</ol>  
+		</nav>
+		<div class="row mb-2">
+			<div class="col-xs-12 col-sm-12 col-md-12">
+				<div class="card m-1 h-100">
+					<div class="card-body">
+						<ul class="nav nav-tabs">
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#main" href="">Main</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" data-bs-toggle="tab" data-bs-target="#skus" href="">SKUs</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" data-bs-toggle="tab" data-bs-target="#packaging" href="">Weight and Dimensions</a>
+							</li>
+						</ul>
+						<div class="tab-content" id="tab">
+							<div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+								<div class="card m-1 h-100">
+									<div class="card-body">
+										<form name="skuForm" id="skuForm" novalidate ng-submit="saveSku()">
+											<div class="row">
+												<div class="col-sm-6">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="id"><strong>SKU Id</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>SKU's id value.</small>
+									   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="sku.id"/>
+									   				</div>
+												</div>
+												<div class="col-sm-6">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Product</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The parent product of this SKU.</small>
+									   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="productName" id="productName" ng-model="sku.productId"/>
+									   				</div>
+									   			</div>
+								   				
+								   				<div class="col-sm-6">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="creationDate"><strong>Creation Date</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>Auto generated date for when this SKU was first created within the system.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="sku.creationDate"/>
+															<span class="input-group-text" id="basic-addon2"><i class="fas fa-calendar"></i></span>
+														</div>
+									   					
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-6">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="availabilityDate"><strong>Availability Date</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The date that this SKU is available for sales. If left blank the SKU is immediately available.</small>
+									   					<input class="form-control form-control-sm" type="date" name="availabilityDate" id="availabilityDate" ng-model="sku.availabilityDate"/>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-6">
+									   				<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="lastModifiedDate"><strong>Last Modified Date</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>Auto generated date for when the product was last updated within the system.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="sku.lastModifiedDate"/>
+															<span class="input-group-text" id="basic-addon2"><i class="fas fa-calendar"></i></span>
+														</div>
+									   					
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-6">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Price</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger">*</span>
+							            					</div>
+									   					</div>
+									   					<small>The price for the SKU.</small>
+									   					<div class="input-group input-group-sm">
+							   								<span class="input-group-text"><strong>$</strong></span>
+										   					<input required class="form-control form-control-sm" type="text" name="productName" id="ProductName" ng-model="sku.price"
+										   					ng-class="{'is-invalid': skuForm.price.$touched && skuForm.price.$invalid, 
+										   					'is-valid': skuForm.price.$touched && skuForm.price.$valid }"/>
+										   				</div>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-6">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Currency</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The currency used for this SKU. If left blank, the system default currency will be used.</small>
+									   					<select class="form-select form-select-sm" id="skuCurrency" name="skuCurrency" ng-model="sku.currency"
+									   					ng-class="{'is-invalid': skuForm.currency.$touched && skuForm.currency.$invalid, 
+									   					'is-valid': skuForm.currency.$touched && skuForm.currency.$valid }">
+									   						<option value="USD">USD</option>
+									   						<option value="CAD">CAD</option>
+									   						<option value="EUR">EUR</option>
+									   					</select>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-6">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="onhand"><strong>Stock Threshold</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>Set the threshold where a low inventory event is fired. Default is "-1" which disables the threshold messaging.</small>
+									   					<input class="form-control form-control-sm" type="number" name="stockThreshold" id="stockThreshold" ng-model="sku.stockThreshold"
+									   					ng-class="{'is-invalid': skuForm.stockThreshold.$touched && skuForm.stockThreshold.$invalid, 
+									   					'is-valid' :  skuForm.stockThreshold.$touched && skuForm.stockThreshold.$valid}"/>
+									   				</div>
+												</div>
+									   			<div class="col-sm-6">
+													<div class="form-group">
+									   					<div class="input-group">
+									   						<label class="pr-2" for="backOrdered"><strong>Back Ordered</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="require"></span>
+							            					</div>
+									   					</div>
+									   					<small>The back order value is determined by available stock - order quantity.</small>
+									   					<input ng-disabled="true" class="form-control form-control-sm" type="number" name="backOrdered" id="backOrdered" ng-model="invitem.backordered"/>
+									   				</div>
+												</div>
+											</div>
+											<div class="row mt-3">
+												<div class="col-sm-12 text-end">
+													<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="findSkuById()">Reset</button>
+													<button type="submit" class="btn btn-outline-success m-1 btn-sm">Save Changes</button>
+												</div>
+											</div>
+										</form>		
+									</div>
+								</div>						
+							</div>
+							
+							<div class="tab-pane fade show" id="skus" role="tabpanel" aria-labelledby="skus-tab">
+								<div class="card m-1">
+									<div class="card-header">
+										<span class=""><strong>Bundle SKUs</strong></span>			
+										<span class="ms-2 badge bg-dark">{{sku.skus.length}}</span>		
+										<button class="btn btn-outline-dark float-end btn-sm" data-bs-toggle="modal" ng-click="" data-bs-target="#skuBundleModal">Add SKU</button>
+										<h6>The SKUs listed below make up the components of the SKU Bundle. The maximum number of this SKU Bundle available for sale is based
+										on the maximum number of finished units that can be assembled with the required components SKUs.</h6>
+									</div>
+									<div class="card-body">
+										<small>
+										<table class="table table-hover table-sm table-striped">
+											<thead>
+												<tr>
+													<th class="text-start">SKU Id</th>
+													<th class="text-start">Name</th>
+													<th class="text-center">Color / Size</th>
+													<th class="text-center">Available</th>
+													<th class="text-center">Warehouses</th>
+													<th class="text-center">Unit Cost</th>
+													<th class="text-center"></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr ng-repeat="sItem in sku.skus" >
+													<td class="align-middle text-start">{{sItem.id}}</td>
+													<td class="align-middle text-start">{{sItem.productName}}</td>
+													<td class="align-middle text-center"><span ng-show="sItem.sizing != undefined || sItem.colorSwatch != undefined"> <i class="fas fa-stop pe-3" style="color:{{sItem.colorSwatch.hexCode}}"></i> {{sItem.colorSwatch.name}} : {{(sItem.sizing.name != undefined) ? sItem.sizing.name : 'N/A'}}</span></td>   
+													<td class="align-middle text-center">{{(sItem.count == 'INFINITE') ? '&infin;' : sItem.available}}</td>
+													<td class="align-middle text-center">
+														<span ng-repeat="w in sItem.warehouses">
+															{{w}}
+															<span ng-show="!$last">,</span>
+														</span>
+													</td>
+													<td class="align-middle text-center"><span ng-bind-html="sItem.price | supercurrency"></td>
+													<td class="align-middle text-center"><i class="fas fa-times text-danger" ng-click="toggleSkuBundleList(sItem.id)"></i></td>
+												</tr>
+												<tr>
+													<td colspan="7" class="align-bottom">
+														<hr />
+													</td>
+												</tr>
+												<tr>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td colspan="2" class="text-end">
+														<strong>Maximum Available Units:</strong> {{sku.maxAvailableUnits | number}}
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</small>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane fade show" id="packaging" role="tabpanel" aria-labelledby="packaging-tab">
+								<div class="card m-1">
+									<div class="card-body">
+										<div class="card card-body">
+											<div class="row">
+												<div class="col-sm-12">
+													<strong>Dimensions</strong>
+													<p><small>Set the dimensions for the Sku to assist the system in estimating shipping charges and stocking capacity. Units of measure are
+													defined within the System Configuration section of the application.</small></p>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-sm-3">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Width</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The parent product of this SKU.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input class="form-control form-control-sm" type="number" name="sHeight" id="sHeight" ng-model="sku.dimensions.width"/>
+															<span class="input-group-text" id="basic-addon2">mm</span>
+														</div>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-3">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Height</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The parent product of this SKU.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input class="form-control form-control-sm" type="number" step="1" name="sHeight" id="sHeight" ng-model="sku.dimensions.height"/>
+															<span class="input-group-text" id="basic-addon2">mm</span>
+														</div>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-3">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Length</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The parent product of this SKU.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input class="form-control form-control-sm" type="number" step="1" name="sLength" id="sLength" ng-model="sku.dimensions.length"/>
+															<span class="input-group-text" id="basic-addon2">mm</span>
+														</div>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-3">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Volume</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>The parent product of this SKU.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input class="form-control form-control-sm" type="number" step="1" name="sVolume" id="sVolume" ng-model="sku.dimensions.volume"/>
+															<span class="input-group-text" id="basic-addon2">ml</span>
+														</div>
+									   				</div>
+									   			</div>
+									   			<div class="col-sm-3">
+													<div class="form-group mt-2">
+									   					<div class="input-group">
+									   						<label class="pe-2" for="productName"><strong>Weight</strong></label>
+									   						<div class="input-group-append">
+							            						<span class="text-danger"></span>
+							            					</div>
+									   					</div>
+									   					<small>Enter the weight in kgs.</small>
+									   					<div class="input-group input-group-sm mb-3">
+															<input class="form-control form-control-sm" type="number" step=".01" name="sWeight" id="sWeight" ng-model="sku.dimensions.weight"/>
+															<span class="input-group-text" id="basic-addon2">kg</span>
+														</div>
+									   				</div>
+									   			</div>
+									   		</div>
+									   		<div class="row">
+												<div class="col-sm-12">
+													<button class="btn btn-sm btn-outline-success float-end me-2" ng-click="saveSkuDimensions()">Save Dimensions</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div> <!-- End Tab Content -->		
+					</div>
+				</div>
+			</div>
+		</div>
+		<div ng-include="'/include/components/toast-message.html'"></div>
+		
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="skuBundleModal" role="dialog" >
+    	<div class="modal-dialog" role="document">
+    		<div class="modal-content">
+    			<div class="card card-body">
+					<div class="row mt-1">
+						<div class="col-sm-12">
+							<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-12">
+	    					<strong>Enter a Product Id or Product Name. Click on the product in the list to expand. </strong>
+	                        <form name="searchForm" id="searchForm">
+			   					<div class="input-group input-group-sm">		   					
+			   						<input class="form-control form-control-sm" minlength="3" ng-focus="focusSearch" required ng-change="findComponentSkuByKeyword()"
+			   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');">
+		   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+		   								<i class="fa fa-search"></i>
+		   							</button>			   						 
+			   					</div> 
+			   					          		
+			            	</form>
+	            			<div ng-show="searchForm.keyword.$touched && searchForm.keyword.$invalid" class="col-sm-12 text-danger text-center"><strong><i>You must enter at least 3 characters</i></strong></div>
+	    				</div>
+					</div>
+					<div class="row mt-2">
+						<div class="col-sm-12">
+							<small>
+								<table class="table table-sm table-striped">
+									<thead>
+										<tr>
+											<th>Product Id</th>
+											<th>Name</th>
+											<th class="text-center">Color</th>
+											<th class="text-center">Size</th>
+											<th class="text-center">Available</th>
+											<th class="text-center">Add/Remove</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-repeat="item in searchResults.results">
+											<td>{{item.productId}}</td>
+											<td>{{item.productName}}</td>
+											<td class="text-center">{{item.color}}</td>
+											<td class="text-center">{{item.size}}</td>
+											<td class="text-center">{{item.available | number}}</td>
+											<td class="text-center"><input class="form-check-input me-1" type="checkbox" ng-checked="(bundleSkus.indexOf(item.id) > -1)" ng-click="toggleSkuBundleList(item.id)" ng-model="bundleSkus"></td>
+										</tr>
+									</tbody>
+								</table>
+							</small>
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col-sm-12 text-end">
+							<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Done</button>
+						</div>
+					</div>
+				</div>
+    		</div>
+    	</div>
+    </div>
+
+</section>

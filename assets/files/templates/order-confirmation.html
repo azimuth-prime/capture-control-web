@@ -1,0 +1,167 @@
+<html>
+	<head>
+		<title>Order Confirmation #: ${order.id!""}</title>		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta name="description" content="">   	
+    	<link href="https://fonts.googleapis.com/css?family=Bungee|Open+Sans+Condensed:300" rel="stylesheet">
+    	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">       	
+		
+		<style>
+			table, th, td {
+				border: 1px solid white;
+				border-collapse: collapse;
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 13px;
+			}
+		</style>
+	
+	</head>
+	<body style="text-align:center;">
+		<table style="max-width:85%;margin:auto;">
+		<tr>
+		<td>
+			<table width="100%">
+				<tr>
+					<td style="text-align:center;">
+						<img src="https://bizhub.globalairparts.ca/assets/images/logos/text-logo-3-dark.png" width="400" height="auto" />
+					</td>
+				</tr>
+			</table>
+			<table style="padding-top:50px;" width="100%">
+				<tr>
+					<td style="text-align:left;">
+						<h2><strong>Thank you for your Order!</strong></h2>
+					</td>
+				</tr>
+			</table>
+			<table style="padding-top:50px;" width="100%">
+				<tr>
+					<td>
+						<strong>ShipTo Address:</strong> <br />
+						<strong>ATTN:</strong> ${order.shipToAddress.contactName!"N/A"}  <br />
+						${order.shipToAddress.address1!""} <br />
+						${order.shipToAddress.city!""}, ${order.shipToAddress.province!""} <br />
+						${order.shipToAddress.postalCode!""} <br />
+					</td>
+					<td style="text-align:right;">
+						<strong>Sales Order #:</strong> <br />
+						${order.id!""} <br /><br />
+						<strong>Order Date:</strong> <br />
+						${(order.submittedDate?date)!}<br />
+					</td>
+				</tr>
+			</table>
+			<table width="100%" style="padding-top:50px;">
+				<tr>
+					<td colspan="2">
+						<h5><strong>Your Sales Order Items:</strong></h5>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<hr />
+					</td>
+				</tr>
+				<#list order.items as item>
+					<tr>
+						<td style="vertical-align:top;">
+							<h6><b>${item.sku.productName} </b></h6>
+							<p>
+								${item.sku.description!""}
+							</p>
+							<strong>Qty:</strong> ${item.quantityOrdered}
+						</td>
+						<td style="text-align:right;vertical-align:top;">
+							<b>
+								${item.priceInfo.subtotal?string.currency}
+							</b>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<hr />
+						</td>
+					</tr>
+				</#list>
+				
+			</table>
+			<table width="100%" style="padding-top:50px;">
+				<tr>
+					<td style="text-align:left;">
+						<strong>Subtotal:</strong>
+					</td>
+					<td style="text-align:right;">
+						<strong>${order.price.subtotal?string.currency}</strong>
+					</td>
+				</tr>
+			</table>
+			<#if order.price.discounts?has_content>
+				<table width="100%" style="">
+					<tr>
+						<td style="text-align:left;vertical-align:top;">
+							<strong>Discounts:</strong>
+						</td>
+						<td style="text-align:right;vertical-align:top;">
+							<#list order.price.discounts as discount>
+								<strong class="small">${discount.name} ( ${discount.amount} % ):</strong><strong>${discount.savings?string.currency}</strong> <br />
+							</#list>
+						</td>
+					</tr>
+				</table>
+			</#if>
+			<table width="100%" style="">
+				<tr>
+					<td style="text-align:left;vertical-align:top;">
+						<strong>Taxes:</strong>
+					</td>
+					<td style="text-align:right;vertical-align:top;">
+						<#list order.price.taxes as tax>
+							<strong class="small">${tax.name} ( ${tax.rate} % ):</strong><strong>${tax.amount?string.currency}</strong><br />							
+						</#list>
+					</td>
+				</tr>
+			</table>
+			<#if order.price.shippingInfo?has_content>
+				<table width="100%" style="">
+					<tr>
+						<td style="text-align:left;vertical-align:top;">
+							<strong>Shipping:</strong>
+						</td>
+						<td style="text-align:right;vertical-align:top;">
+							<strong>Ship Via:  ${order.price.shipInfo.carrier.name!""}<small>Tracking Number #: ${order.price.shipInfo.trackingNumber!""}</small></strong>
+							<strong class="pe-3">${order.price.shipInfo.amount!"0.00"?string.currency}
+						</td>
+					</tr>
+				</table>
+			</#if>
+			<table width="100%" style="">
+				<tr>
+					<td style="text-align:left;">
+						<h5><strong>Total:</strong></h5>
+					</td>
+					<td style="text-align:right;">
+						<h5><strong>${order.price.total?string.currency}</strong></h5>
+					</td>
+				</tr>
+			</table>
+			<table width="100%" style="padding-top:100px;">
+				<tr>
+					<td>
+						<p>
+						This email is being sent by the Capture Business Hub system. Make sure that you allow emails from 
+						Capture Business Hub in your white list to ensure you get timely and up to date information on your
+						sales order. If you have any questions or concerns about your sales order, contact us at <u>416-555-7865 </u>
+						or by email: <u>sales@someplace.com</u>.
+						</p>
+					</td>
+				</tr>
+			</table>
+			
+			</td>
+			</tr>
+		</table>
+	</body>
+</html>

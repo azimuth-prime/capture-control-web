@@ -1,0 +1,198 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="reportController" ng-init="generateProductReports()">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Product Dashboard</li>
+				</ol>   
+			</nav>
+			<div class="row">
+				<div class="card col-xs-12 col-sm-12 col-md-12">
+					<div class="card-body">
+						<div class="row mt-2">
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Average Inventory Value</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findAverageInventoryValue('30days')">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findAverageInventoryValue('6months')">
+														Last 6 Months
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findAverageInventoryValue('year')">
+														Last Year
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong><span ng-bind-html="inventoryValue.value | supercurrency"></span></strong></h2>
+										{{inventoryValueMessage}}
+									</p> 
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Inventory Turnover</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findInventoryTurnover('30days')">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findInventoryTurnover('6months')">
+														Last 6 Months
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findInventoryTurnover('year')">
+														Last Year
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span> 
+									<p>
+										<h2 class="text-success"><strong>{{inventoryTurnoverValue.value}}</strong></h2>
+										{{inventoryTurnoverValueMessage}}
+									</p>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Service Orders</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="">
+														Last 12 Months
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong>$12,316.58</strong></h2>
+										Issued Service Order Value
+									</p>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Days Sales of Inventory</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findDaysSalesOfInventory('30days')">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findDaysSalesOfInventory('6months')">
+														Last 6 Months
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findDaysSalesOfInventory('year')">
+														Last Year
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong>{{daysSales.value | number }} Days</strong></h2>
+										{{daysSalesValueMessage}}
+									</p>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Inventory To Sales Ratio</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findInventoryToSalesRatio('30days')">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findInventoryToSalesRatio('year')">
+														Last Year
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong>{{(salesRatio.value * 100) | number:2 }}%</strong></h2>
+										{{salesRatioValueMessage}}
+									</p>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Average Inventory Period</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findAverageInventoryPeriodLast30Days('30days')">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findAverageInventoryPeriodLast30Days('year')">
+														Last Year
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong>{{inventoryPeriod.value | number:2 }}</strong></h2>
+										{{salesRatioValueMessage}}
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	    </div>	
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

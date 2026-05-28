@@ -1,0 +1,203 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="reportController">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item active" aria-current="page">My Dashboard</li>
+				</ol>  
+			</nav>
+			<div class="row">
+				<div class="card col-xs-12 col-sm-12 col-md-12">
+					<div class="card-body">
+						<div class="row mt-2">
+							<div class="col-sm-12 mt-2">
+								<div class="card card-body h-100">
+									<span><strong class="">Sales Orders</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="updateOrdersByDay()">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="updateOrdersByMonth()">
+														Last 12 Months
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<span class="text-success pe-2" style="font-size:32px;"><strong>{{salesOrdersTotal | number}}</strong></span>
+										{{salesOrderChartMessage}}
+									</p>
+									<div>
+										<canvas id="salesOrderChart" height="50"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">Profit & Loss</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findPLLast30Days()">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findPLLastYear()">
+														Last 12 Months
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong><span ng-bind-html="pl.totalProfit | supercurrency"></span></strong></h2>
+										<span class="fw-bold text-success">{{(pl.totalProfitPercent) * 100 | number:2}} %</span> Gross Profit Margin for the {{pl.message}}
+									</p>
+									<div>
+										<canvas id="plIncomeChart" height="100"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">Sales Revenue</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findRevenue('30days')">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findRevenue('year')">
+														Last 12 Months
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong><span ng-bind-html="salesRevenue.total | supercurrency"></span></strong></h2>
+										{{salesChartMessage}}
+									</p>
+									<div>
+										<canvas id="salesChart"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">Invoices</strong>
+									</span>
+									<p>
+										<h2 class="text-success"><strong><span ng-bind-html="invoiceTotal | supercurrency"></span></strong></h2>  
+										Total invoicing this year
+									</p>
+									<div>
+										<canvas id="invoiceChart" height="100"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">Purchase Orders</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findPurchaseOrderOpenCloseLast30Days()">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findPurchaseOrderOpenCloseLastYear()">
+														Last 12 Months
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong><span ng-bind-html="poOpenClose.total | supercurrency"></span></strong></h2>
+										{{openClosePosMessage}}
+									</p>
+									<div>
+										<canvas id="poChart" height="100"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">Top Sellers</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" ng-click="findTopSellersLast30Days();">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="findTopSellersLastYear();">
+														Last 12 Months
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong><span ng-bind-html="topSellers.total | supercurrency"></span></strong></h2>
+										Total Revenue from Top 5 Products over the {{topSellers.period}}
+									</p>
+									<div>
+										<table class="table table-sm table-striped table-hover small">
+											<thead>
+												<tr>
+													<th>Id</th>
+													<th>Name</th>
+													<th class="text-center">Qty</th>
+													<th class="text-end" style="white-space: nowrap;">Total</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr ng-repeat="item in topSellers | limitTo:5" ng-click="viewProduct(item.id)">
+													<td>{{item.id}}</td>
+													<td>{{item.name}}</td>
+													<td class="text-center">{{item.quantity | number}}</td>
+													<td class="text-end fw-bold" style="white-space: nowrap;"><span ng-bind-html="item.total | supercurrency"></span></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	    </div>	
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <div ng-init="generateDashboardCharts()"></div>
+	</section>
+</div>

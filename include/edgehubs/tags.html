@@ -1,0 +1,137 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item active" aria-current="page">RFID Tags</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<!-- keyword search box -->
+					<div class="card">
+						<div class="card-header">
+							<h6 class="float-inline mr-auto">Type in a customer/vendor name. As you type the list below will update accordingly. Click on an item in the list to direct to 
+							a invoice details page. If there is only one result you will be automatically directed to the details page for that invoice.</h6>
+						</div>
+			   			<div class="card-body">
+			   				<form name="searchForm" id="searchForm">
+			   					<div class="input-group col-sm-12">		   					
+			   						<input class="form-control py-2" minlength="3" ng-focus="focusSearch" required ng-change=""
+			   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');">
+		   							<button class="btn btn-outline-secondary" type="submit" ng-disabled="searchForm.$invalid">
+		   								<i class="fa fa-search"></i>
+		   							</button>			   						 
+			   					</div> 
+			   					          		
+			            	</form>
+			            	<div ng-show="searchForm.keyword.$invalid" class="col-sm-12 text-danger text-center"><strong><i>You must enter at least 3 characters</i></strong></div>
+			   			</div>
+			   		</div>
+			   		
+			   		<div class="row mt-2" ng-show="searchResults != undefined">
+						<div class="col-sm-12">
+							<div class="float-right">
+								<ul class="pagination">
+									<li class="page-item">
+										<button type="button" class="btn btn-link page-link" ng-click="paginate(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+									</li>
+									<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+										<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link" ng-click="paginate($index)">{{$index + 1}}</button>
+									</li>
+									<li>
+										<button type="button" class="btn btn-link page-link" ng-click="paginate(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+									</li>
+								</ul>
+							</div>
+						</div>		
+					</div>
+			   		
+					<div class="card mt-2">
+						<div class="card-header">
+							<h5>
+								<span class="font-weight-bold text-uppercase">Customers/Vendors</span> 
+								<span class="badge badge-dark">{{ searchResults.totalRecordCount }}</span>
+								<button class="btn btn-outline-dark float-end">New Customer/Vendor</button>
+							</h5>
+							<h6>Select a Customer/Vendor from the list below to view and manage.</h6>
+						</div>
+			   			<div class="card-body">
+			   				<table class="table table-striped table-hover table-sm">
+			   					<thead>
+			   						<tr>
+			   							<th>Id</th>
+			   							<th>Vendor</th>
+			   							<th>Issue Date</th>
+			   							<th>Received Date</th>
+			   							<th>Quantity</th>
+			   							<th>Status</th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-click="viewOrganization('0005b016-914b-4971-abb2-99a4c654709f')">
+			   							<td>ORG000000001</td>
+			   							<td>Clearwater Defense Systems Corp.</td>
+			   							<td>Jan 12, 2022</td>
+			   							<td>N/A</td>
+			   							<td>2</td>
+			   							<td>Open</td>
+			   						</tr>
+			   						<tr ng-click="viewOrganization('0005b016-914b-4971-abb2-99a4c654709f')">
+			   							<td>ORG000000002</td>
+			   							<td>Clearwater Defense Systems Corp.</td>
+			   							<td>Jan 12, 2022</td>
+			   							<td>Feb 1, 2022</td>
+			   							<td>2</td>
+			   							<td>Partial</td>
+			   						</tr>
+			   						<tr ng-click="viewOrganization('0005b016-914b-4971-abb2-99a4c654709f')">
+			   							<td>ORG000000003</td>
+			   							<td>Clearwater Defense Systems Corp.</td>
+			   							<td>Jan 12, 2022</td>
+			   							<td>Feb 12, 2022</td>
+			   							<td>2</td>
+			   							<td>Received</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   			</div>
+			   		</div>
+			   		<div class="row mt-2" ng-show="searchResults != undefined">
+						<div class="col-sm-12">
+							<div class="float-right">
+								<ul class="pagination">
+									<li class="page-item">
+										<button type="button" class="btn btn-link page-link" ng-click="paginate(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+									</li>
+									<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+										<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link" ng-click="paginate($index)">{{$index + 1}}</button>
+									</li>
+									<li>
+										<button type="button" class="btn btn-link page-link" ng-click="paginate(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+									</li>
+								</ul>
+							</div>
+						</div>		
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    <!-- Toast messaging: set messaging, set whether danger or success -->
+	<div ng-include="'/include/components/toast-message.html'"></div>
+	
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

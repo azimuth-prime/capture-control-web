@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Inventory Summary</title>
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta name="description" content="">
+    	
+    	<link href="https://fonts.googleapis.com/css?family=Bungee|Open+Sans+Condensed:300" rel="stylesheet">
+    	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <link rel="stylesheet" href="/assets/css/global.css" />
+        <link rel="stylesheet" href="/assets/css/print.css" />
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-cookies.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-sanitize.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+		<script src="/app/global/data.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/angular-ui/bower-ui-grid/ui-grid.min.js"></script>
+		
+		<script src="/app/capture-control.module.js"></script>
+		<script src="/app/global/filters.js"></script>
+		<script src="/app/auth/auth.service.js"></script>
+		<script src="/app/crm/user.service.js"></script>
+		
+		<script src="/app/crm/user.controller.js"></script>
+ 
+		<style>@page { size: letter }</style>		
+	</head>
+	<body ng-app="captureControlApp" ng-cloak style="font-family: 'Open Sans Condensed', sans-serif;">
+  		<div class="row mb-5 ml-5 mr-5 mt-5 hidden-sm">
+			<div class="col-sm-12">
+				<button class="btn btn-outline-danger float-end me-2" onclick="window.close()" type="button">Close</button>
+				<button class="btn btn-outline-success float-end me-2" onclick="window.print()" type="button">Print</button>
+			</div>
+		</div>
+		<section class="sheet padding-10mm">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<div class="col-sm-4 p-2">
+								<img src="/assets/images/logos/text-logo-3-dark.png" class="img-fluid"/>
+							</div>
+							<div class="col-sm-5 text-center">
+								<div class="card-text ms-5">
+									<h5><strong>October 15, 2022</strong></h5>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="vr"></div>
+								<h1 class="float-end me-3"><strong>INVENTORY SUMMARY</strong></h1>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>Product #</th>
+										<th>Name</th>
+										<th>SKU #</th>
+										<th>Color/Size</th>
+										<th>Available</th>
+										<th>Total Sold</th>
+										<th>Sold/Day</th>
+										<th>Est. Supply (Days)</th>
+										<th>Average Unit Cost</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>PRD10000000</td>
+										<td>name 1</td>
+										<td>SKU10000000</td>
+										<td>Red/Large</td>
+										<td>7</td>
+										<td>5</td>
+										<td>1</td>
+										<td>64</td>
+										<td><span ng-bind-html="9.95 | supercurrency"></td>
+									</tr>
+									<tr>
+										<td>PRD10000000</td>
+										<td>name 1</td>
+										<td>SKU10000000</td>
+										<td>Red/Large</td>
+										<td>7</td>
+										<td>5</td>
+										<td>1</td>
+										<td>64</td>
+										<td><span ng-bind-html="9.95 | supercurrency"></td>
+									</tr>
+									<tr>
+										<td>PRD10000000</td>
+										<td>name 1</td>
+										<td>SKU10000000</td>
+										<td>Red/Large</td>
+										<td>7</td>
+										<td>5</td>
+										<td>1</td>
+										<td>64</td>
+										<td><span ng-bind-html="9.95 | supercurrency"></td>
+									</tr>
+									<tr>
+										<td>PRD10000000</td>
+										<td>name 1</td>
+										<td>SKU10000000</td>
+										<td>Red/Large</td>
+										<td>7</td>
+										<td>5</td>
+										<td>1</td>
+										<td>64</td>
+										<td><span ng-bind-html="9.95 | supercurrency"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+        </section> 
+		
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  	</body>
+	
+</html>

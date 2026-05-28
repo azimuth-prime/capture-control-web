@@ -1,0 +1,586 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="warehouseController" ng-init="findAllWarehouses(); findAllCarriers();">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="configController" ng-init="findGlobalConfig();">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/wms-dashboard">WMS</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Configuration</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2" ng-controller="templateController">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="col-sm-12">		
+								<ul class="nav nav-tabs">
+									<li class="nav-item">
+										<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#config" href="">Warehouse Configuration</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-bs-toggle="tab" ng-click="findTemplatesByCategory(['warehouse'])" data-bs-target="#templates" href="">Warehouse Print Templates</a>
+									</li>
+								</ul>   	
+								<div class="tab-content" id="tab">
+									<div class="tab-pane fade show active" id="config" role="tabpanel" aria-labelledby="config-tab">				
+					   					<div class="card mt-2">
+			  								<div class="card-header">
+			  									<h6><strong>Warehouses</strong></h6>
+			  									<p>Edit and configure your warehouse features and functionality.</p>
+			  								</div>
+			  								<div class="card-body">
+				  								<div class="row">	  									
+				  									<div class="col-sm-8 mt-2">
+					  									<div class="card h-100">
+					  										<div class="card-header">
+																<span class=""><strong>Warehouses</strong></span>			
+																<button class="btn btn-sm btn-outline-dark float-end" ng-click="resetWarehouse()" data-bs-toggle="modal" data-bs-target="#warehouseDialog">New Warehouse</button>
+																<h6>Click on a warehouse in the list below to edit the details.</h6>
+															</div>
+															<div class="card-body">
+						  										<div class="row">
+						  											<div class="col-sm-12">
+						  												<table class="table table-sm table-hover small">
+						  													<thead>
+						  														<tr>
+						  															<th>Name</th>
+						  															<th>Type</th>
+						  															<th>Description</th>
+						  															<th>Address</th>
+						  															<th>State</th>
+						  														</tr>
+						  													</thead>
+						  													<tbody>
+						  														<tr ng-repeat="item in warehouses" data-bs-toggle="modal" data-bs-target="#warehouseDialog" ng-click="findWarehouseById(item.id)">
+						  															<td>{{item.name}}</td>
+						  															<td>{{item.type}}</td>
+						  															<td>{{item.description}}</td>
+						  															<td>
+						  																{{item.address.address1 + ' ' + item.address.city + ', ' + item.address.province}}
+						  															</td>
+						  															<td>{{item.state}}</td>
+						  														</tr>
+						  													</tbody>
+						  												</table>
+						  											</div>
+						  										</div>
+						  									</div>
+					  									</div>
+				  									</div>
+				  									<div class="col-sm-4 mt-2">
+					  									<div class="card h-100">
+					  										<div class="card-header">
+																<span><h6><strong>Shipping</strong></h6></span>		
+																<button class="btn btn-sm btn-outline-dark float-end" ng-click="carrier = {}" data-bs-toggle="modal" data-bs-target="#carrierDialog">New Carrier</button>
+																
+																<p class="small">Manage shipping methods.</p>
+															</div>
+															<div class="card-body">
+						  										<div class="row">
+						  											<div class="col-sm-12">
+						  												<table class="table table-sm table-hover small">
+						  													<thead>
+						  														<tr>
+						  															<th>Name</th>
+						  															<th>Region</th>
+						  															<th class="text-center">Logo</th>
+						  														</tr>
+						  													</thead>
+						  													<tbody>
+						  														<tr ng-repeat="item in carriers" ng-click="findCarrierById(item.id)" data-bs-toggle="modal" data-bs-target="#carrierDialog">
+						  															<td>{{item.name}}</td>
+						  															<td>{{item.region}}</td>
+						  															<td class="text-center"><span ng-bind-html="item.logo"></span></td>
+						  														</tr>
+						  													</tbody>
+						  												</table>
+						  											</div>
+						  										</div>
+						  									</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  									<div class="row">
+			  										<div class="col-sm-6 mt-2">
+					  									<div class="card h-100">
+															<div class="card-body">
+						  										<div class="row">
+						  											<div class="col-sm-12">
+																		<div class="form-group mt-2">
+														   					<div class="input-group">
+														   						<label class="pe-2" for="currency"><strong>Shipping Label Printer</strong></label>
+														   						<div class="input-group-append">
+												            						<span class="text-danger"></span>
+												            					</div>
+														   					</div>
+														   					<p><small>Enter the URL of the Zebra label printer. If you are using the Business Hub shipping module
+														   					then your default system printer will be used as the carrier will provide a label.</small></p>
+														   					<div class="input-group input-group-sm">
+																				<input type="text" class="form-control form-control-sm" name="shippingPrinter" id="shippingPrinter" ng-model="globalConfig.shippingPrinter" /> 
+																				<button class="btn btn-outline-secondary btn-sm" type="button" 
+																				ng-click="setParameter('shippingPrinter', globalConfig.shippingPrinter);">Save</button>
+																			</div>
+														   				</div>
+						  											</div>
+						  										</div>
+						  									</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  								</div>
+					   					</div>
+					   					</div>
+					   					<div class="tab-pane fade show" id="templates" role="tabpanel" aria-labelledby="templates-tab">
+				  							<div class="col-sm-12 mt-2">
+			  									<div class="card h-100">
+			  										<div class="card-header">
+														<span class=""><strong>Templates</strong></span>			
+														<h6>Configure warehouse documents.</h6>
+													</div>
+													<div class="card-body">
+														<div class="row">
+															<div class="col-sm-12">
+																<div class="form-group mt-2">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="productType"><strong>Print Packing Slip.</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<small>Indicate whether a packing slip should be printed automatically when a sales order has been
+												   					packed.</small>
+												   					<div class="input-group input-group-sm">
+													   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="printPackSlip" id="printPackSlip" ng-value="true" ng-model="globalConfig.printPackSlip"
+										 										ng-change="setParameter('printPackSlip', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																		</div>
+																		<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="printPackSlip" id="printPackSlip" ng-value="false" ng-model="globalConfig.sendOrderConfirmEmail"
+										 										ng-change="setParameter('printPackSlip', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																		</div>
+																	</div>
+												   				</div>
+															</div>
+														</div>
+														<div class="row">
+															<div class="col-sm-12">
+																<div class="form-group mt-2">
+												   					<div class="input-group">
+												   						<label class="pe-2" for="productType"><strong>Print Shipping Labels</strong></label>
+												   						<div class="input-group-append">
+										            						<span class="text-danger"></span>
+										            					</div>
+												   					</div>
+												   					<small>Indicate whether shipping labels should be printed automatically when a sales order has been
+												   					shipped.</small> 
+												   					<div class="input-group input-group-sm">
+													   					<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input " type="radio" name="printShippingLabels" id="printShippingLabels" ng-value="true" ng-model="globalConfig.printShippingLabels"
+										 										ng-change="setParameter('printShippingLabels', 'true')">
+										 										<label class="form-check-label" for="inlineCheckbox1">Yes</label>
+																		</div>
+																		<div class="form-check form-check-inline btn-sm ms-3">
+										 										<input class="form-check-input" type="radio" name="printShippingLabels" id="printShippingLabels" ng-value="false" ng-model="globalConfig.printShippingLabels"
+										 										ng-change="setParameter('printShippingLabels', 'false')">
+										 										<label class="form-check-label" for="inlineCheckbox1">No</label>
+																		</div>
+																	</div>
+												   				</div>
+															</div>
+															
+														</div>
+				  									</div>
+			  									</div>
+		  									</div>
+				  							
+				  							<div class="card mt-2">
+				  								<div class="card-header">
+				  									<h6><strong>Warehouse Templates</strong></h6>
+				  									<p>Add, edit and view templates for warehouse documentation and sales order inserts. Instructions for using the template 
+				  									language can be found in the help documentation under "Template Design".</p>
+				  								</div>
+				  								<div class="card-body" id="accordian">
+					  								<div class="row mt-1" ng-repeat="item in templates">
+					  									<div class="col-sm-12">
+					  										<div class="card h-100 mt-1">
+						  										<div class="card-header">
+																	<span class=""><strong>{{item.name}}</strong></span>
+																	<span data-bs-toggle="collapse" data-bs-target="#{{item.entity}}"><i class="fas fa-caret-down float-end fa-lg"></i></span>
+																	<span class="me-3 small float-end">Last Modified: {{item.lastModifiedDate | date: 'mediumDate'}}</span>		
+																	<h6>{{item.description}}</h6>
+																</div>
+																<div class="card-body collapse" data-bs-parent="#accordian" id="{{item.entity}}">
+																	<div class="row mb-2">
+																		<div class="col-sm-12">
+																			<h6>Enter the template text in the textarea below. </h6>
+														   					<div class=form-group col-sm-12">		   					
+														   						<textarea rows="20" class="form-control form-control-sm" ng-model="item.content"></textarea>
+														   					</div> 
+														            	</div>
+																	</div>
+																	<div class="row mt-5">
+																		<div class="col-sm-12">
+																			<button type="button" class="btn btn-sm btn-outline-success float-end m-1" ng-click="saveTemplate(item)">Save</button>
+																			<button type="button" class="btn btn-sm btn-outline-success float-end m-1" ng-click="previewPDF(item)">Preview</button>
+																		</div>
+																	</div>
+							  									</div>
+						  									</div>
+					  									</div>
+					  								</div>
+					  							</div>
+					  						</div>
+				  						</div>
+					   				</div>
+					   			</div>		   					
+			   				</div>
+			   			</div>
+			   		</div>
+			   	</div>
+			   	<div ng-include="'/include/components/toast-message.html'"></div>
+			</div>
+		
+		<div class="modal fade" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="carrierDialog" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+	    				<form name="carrierForm" id="carrierForm" ng-submit="saveCarrier()">
+	    					<div class="row">
+	    						<div class="col-sm-12">
+	    							<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Name</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the carrier name. The name will appear in reports and on the display.</small></p>
+					   					<input required class="form-control form-control-sm" type="text" name="cName" id="cName" ng-model="carrier.name"
+					   					ng-class="{'is-invalid': carrierForm.cName.$touched && carrierForm.cName.$invalid, 
+					   					'is-valid' : carrierForm.cName.$touched && carrierForm.cName.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Region</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the region supported by the carrier. For world-wide service enter "Global" otherwise
+					   					enter the country code serviced by the carrier.</small></p>
+					   					<input required class="form-control form-control-sm" type="text" name="cRegion" id="cRegion" ng-model="carrier.region"
+					   					ng-class="{'is-invalid': carrierForm.cRegion.$touched && carrierForm.cRegion.$invalid, 
+					   					'is-valid' : carrierForm.cRegion.$touched && carrierForm.cRegion.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Account #</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the region supported by the carrier. For world-wide service enter "Global" otherwise
+					   					enter the country code serviced by the carrier.</small></p>
+					   					<input class="form-control form-control-sm" type="text" name="cAccount" id="cAccount" ng-model="carrier.account"
+					   					ng-class="{'is-invalid': carrierForm.cAccount.$touched && carrierForm.cAccount.$invalid, 
+					   					'is-valid' : carrierForm.cAccount.$touched && carrierForm.cAccount.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Logo</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter an image URL or a font-awesome image. For display purposes only.</small></p>
+					   					<input class="form-control form-control-sm" type="text" name="clogo" id="clogo" ng-model="carrier.logo"
+					   					ng-class="{'is-invalid': carrierForm.clogo.$touched && carrierForm.clogo.$invalid, 
+					   					'is-valid' : carrierForm.clogo.$touched && carrierForm.clogo.$valid}"/>
+					   				</div>
+	    						</div>
+	    					</div>
+	    					<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-sm btn-outline-danger m-1" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-sm btn-outline-success m-1" ng-disabled="carrierForm.$invalid">Save</button>
+								</div>
+							</div>
+	    				</form>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	
+	    <div class="modal fade" id="warehouseDialog" role="dialog">
+	        <div class="modal-dialog modal-large" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body">
+	                	<form name="warehouseForm" id="warehouseForm" ng-submit="saveWarehouse()">
+	                	<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+							<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="card card-body">
+										<div class="row">
+											<div class="col-sm-12">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Name</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<p><small>Give the warehouse a name. The name will be used in reports and display.</small></p>
+								   					<input required class="form-control form-control-sm" type="text" name="wName" id="wName" ng-model="warehouse.name"
+								   					ng-class="{'is-invalid': warehouseForm.wName.$touched && warehouseForm.wName.$invalid, 
+								   					'is-valid' : warehouseForm.wName.$touched && warehouseForm.wName.$valid}"/>
+								   					<p ng-if="uniqueNameError != undefined" class="small text-danger">{{uniqueNameError}}</p>
+								   				</div>
+											</div>
+											<div class="col-sm-12">
+												<div class="input-group">
+							   						<label class="pe-2" for="name"><strong>Warehouse Type</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+												<p><small>Select whether the warehouse is a physical location or a virtual warehouse.</small></p>
+												<div class="form-check form-check-inline btn-sm ms-3">
+													<input class="form-check-input" type="radio" name="wType" id="wType" value="PHYSICAL" ng-model="warehouse.type">
+													<label class="form-check-label" for="inlineRadio1">Physical Warehouse</label>
+												</div>
+												<div class="form-check form-check-inline btn-sm ms-3">
+													<input class="form-check-input" type="radio" name="wType" id="wType" value="LOGICAL" ng-model="warehouse.type">
+													<label class="form-check-label" for="inlineRadio2">Virtual Warehouse</label>
+												</div>
+											</div>
+											<div class="col-sm-12">
+												<div class="input-group">
+							   						<label class="pe-2" for="name"><strong>Warehouse State</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+												<p><small>Mark the warehouse either ACTIVE or INACTIVE. If INACTIVE the warehouse will not show up in 
+												warehouse fields throughout the application.</small></p>
+												<div class="form-check form-check-inline btn-sm ms-3">
+													<input class="form-check-input" type="radio" name="wState" id="wState" value="ACTIVE" ng-model="warehouse.state">
+													<label class="form-check-label" for="inlineRadio1">ACTIVE</label>
+												</div>
+												<div class="form-check form-check-inline btn-sm ms-3">
+													<input class="form-check-input" type="radio" name="wState" id="wState" value="INACTIVE" ng-model="warehouse.state">
+													<label class="form-check-label" for="inlineRadio2">INACTIVE</label>
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-sm-12">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Description</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Add an optional description for the warehouse.</small></p>
+								   					<textarea class="form-control form-control-sm" cols="5" name="wDescription" id="wDescription" ng-model="warehouse.description"></textarea>
+								   				</div>
+											</div>
+										</div>
+									</div>
+									<div class="card card-body mt-2" ng-show="warehouse.type == 'PHYSICAL'">
+										<div class="row">
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Attention</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="wContactName" id="wContactName" ng-model="warehouse.address.contactName"
+								   					ng-class="{'is-invalid': warehouseForm.wContactName.$touched && warehouseForm.wContactName.$invalid, 
+								   					'is-valid' : warehouseForm.wContactName.$touched && warehouseForm.wContactName.$valid}"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Address1</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input ng-required="warehouse.type == 'PHYSICAL'" class="form-control form-control-sm" type="text" name="wAddress1" id="wAddress1" ng-model="warehouse.address.address1"
+								   					ng-class="{'is-invalid': warehouseForm.wAddress1.$touched && warehouseForm.wAddress1.$invalid, 
+								   					'is-valid' : warehouseForm.wAddress1.$touched && warehouseForm.wAddress1.$valid}"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Address2</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="wAddress2" id="wAddress2" ng-model="warehouse.address.address2"
+								   					ng-class="{'is-invalid': warehouseForm.wAddress2.$touched && warehouseForm.wAddress2.$invalid, 
+								   					'is-valid' : warehouseForm.wAddress2.$touched && warehouseForm.wAddress2.$valid}"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Address3</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="wAddress3" id="wAddress3" ng-model="warehouse.address.address3"
+								   					ng-class="{'is-invalid': warehouseForm.wAddress3.$touched && warehouseForm.wAddress3.$invalid, 
+								   					'is-valid' : warehouseForm.wAddress3.$touched && warehouseForm.wAddress3.$valid}"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>City</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input ng-required="warehouse.type == 'PHYSICAL'" class="form-control form-control-sm" type="text" name="wCity" id="wCity" ng-model="warehouse.address.city"
+								   					ng-class="{'is-invalid': warehouseForm.wCity.$touched && warehouseForm.wCity.$invalid, 
+								   					'is-valid' : warehouseForm.wCity.$touched && warehouseForm.wCity.$valid}"/>
+								   				</div>
+											</div>
+										
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="size"><strong>Country</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   				</div>
+					   							<div class="input-group mb-3">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="item in countries">
+															<a class="dropdown-item" href="" ng-click="setCountry(item.isoCode)">
+																{{item.name}}
+															</a>
+														</li>
+													</ul>
+													<input ng-required="warehouse.type == 'PHYSICAL'" ng-disabled="true" type="text" class="form-control form-control-sm" name="cCountry" id="cCountry" ng-model="warehouse.address.country" /> 
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   				</div>
+								   				<div class="input-group mb-3" ng-if="warehouse.address.country == 'CA' || warehouse.address.country == 'US'">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="item in cCountry.provinces">
+															<a class="dropdown-item" href="" ng-click="setProvince(item.isoCode)">
+																{{item.name}}
+															</a>
+														</li>
+													</ul>
+													<input ng-required="warehouse.address.country == 'CA' || warehouse.address.country == 'US'" ng-disabled="true" type="text" class="form-control form-control-sm" name="cProvince" id="cProvince" ng-model="warehouse.address.province" /> 
+												</div>
+												<div class="input-group mb-3" ng-if="warehouse.address.country != 'CA' && warehouse.address.country != 'US'">
+													<input ng-required="warehouse.address.country == 'CA' || warehouse.address.country == 'US'" type="text" class="form-control form-control-sm" name="cProvince" id="cProvince" ng-model="warehouse.address.province"/>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Postal Code</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger" ng-show="warehouse.address.country == 'CA' || warehouse.address.country == 'US'">*</span>
+						            					</div>
+								   					</div>
+								   					<input ng-required="warehouse.address.country == 'CA' || warehouse.address.country == 'US'" class="form-control form-control-sm" type="text" name="wPostalCode" id="wPostalCode" ng-model="warehouse.address.postalCode"
+								   					ng-class="{'is-invalid': warehouseForm.wPostalCode.$touched && warehouseForm.wPostalCode.$invalid, 
+								   					'is-valid' : warehouseForm.wPostalCode.$touched && warehouseForm.wPostalCode.$valid}"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="name"><strong>Phone</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger" ng-show="warehouse.address.country == 'CA' || warehouse.address.country == 'US'">*</span>
+						            					</div>
+								   					</div>
+								   					<input ng-required="warehouse.address.country == 'CA' || warehouse.address.country == 'US'" class="form-control form-control-sm" type="tel" name="wPhone" id="wPhone" ng-model="warehouse.address.phone"
+								   					ng-class="{'is-invalid': warehouseForm.wPhone.$touched && warehouseForm.wPhone.$invalid, 
+								   					'is-valid' : warehouseForm.wPhone.$touched && warehouseForm.wPhone.$valid}"/>
+								   				</div>
+											</div>
+										</div>
+									</div>
+									<div class="card card-body mt-2" ng-show="warehouse.type == 'LOGICAL'">										
+										<div class="list-group">
+											<div class="list-group-item list-group-item-action" aria-current="true" ng-repeat="item in warehouses | filter: { type: 'PHYSICAL'}">
+												<div class="d-flex w-100 justify-content-between">
+													<small class="mb-1 fw-bold">{{item.name}}</small>
+													<small>
+														<input ng-required="warehouse.type == 'LOGICAL'" class="form-check-input" type="radio" name="parentWarehouse" id="parentWarehouse" value="{{item.id}}" ng-model="warehouse.parentId">
+													</small>
+												</div>
+												<p class="mb-1">{{item.description}}</p>
+												<small>{{item.address.address1}} {{item.address.address2}} {{item.address.address3}}
+												{{item.address.city}}, {{item.address.province}}, {{item.address.country}}, {{item.address.postalCode}} <br />
+												{{item.address.phone}}</small>
+											</div>
+										</div>
+									</div>
+								</div>
+	
+								<div class="row mt-3">
+									<div class="col-sm-12 text-end">
+										<button type="button" class="btn btn-sm btn-outline-danger m-1" data-bs-dismiss="modal">Cancel</button>
+										<button type="submit" class="btn btn-sm btn-outline-success m-1" ng-disabled="warehouseForm.$invalid">Save</button>
+									</div>
+								</div>
+							</div>
+						</form>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

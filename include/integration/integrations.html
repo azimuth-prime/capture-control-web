@@ -1,0 +1,282 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="configController" ng-init="integrationInit()">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Integrations</li>
+			</ol>  
+		</nav>
+		<div class="row mb-2">
+			<div class="col-xs-12 col-sm-12 col-md-12">
+				<div class="card m-1 h-100">
+					<div class="card-body">
+						<div class="col-sm-12">		   					
+		   					<div class="card mt-2">
+  								<div class="card-header">
+  									<h6><strong>Integrations</strong></h6>
+  									<p>Capture Business Hub provides multiple integration capabilities for integration to 3rd party systems. The 
+  									following sections provide information and setup processes for those systems.</p>
+  								</div>
+  								<div class="card-body">
+  									<div class="row">	  									
+	  									<div class="col-sm-12 mt-2">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+		  											<h6><strong>Intuit QuickBooks Online</strong></h6>
+  													<p>Capture Business Hub can be setup to perform a realtime integration with your QuickBooks Online 
+  													accounting system.</p>
+		  										</div>
+												<div class="card-body text-center">
+													<div class="row" ng-show="globalConfig.qboEnabled">
+														<div class="col-sm-6">
+															<ul class="list-group">
+																<li class="list-group-item border-top-0 border-start-0 border-end-0 text-start" style="border-style: dotted;">
+																	<span class="fw-bold pe-3">Company Name:</span> {{qbInfo.companyName}}
+																</li>
+																<li class="list-group-item border-top-0 border-start-0 border-end-0 text-start" style="border-style: dotted;">
+																	<span class="fw-bold pe-3">QuickBooks Version:</span> {{qbInfo.quickBooksVersion}}
+																</li>
+															</ul>
+														</div>
+														<div class="col-sm-6">
+															<ul class="list-group">
+																<li class="list-group-item border-top-0 border-start-0 border-end-0 text-start" style="border-style: dotted;">
+																	<span class="fw-bold pe-3">Company Type:</span> {{qbInfo.companyType}}
+																</li>
+																<li class="list-group-item border-top-0 border-start-0 border-end-0 text-start" style="border-style: dotted;">
+																	<span class="fw-bold pe-3">Industry:</span> {{qbInfo.industry}}
+																</li>
+															</ul>
+														</div>
+													</div>
+													<div class="row mt-3" ng-show="globalConfig.qboEnabled">
+														<div class="col-sm-12 text-center">
+															<button class="btn btn-sm btn-outline-danger" ng-click="removeIntuitAccount()">Disconnect From QuickBooks</button>
+														</div>
+													</div>
+													<div class="row" ng-show="!globalConfig.qboEnabled">
+														<div class="sol-sm-12">
+															<a class="imgLink" ng-click="launchIntuitSignIn();">
+																<img src="/assets/images/logos/third-party/Sign_in_transparent_btn_med_default.png" />
+															</a>
+														</div>
+													</div>
+			  									</div>
+		  									</div>
+	  									</div>
+	  									<div class="col-sm-6 mt-2" ng-show="globalConfig.qboEnabled">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+		  											<h6><strong>Default Inventory Accounts</strong></h6>
+  													<p>Select the default QuickBooks accounts for inventory. Accounts can also be set on a warehouse
+  													level which will override these values.</p>
+		  										</div>
+												<div class="card-body">
+													<div class="row">
+														<div class="col-sm-12">
+															<table class="table table-borderless">
+																<tbody>
+																	<tr>
+																		<td>
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Asset Account</button>
+																				<ul class="dropdown-menu">
+																					<li class="m-2">  
+																						<label class="pe-2" for="aFilter"><strong>Filter: </strong></label> 					
+																	   					<input class="form-control form-control-sm" type="text" name="aFilter" id="aFilter" ng-model="aFilter"/>	
+																					</li>
+																					<li ng-repeat="item in qbInfo.assetAccounts | filter: aFilter | orderBy: '+name'">
+																						<a class="dropdown-item" href="" ng-click="setGLAccount('asset', item.id)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="incomeAcct" id="incomeAcct" 
+																				ng-model="qbInfo.assetAccount.name" /> 
+																			</div>
+																		</td>
+																	</tr>
+																	<tr>
+																		<td>
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Expense Account</button>
+																				<ul class="dropdown-menu">
+																					<li class="m-2">  
+																						<label class="pe-2" for="eFilter"><strong>Filter: </strong></label> 					
+																	   					<input class="form-control form-control-sm" type="text" name="eFilter" id="eFilter" ng-model="eFilter"/>	
+																					</li>
+																					<li ng-repeat="item in qbInfo.expenseAccounts | filter: eFilter | orderBy: '+name'">
+																						<a class="dropdown-item" href="" ng-click="setGLAccount('expense', item.id)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="expenseAcct" id="expenseAcct" 
+																				ng-model="qbInfo.expenseAccount.name" /> 
+																			</div>
+																		</td>
+																	</tr>
+																	<tr>
+																		<td>
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Income Account</button>
+																				<ul class="dropdown-menu">
+																					<li class="m-2">  
+																						<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+																	   					<input class="form-control form-control-sm" type="text" name="iFilter" id="iFilter" ng-model="iFilter"/>	
+																					</li>
+																					<li ng-repeat="item in qbInfo.incomeAccounts | filter: iFilter | orderBy: '+name'">
+																						<a class="dropdown-item" href="" ng-click="setGLAccount('income', item.id)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="incomeAcct" id="incomeAcct" 
+																				ng-model="qbInfo.incomeAccount.name" /> 
+																			</div>
+																		</td>
+																	</tr>
+																	<tr>
+																		<td>
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select COGS Account</button>
+																				<ul class="dropdown-menu">
+																					<li class="m-2">  
+																						<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+																	   					<input class="form-control form-control-sm" type="text" name="cFilter" id="cFilter" ng-model="cFilter"/>	
+																					</li>
+																					<li ng-repeat="item in qbInfo.cogsAccounts | filter: cFilter | orderBy: '+name'">
+																						<a class="dropdown-item" href="" ng-click="setGLAccount('cogs', item.id)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="cogsAcct" id="cogsAcct" 
+																				ng-model="qbInfo.cogsAccount.name" /> 
+																			</div>
+																		</td>
+																	</tr>
+																</tbody>
+															</table>
+														</div>
+													</div>
+			  									</div>
+		  									</div>
+	  									</div>
+	  									<div class="col-sm-6 mt-2" ng-show="globalConfig.qboEnabled">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+		  											<h6><strong>QuickBooks Product Types</strong></h6>
+  													<p>Select the default product type, which applies to all regaulr inventory items, the product type
+  													for vendor shipping charges and the product type for any customs duties, tariffs and risk costs.</p>
+		  										</div>
+												<div class="card-body">
+													<div class="input-group mb-3">
+														<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Inventory Product</button>
+														<ul class="dropdown-menu">
+															<li class="m-2">  
+																<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+											   					<input class="form-control form-control-sm" type="text" name="pFilter" id="pFilter" ng-model="pFilter"/>	
+															</li>
+															<li ng-repeat="item in qbInfo.items | filter: pFilter | orderBy: '+name'">
+																<a class="dropdown-item" href="" ng-click="setProductType('PRODUCT', item.id)">
+																	{{item.name}}
+																</a>
+															</li>
+														</ul>
+														<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="pType" id="pType" 
+														ng-model="qbInfo.defaultProductType.name" /> 
+													</div>
+			  									</div>
+			  									<div class="card-body">
+													<div class="input-group mb-3">
+														<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Shipping Product</button>
+														<ul class="dropdown-menu">
+															<li class="m-2">  
+																<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+											   					<input class="form-control form-control-sm" type="text" name="pFilter" id="pFilter" ng-model="pFilter"/>	
+															</li>
+															<li ng-repeat="item in qbInfo.items | filter: pFilter | orderBy: '+name'">
+																<a class="dropdown-item" href="" ng-click="setProductType('SHIP', item.id)">
+																	{{item.name}}
+																</a>
+															</li>
+														</ul>
+														<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="pType" id="pType" 
+														ng-model="qbInfo.supplierShippingCharge.name" /> 
+													</div>
+			  									</div>
+			  									<div class="card-body">
+													<div class="input-group mb-3">
+														<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Customs Product</button>
+														<ul class="dropdown-menu">
+															<li class="m-2">  
+																<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+											   					<input class="form-control form-control-sm" type="text" name="pFilter" id="pFilter" ng-model="pFilter"/>	
+															</li>
+															<li ng-repeat="item in qbInfo.items | filter: pFilter | orderBy: '+name'">
+																<a class="dropdown-item" href="" ng-click="setProductType('DUTY', item.id)">
+																	{{item.name}}
+																</a>
+															</li>
+														</ul>
+														<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="pType" id="pType" 
+														ng-model="qbInfo.purchaseDutyTariff.name" /> 
+													</div>
+			  									</div>
+		  									</div>
+	  									</div>
+	  									<div class="col-sm-6 mt-2" ng-show="globalConfig.qboEnabled">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+		  											<h6><strong>Inventory Adjustment Account</strong></h6>
+  													<p>Select the QuickBooks account to be used for Inventory Adjustments.</p>
+		  										</div>
+												<div class="card-body">
+													<div class="input-group mb-3">
+														<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Adjustment Account</button>
+														<ul class="dropdown-menu">
+															<li class="m-2">  
+																<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+											   					<input class="form-control form-control-sm" type="text" name="cFilter" id="cFilter" ng-model="cFilter"/>	
+															</li>
+															<li ng-repeat="item in qbInfo.cogsAccounts | filter: cFilter | orderBy: '+name'">
+																<a class="dropdown-item" href="" ng-click="setGLAccount('adjust', item.id)">
+																	{{item.name}}
+																</a>
+															</li>
+														</ul>
+														<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="assetAdjustmentAccount" id="assetAdjustmentAccount" 
+														ng-model="qbInfo.assetAdjustmentAccount.name" /> 
+													</div>
+			  									</div>
+		  									</div>
+	  									</div>
+  									</div>
+  								</div>
+		   					</div>		   					
+		   				</div>
+		   			</div>
+		   		</div>
+		   	</div>
+		   	<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+		</div>
+		
+	</div>
+	
+	<div class="modal fade" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</section>

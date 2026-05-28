@@ -1,0 +1,584 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="configController" ng-init="findGlobalConfig(); findAllPaymentConfigData(); findAllPrinters(); ">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Application Configuration</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<ul class="nav nav-tabs nav-fill ">
+			  					<li class="nav-item">
+			    					<a class="nav-link active" data-bs-toggle="tab" role="tab" data-bs-target="#main">Application Settings</a>
+			  					</li>
+			  					<li class="nav-item">
+			    					<a class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#taxes" ng-click="getAllTaxes(); getAllIntuitTaxes();">Sales Tax</a>
+			  					</li>
+							</ul>
+							<div class="tab-content">
+		  						<div class="tab-pane active" role="tabpanel" id="main">
+									<div class="col-sm-12">		   					
+					   					<div class="card mt-2">
+			  								<div class="card-header">
+			  									<h6><strong>Application Settings</strong></h6>
+			  									<p class="small">Add, edit and delete system wide application settings.</p>
+			  								</div>
+			  								<div class="card-body">
+			  									<div class="row">	  									
+				  									<div class="col-sm-12 mt-2">
+					  									<div class="card h-100">
+					  										<div class="card-header">
+					  											<h6><strong>Company Information</strong></h6>
+			  													<p class="small">Enter your company information. This information will be used throughout the system
+			  													for items such as invoices, sales orders and purchase orders.</p>
+					  										</div>
+															<div class="card-body">
+																<form name="cForm" id="cForm">
+							  										<div class="row">
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Company Name</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   					<p><small>The company name that will appear on sales orders, invoices and purchase orders.</small></p>
+															   					<input required class="form-control form-control-sm" type="text" name="cName" id="cName" ng-model="globalConfig.companyName"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Company Website</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<p><small>The company website that will appear on sales orders, invoices and purchase orders.</small></p>
+															   					<input class="form-control form-control-sm" type="text" name="cWeb" id="cWeb"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Address1</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   					<input required class="form-control form-control-sm" type="text" name="cAddress1" id="cAddress1" ng-model="globalConfig.address.address1"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Address2</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<input class="form-control form-control-sm" type="text" name="cAddress2" id="cAddress2" ng-model="globalConfig.address.address2"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Address3</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<input class="form-control form-control-sm" type="text" name="cAddress3" id="cAddress3" ng-model="globalConfig.address.address3"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>City</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   					<input class="form-control form-control-sm" type="text" name="cCity" id="cCity" ng-model="globalConfig.address.city"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="size"><strong>Country</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   				</div>
+												   							<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="item in countries">
+																						<a class="dropdown-item" href="" ng-click="setCountry(item.isoCode)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="cCountry" id="cCountry" ng-model="globalConfig.address.country" /> 
+																			</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   				</div>
+															   				<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="item in cCountry.provinces">
+																						<a class="dropdown-item" href="" ng-click="setProvince(item.isoCode)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="cProvince" id="cProvince" ng-model="globalConfig.address.province" /> 
+																			</div>
+																		</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Postal/Zip</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger"></span>
+													            					</div>
+															   					</div>
+															   					<input class="form-control form-control-sm" type="text" name="cPostalCode" id="cPostalCode" ng-model="globalConfig.address.postalCode"/>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Main Phone</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   					<div class="input-group input-group-sm">	
+																					<span class="input-group-text"><i class="fas fa-phone"></i></span>	   					
+															   						<input required class="form-control form-control-sm" type="text" name="cPhone" id="cPhone" ng-model="globalConfig.address.phone"/>			   						 
+																   				</div>
+															   				</div>
+							  											</div>
+							  											<div class="col-sm-6">
+							  												<div class="form-group mt-2">
+															   					<div class="input-group">
+															   						<label class="pe-2" for="id"><strong>Main Email</strong></label>
+															   						<div class="input-group-append">
+													            						<span class="text-danger">*</span>
+													            					</div>
+															   					</div>
+															   					<p><small>The company general contact email address that will appear on sales orders, invoices and purchase orders.</small></p>
+															   					<div class="input-group input-group-sm">	
+																					<span class="input-group-text"><i class="fas fa-envelope"></i></span>	   					
+															   						<input required class="form-control form-control-sm" type="text" name="cEmail" id="cEmail" ng-model="globalConfig.address.contactEmail"/>	   						 
+																   				</div>
+															   				</div>
+							  											</div>
+							  										</div>
+							  										<div class="row mt-3">
+							  											<div class="col-sm-12">
+							  												<button type="button" class="btn btn-outline-success btn-sm float-end me-2" ng-disabled="cForm.$invalid" ng-click="saveCompanyInfo()">Save Changes</button>
+							  											</div>
+							  										</div>
+							  									</form>
+						  									</div>
+					  									</div>
+				  									</div>
+			  									</div>
+				  								<div class="row">	  									
+				  									<div class="col-sm-12 mt-2">
+					  									<div class="card h-100">
+															<div class="card-body">
+						  										<div class="row">
+						  											<div class="col-sm-6">
+																		<div class="form-group mt-2">
+														   					<div class="input-group">
+														   						<label class="pe-2" for="price"><strong>Measurement System</strong></label>
+														   						<div class="input-group-append">
+												            						<span class="text-danger"></span>
+												            					</div>
+														   					</div>
+														   					<small>If your products have only a single SKU or variation, select this option. It will 
+														   					generate a default single SKU during product creation. If this is set to false, you will need
+														   					to create at least 1 SKU when creating a product.</small>
+														   					<div class="input-group"> 
+														   						<div class="form-check form-check-inline">
+																					<input class="form-check-input" type="radio" id="measurement" value="METRIC" ng-model="globalConfig.measurementSystem"
+																					ng-change="setParameter('measurementSystem', 'METRIC')">
+																					<label class="form-check-label" for="inlineCheckbox1">Metric</label>
+																				</div>
+																				<div class="form-check form-check-inline">
+																					<input class="form-check-input" type="radio" id="measurement" value="STANDARD" ng-model="globalConfig.measurementSystem"
+																					ng-change="setParameter('measurementSystem', 'STANDARD')">
+																					<label class="form-check-label" for="inlineCheckbox2">Standard</label>
+																				</div>
+														   					</div>
+														   				</div>
+						  											</div>
+						  										</div>
+						  									</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  									<div class="row">	  									
+				  									<div class="col-sm-6 mt-2">
+					  									<div class="card h-100">
+															<div class="card-body">
+						  										<div class="row">
+						  											<div class="col-sm-12">
+																		<div class="form-group mt-2">
+														   					<div class="input-group">
+														   						<label class="pe-2" for="currency"><strong>Currency</strong></label>
+														   						<div class="input-group-append">
+												            						<span class="text-danger">*</span>
+												            					</div>
+														   					</div>
+														   					<small>Select the default system currency.</small>
+														   					<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Currency</button>
+																				<ul class="dropdown-menu">
+																					<li class="m-2">  
+																						<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+																	   					<input class="form-control form-control-sm" type="text" name="cFilter" id="cFilter" ng-model="cFilter"/>	
+																					</li>
+																					<li ng-repeat="item in paymentConfigData.currencies | filter: cFilter | orderBy: '+code'">
+																						<a class="dropdown-item" href="" ng-click="setParameter('defaultCurrency', item.code)">
+																							{{item.code}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="currency" id="currency" 
+																				ng-model="globalConfig.defaultCurrency" /> 
+																			</div>
+														   				</div>	
+						  											</div>
+						  										</div>
+						  									</div>
+					  									</div>
+				  									</div>
+				  									<div class="col-sm-6 mt-2">
+					  									<div class="card h-100">
+															<div class="card-body">
+						  										<div class="row">
+						  											<div class="col-sm-12">
+																		<div class="form-group mt-2">
+														   					<div class="input-group">
+														   						<label class="pe-2" for="currency"><strong>System Printer</strong></label>
+														   						<div class="input-group-append">
+												            						<span class="text-danger">*</span>
+												            					</div>
+														   					</div>
+														   					<small>Select the printer you will use for printing pick slips, pack slips, orders, etc.</small>
+														   					<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Printer</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="item in printers">
+																						<a class="dropdown-item" href="" ng-click="setParameter('systemPrinter', item.name)">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																				<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="printer" id="printer" 
+																				ng-model="globalConfig.systemPrinter" /> 
+																			</div>
+														   				</div>
+						  											</div>
+						  										</div>
+						  									</div>
+					  									</div>
+				  									</div>
+			  									</div>
+			  								</div>
+					   					</div>		   					
+					   				</div>
+					   			</div>
+					   			<div class="tab-pane" role="tabpanel" id="taxes">
+					   				<div class="col-sm-12">		   					
+					   					<div class="card mt-2">
+			  								<div class="card-header">
+			  									<h6><strong>Sales Tax</strong></h6>
+			  									<p class="small">Add, edit and delete system wide sales taxes.</p>
+			  								</div>
+			  								<div class="card-body">
+			  									<div class="row">	  									
+				  									<div class="col-sm-12 mt-2">
+					  									<div class="card h-100">
+					  										<div class="card-header">
+					  											<div class="row">
+					  												<div class="col-sm-12">
+					  													<span class=""><strong>Sales tax</strong></span>
+					  													<button class="btn btn-outline-dark float-end btn-sm" ng-click="tax = {};" data-bs-toggle="modal" data-bs-target="#taxModal">New Tax</button>
+					  												</div>
+					  											</div>
+					  											<div class="row">
+					  												<div class="col-sm-12">
+					  													<p class="small">If using the Intuit integration, match the BusinessHub tax that you have defined
+									  									with a matching tax from the Intuit system. The exempt sales tax is a system default and cannot be edited or deleted. If using
+									  									Intuit, then match the Exempt tax with the Intuit Exempt tax.</p>
+									  									<p class="small">The ISO Code value is structured using the 2 character ISO codes for country and province/state. ie: Ontario, Canada
+									  									would be "CA-ON". The "Tax Name" value is the name that is displayed on all invoices and communications in the summary sections. ie:
+									  									 "GST", "PST", "VAT", etc. Order of Operations controls how taxes are applied in cases where they are stacked. By default this is left blank.
+									  									 </p>
+					  												</div>
+					  											</div>
+					  										</div>
+															<div class="card-body">
+																<table class="table table-sm table-striped small table-responsive">
+																	<thead>
+																		<tr>
+																			<th width="10%">ISO Code</th>
+																			<th width="15%">Name</th>
+																			<th width="15%">Tax Name</th>
+																			<th width="10%">Tax Type</th>
+																			<th width="10%">Amount</th>
+																			<th width="15%">Applies To</th>
+																			<th width="10%">Order of Operations</th>
+																			<th width="15%">Intuit Tax</th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<tr ng-repeat="item in taxes" ng-click="getTaxById(item.id)" data-bs-toggle="modal" data-bs-target="#taxModal">
+																			<td>
+																				{{item.isoCode}}
+																			</td>
+																			<td>
+																				{{item.name}}
+																			</td>
+																			<td>
+																				{{item.taxName}}
+																			</td>
+																			<td>
+																				{{item.taxType}} 
+																			</td>
+																			<td>
+																				{{item.amount | number}}
+																			</td>
+																			<td>
+																				{{item.appliesTo}}
+																			</td>
+																			<td>
+																				{{item.orderOfOps}}
+																			</td>
+																			<td>
+																				{{item.qbTax.name}}
+																			</td>
+																		</tr>
+																	</tbody>
+																</table>
+															</div>
+														</div>
+													</div>
+												</div>
+			  								</div>
+			  							</div>
+			  						</div>
+					   			</div>
+					   		</div>
+			   			</div>
+			   		</div>
+			   	</div>
+			   	<!-- Toast messaging: set messaging, set whether danger or success -->
+				<div ng-include="'/include/components/toast-message.html'"></div>
+			</div>
+			
+		</div>
+		
+		<div class="modal fade" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="taxModal" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body">
+	                	<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+	                	<form name="taxForm" id="taxForm" ng-submit="saveTax()">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>ISO Code</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<small>2 character ISO country code + "-" + 2 character ISO province/state code</small>
+					   					<input required class="form-control form-control-sm" type="text" ng-min="5" name="isocode" id="isocode" ng-model="tax.isoCode"
+					   					ng-class="{'is-invalid': taxForm.isocode.$touched && taxForm.isocode.$invalid, 
+					   					'is-valid' : taxForm.isocode.$touched && taxForm.isocode.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Name</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<small>A descriptive name for your reference.</small>
+					   					<input required class="form-control form-control-sm" type="text" ng-min="5" name="name" id="name" ng-model="tax.name"
+					   					ng-class="{'is-invalid': taxForm.name.$touched && taxForm.name.$invalid, 
+					   					'is-valid' : taxForm.name.$touched && taxForm.name.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Tax Name</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<small>The tax name as it should appear on invoices, POs and sales orders.</small>
+					   					<input required class="form-control form-control-sm" type="text" ng-min="5" name="taxName" id="taxName" ng-model="tax.taxName"
+					   					ng-class="{'is-invalid': taxForm.taxName.$touched && taxForm.taxName.$invalid, 
+					   					'is-valid' : taxForm.taxName.$touched && taxForm.taxName.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="price"><strong>Tax Type</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<small>The type of tax whether a percent based or flat value.</small>
+						   				<div class="input-group input-group-sm">   
+											<span>
+												<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Tax Type</button>
+												<ul class="dropdown-menu">
+													<li>
+														<a class="dropdown-item" href="" ng-click="setTaxValue('taxType', 'PERCENT')">
+															PERCENT
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setTaxValue('taxType', 'FLAT')">
+															FLAT
+														</a>
+													</li>
+												</ul>
+											</span>
+											<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="taxType" id="taxType" 
+											ng-model="tax.taxType" ng-class="{'is-invalid': taxForm.taxType.$touched && taxForm.taxType.$invalid, 
+					   						'is-valid' : taxForm.taxType.$touched && taxForm.taxType.$valid}"/> 
+										</div>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Amount</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<small>The amount of the tax. For a 5% tax the value would be .05.</small>
+					   					<input required class="form-control form-control-sm" type="text" ng-min="5" name="amount" id="amount" ng-model="tax.amount"
+					   					ng-class="{'is-invalid': taxForm.amount.$touched && taxForm.amount.$invalid, 
+					   					'is-valid' : taxForm.amount.$touched && taxForm.amount.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="price"><strong>Applies To</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<small>The applicability of the tax whether subtotal or total.</small>
+						   				<div class="input-group input-group-sm">   
+											<span>
+												<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Applies To</button>
+												<ul class="dropdown-menu">
+													<li>
+														<a class="dropdown-item" href="" ng-click="setTaxValue('appliesTo', 'SUBTOTAL')">
+															SUBTOTAL
+														</a>
+													</li>
+													<li>
+														<a class="dropdown-item" href="" ng-click="setTaxValue('appliesTo', 'TOTAL')">
+															TOTAL
+														</a>
+													</li>
+												</ul>
+											</span>
+											<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="appliesTo" id="appliesTo" 
+											ng-model="tax.appliesTo" ng-class="{'is-invalid': taxForm.appliesTo.$touched && taxForm.appliesTo.$invalid, 
+					   						'is-valid' : taxForm.appliesTo.$touched && taxForm.appliesTo.$valid}"/> 
+										</div>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="name"><strong>Order of Operations</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<small>The order that this tax should applied if stacked taxes.</small>
+					   					<input class="form-control form-control-sm" type="text" ng-min="5" name="orderOfOps" id="orderOfOps" ng-model="tax.orderOfOps"
+					   					ng-class="{'is-invalid': taxForm.orderOfOps.$touched && taxForm.orderOfOps.$invalid, 
+					   					'is-valid' : taxForm.orderOfOps.$touched && taxForm.orderOfOps.$valid}"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="price"><strong>Intuit Tax</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<small>The matching Intuit tax code.</small>
+						   				<div class="input-group input-group-sm">   
+											<span>
+												<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">QuickBooks Tax</button>
+												<ul class="dropdown-menu">
+													<li ng-repeat="tax in qbTaxes | orderBy:'name'">
+														<a class="dropdown-item" href="" ng-click="setTaxValue('qbo', tax)">
+															{{tax.name}}
+														</a>
+													</li>
+												</ul>
+											</span>
+											<input ng-disabled="true" type="text" class="form-control form-control-sm" name="qbTax" id="qbTax" 
+											ng-model="tax.qbTax.name" ng-class="{'is-invalid': taxForm.qbTax.$touched && taxForm.qbTax.$invalid, 
+					   						'is-valid' : taxForm.qbTax.$touched && taxForm.qbTax.$valid}"/> 
+										</div>
+					   				</div>
+					   				<div class="row mt-3">
+										<div class="col-sm-12 text-end">
+											<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+											<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="taxForm.$invalid">Save</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	
+	    
+	</section>
+</div>

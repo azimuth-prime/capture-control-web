@@ -1,0 +1,126 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="purchaseController" ng-init="findPosByKeyword();">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Purchase Orders</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<!-- keyword search box -->
+					<div class="card">
+						<div class="card-header">
+							<small class="float-inline mr-auto">Type in a purchase order id, supplier name or a warehouse name. As you type the list below will update accordingly. Click on an item in the list to direct to 
+							a purchase order details page. If there is only one result you will be automatically directed to the details page for that purchase order.</small>
+						</div>
+			   			<div class="card-body">
+			   				<div class="row">
+			   					<div class="col-sm-12">
+			   						<form name="searchForm" id="searchForm">
+					   					<div class="input-group col-sm-12">		   					
+					   						<input class="form-control form-control-sm" ng-focus="focusSearch" required ng-change="findPosByKeyword()"
+					   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');" />
+				   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+				   								<i class="fa fa-search"></i>
+				   							</button>			   						 
+					   					</div> 
+					   				</form>
+			   					</div>
+			   				</div>
+			   			</div>			   			
+			   		</div>
+			   		
+			   		<div class="row mt-2" ng-show="searchResults != undefined">
+						<div class="col-sm-12">
+							<div class="float-right">
+								<ul class="pagination">
+									<li class="page-item">
+										<button type="button" class="btn btn-link page-link" ng-click="findPosByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+									</li>
+									<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+										<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link" ng-click="findPosByKeyword($index)">{{$index + 1}}</button>
+									</li>
+									<li>
+										<button type="button" class="btn btn-link page-link" ng-click="findPosByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+									</li>
+								</ul>
+							</div>
+						</div>		
+					</div>
+			   		
+					<div class="card mt-2">
+						<div class="card-header">
+							<h5>
+								<span class="font-weight-bold text-uppercase">Purchase Orders</span> 
+								<span class="ms-2 badge bg-dark">{{ searchResults.totalResults }}</span>
+								<a href="#/new-purchase-order"><button class="btn btn-outline-dark float-end btn-sm">New Purchase Order</button></a>
+							</h5>
+							<small>Select a Purchase Order from the list below to view and manage.</small>
+						</div>
+			   			<div class="card-body">
+			   				<table class="table table-striped table-hover table-sm small">
+			   					<thead>
+			   						<tr>
+			   							<th>Purchase Order # <i class="fas fa-sort m-1" ng-click="sortResults('id')"></i></th>
+			   							<th>Supplier <i class="fas fa-sort m-1" ng-click="sortResults('supplierName')"></i></th>
+			   							<th>Warehouse <i class="fas fa-sort m-1" ng-click="sortResults('warehouseName')"></i></th>
+			   							<th>Creation Date <i class="fas fa-sort m-1" ng-click="sortResults('creationDate')"></i></th>
+			   							<th>Issue Date <i class="fas fa-sort m-1" ng-click="sortResults('issueDate')"></i></th>
+			   							<th>Received Date <i class="fas fa-sort m-1" ng-click="sortResults('receivedDate')"></i></th>
+			   							<th>State <i class="fas fa-sort m-1" ng-click="sortResults('state')"></i></th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-show="searchResults.results.length < 1 || searchResults.results == undefined">
+			   							<td colspan="7"><strong>No Results</strong></td>
+			   						</tr>
+			   						<tr ng-repeat="item in searchResults.results" ng-click="viewPurchaseOrder(item.id)">
+			   							<td>{{item.id}}</td>
+			   							<td>{{item.supplierName}}</td>
+			   							<td>{{item.warehouseName}}</td>
+			   							<td>{{item.creationDate | date:'mediumDate'}}</td>
+			   							<td>{{item.issueDate | date:'mediumDate'}}</td>
+			   							<td>{{item.receivedDate | date:'mediumDate'}}</td>
+			   							<td>{{item.state}}</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   			</div>
+			   		</div>
+			   		<div class="row mt-2" ng-show="searchResults != undefined">
+						<div class="col-sm-12">
+							<div class="float-right">
+								<ul class="pagination">
+									<li class="page-item">
+										<button type="button" class="btn btn-link page-link" ng-click="findPosByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+									</li>
+									<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+										<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link" ng-click="findPosByKeyword($index)">{{$index + 1}}</button>
+									</li>
+									<li>
+										<button type="button" class="btn btn-link page-link" ng-click="findPosByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+									</li>
+								</ul>
+							</div>
+						</div>		
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Print Invoice</title>
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta name="description" content="">
+    	
+    	<link href="https://fonts.googleapis.com/css?family=Bungee|Open+Sans+Condensed:300" rel="stylesheet">
+    	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+  
+		<base href="http://control.capture.io">
+        <link href="/assets/css/bootstrap5.css" rel="stylesheet">
+        <link rel="stylesheet" href="/assets/css/global.css" />
+        <link rel="stylesheet" href="/assets/css/print.css" />
+		<style>
+		
+			@page { size: letter }
+		
+		</style>		
+	</head>
+	<body style="font-family: 'Open Sans Condensed', sans-serif;">
+		<section class="sheet padding-10mm">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<div class="col-sm-4 p-2">
+								<img src="/assets/images/logos/text-logo-3-dark.png" class="img-fluid"/>
+							</div>
+							<div class="col-sm-5">
+								<div class="vr"></div>
+								<div class="card-text ms-5">
+									<strong class="text-uppercase">
+										Aeroedge Technologies <br />
+										86 Dupont Street <br />
+										Toronto, ON, CA, M5R 1V2<br />
+									</strong>
+									<small><strong>BILLING ENQUIRIES: 416.727.8406, EMAIL: darren@desato.com</strong></small>
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="vr"></div>
+								<h1 class="float-end me-3"><strong>123456789</strong></h1>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-sm-12">
+					<div class="card card-body p-0 ps-2">
+						<div class="row fw-bold text-uppercase">
+							<div class="col-sm-12 text-center">
+								<table class="table table-sm table-borderless">
+									<tbody>
+										<tr class="fw-bold text-uppercase">
+											<td>Invoice #: 123456789</td>
+											<td>
+												Payment Terms: NET30
+											</td>
+											<td>
+												<span ng-show="invoice.invoiceDate != undefined">Issue Date: Jan 23, 2023</span>
+											</td>
+											<td>
+												<span ng-show="invoice.dueDate != undefined">Due Date: Feb 23, 2023</span>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-sm-12">
+					<div class="card card-body p-0 ps-2">
+						<div class="row">
+							<div class="col-sm-1"> 
+								<div class="vertical-text fw-bold text-uppercase"><h4><strong>Bill To</strong></h4></div>
+							</div>
+							<div class="col-sm-5 fw-bold text-uppercase">
+								<p>
+									Desato Inc. <br />
+									91 Montclair Ave <br />
+									Toronto, ON <br />
+									CA, M5R 1V2<br />
+									ATTN: Darren Pirang
+									
+								</p>
+							</div>
+							<div class="col-sm-1">
+								<div class="vertical-text fw-bold text-uppercase"><h4><strong>Ship To</strong></h4></div>
+							</div>
+							<div class="col-sm-5 fw-bold text-uppercase">
+								<p>
+									Desato Inc. <br />
+									91 Montclair Ave <br />
+									Toronto, ON <br />
+									CA, M5R 1V2<br />
+									ATTN: Darren Pirang
+									
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-sm-12">
+					<div class="card card-body p-0 ps-2">
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-sm table-borderless">
+									<tbody>
+										<tr class="fw-bold text-uppercase">
+											<td>Sales Contact: Some Guy</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-sm-12">
+					<div class="card card-body p-0 ps-2">
+						<div class="row me-2">
+							<div class="col-sm-12">
+								<table class="table small">
+								<thead>
+									<tr class="fw-bold text-uppercase">
+										<th></th>
+										<th>ID</th>
+										<th>Product</th>
+										<th>Unit Cost</th>
+										<th class="text-center">Quantity</th>
+										<th class="text-end">Subtotal</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>1</td>
+										<td>PRD0000001</td>
+										<td>Product 1</td>
+										<td>$ 9.95</td>
+										<td class="text-center">2</td>
+										<td class="text-end">$ 19.90</td>
+									</tr>
+									<tr>
+										<td>2</td>
+										<td>PRD0000002</td>
+										<td>Product 2</td>
+										<td>$ 9.95</td>
+										<td class="text-center">2</td>
+										<td class="text-end">$ 19.90</td>
+									</tr>
+									<tr>
+										<td>3</td>
+										<td>PRD0000003</td>
+										<td>Product 3</td>
+										<td>$ 9.95</td>
+										<td class="text-center">2</td>
+										<td class="text-end">$ 19.90</td>
+									</tr>
+								</tbody>
+							</table>
+							</div>							
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-1">
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<div class="col-sm-6 align-middle">
+								<p class="fw-bold small">
+								Remittance Info
+								</p>
+							</div>
+							<div class="col-sm-6">
+								<table class="table table-sm">
+									<tbody class="fw-bold text-uppercase text-end">
+										<tr>
+											<td>Subtotal</td>
+											<td>$ 59.70</td>
+										</tr>
+										<tr class="mt-2" >
+											<td>Taxes</td>
+											<td class="text-end">
+												<strong class="me-3"><small>GST ( 5.0 % ):</small></strong>
+												<strong class="me-2">$ 1.17</strong>
+											</td>
+										</tr>
+										<tr>
+											<td>
+											Shipping: 
+											<i class="fab fa-fedex fa-3x align-middle me-2 ms-2"></i>
+					   						
+											
+											</td>
+											<td class="align-text-middle">$ 19.95</td>
+										</tr>
+										<tr style="border-top:1px;">
+											<td>Total</td>
+											<td>$ 80.82</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+        </section>
+  	</body>
+	
+</html>

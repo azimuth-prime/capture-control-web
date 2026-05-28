@@ -1,0 +1,248 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="warehouseController" ng-init="findAllWarehouses(); findTransferById();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li> 
+					<li class="breadcrumb-item"><a href="#/wms-dashboard">WMS</a></li>
+					<li class="breadcrumb-item"><a href="#/transfer">Stock Transfers</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Stock Transfer</li>
+				</ol>  
+			</nav>
+			<div class="row">
+				<div class="card col-xs-12 col-sm-12 col-md-12">
+					<div class="card-body">
+						<!-- keyword search box -->
+						<div class="card">
+							<div class="card-header">
+								<small class="float-inline mr-auto">Select the From Warehouse and the To Warehouse below. Add items to 
+								transfer and submit when complete. If items are moving between physical warehouses then you will be
+								directed to a transfer shipping page.</small>
+							</div>
+				   			<div class="card-body">
+				   				<div class="row">
+				   					<div class="col-sm-12">
+				   						<span>
+											<h4><strong class="ps-1 text-success">
+												{{transfer.state}}
+											</strong></h4>
+										</span>	
+				   					</div>
+				   				</div>
+				   				<div class="row">
+				   					<div class="col-sm-12">
+				   						<table class="table table-sm table-borderless">
+				   							<tbody>
+				   								<tr>
+				   									<td class="text-start align-bottom" width="50%">
+														<div class="form-group mt-2">
+										 					<div class="input-group">
+										 						<label class="pe-2" for="size"><strong>FROM Warehouse</strong></label>
+										 						<div class="input-group-append">
+										        						<span class="text-danger">*</span>
+										        					</div>
+										 					</div>
+										 				</div>
+									 					<p><small>Select the FROM warehouse for the transfer.</small></p>
+									 					<div class="input-group mb-3">
+															<button ng-disabled="transfer.state != undefined" class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Warehouse</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="item in warehouses">
+																	<a class="dropdown-item" href="" ng-click="setTransferWarehouse(item, 'from');">
+																		{{item.name}}
+																	</a>
+																</li>
+															</ul>
+															<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="fromWarehouse" id="fromWarehouse" 
+															ng-model="transfer.fromWarehouse.name" /> 
+														</div>
+													</td>
+													<td class="text-start align-bottom" width="50%">
+														<div class="form-group mt-2">
+										 					<div class="input-group">
+										 						<label class="pe-2" for="size"><strong>TO Warehouse</strong></label>
+										 						<div class="input-group-append">
+										        						<span class="text-danger">*</span>
+										        					</div>
+										 					</div>
+										 				</div>
+									 					<p><small>Select the TO warehouse for the transfer.</small></p>
+									 					<div class="input-group mb-3">
+															<button ng-disabled="transfer.state != undefined" class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Warehouse</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="item in warehouses" ng-if="item.id != transfer.fromWarehouse.id">
+																	<a class="dropdown-item" href="" ng-click="setTransferWarehouse(item, 'to');">
+																		{{item.name}}
+																	</a>
+																</li>
+															</ul>
+															<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="toWarehouse" id="toWarehouse" 
+															ng-model="transfer.toWarehouse.name" />  
+														</div>
+													</td>
+				   								</tr>
+				   							</tbody>
+				   						</table>
+				   					</div>
+				   				</div>
+				   				<div class="row">
+				   					<div class="col-sm-12 text-end">
+				   						<!-- <span ng-show="transfer.state == 'NEW'">  -->
+											<!-- When the PO is in Created state -->
+											<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveTransfer()" 
+											ng-show="(transfer.toWarehouse != undefined && transfer.fromWarehouse != undefined) && transfer.state == undefined">Save Changes</button>
+											<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-show="displayTransferBtn()" ng-click="transferStock(transfer.id)">Confirm Transfer</button>
+											<button type="button" class="btn btn-outline-danger m-1 btn-sm float-end" 
+											ng-show="transfer.id != undefined && (transfer.items != undefined && transfer.items.length > 0) && transfer.state != 'RECEIVED'">Cancel</button>
+										<!-- </span> -->
+				   					</div>
+				   				</div>
+				   			</div>
+				   		</div>
+				   		
+				   		
+				   		
+						<div class="card mt-2" ng-show="transfer.id != undefined">
+							<div class="card-header">
+								<div class="row">
+									<div class="col-sm-12">
+										<span class=""><strong>Transfer Items</strong> <span class="ms-2 badge bg-dark">{{ transfer.items.length }}</span></span>
+										<button ng-show="displayTransferBtn()" class="btn btn-outline-success float-end btn-sm" ng-click="saveTransfer()">Save Transfer Items</button>
+										<p class="small">The below list contains the items that will be transferred as part of the transfer request. Click the delete icon to remove an item from the transfer
+										request.</p>
+									</div>
+								</div>
+							</div>
+				   			<div class="card-body">
+				   				<div class="row">
+				   					
+				   					<div class="col-sm-12">
+				   						<table class="table table-striped table-hover table-sm small">
+						   					<thead>
+						   						<tr>
+						   							<th width="">Line #</th>
+						   							<th width="">SKU ID</th>
+						   							<th width="">Name</th>
+						   							<th width="">Lot/Serial</th>
+						   							<th width="">To Location</th>
+						   							<th class="text-center" width="10%">OnHand</th>
+						   							<th class="text-center" width="10%">Quantity</th>
+						   							<th class="text-center" width="10%" ng-if="transfer.state == 'NEW'">Remove</th>
+						   						</tr>
+						   					</thead>
+						   					<tbody>
+						   						<tr ng-repeat="item in transfer.items track by $index">
+						   							<td>{{$index + 1}}</td>
+						   							<td>{{item.skuId}}</td>
+						   							<td>{{item.name}}</td>
+						   							<td>{{item.lotSerial}}</td>
+						   							<td>
+						   								<input ng-disabled="transfer.state != 'NEW'" class="form-control form-control-sm" type="text" id="toLocation" name="toLocation" ng-model="item.toLocation"/>
+						   							</td>
+						   							<td class="text-center">
+						   								<input ng-disabled="true" class="form-control form-control-sm" type="number" name="onHand" id="onHand" ng-model="item.onHand" />
+						   							</td>
+						   							<td class="text-center">
+						   								<input ng-disabled="transfer.state != 'NEW'" class="form-control form-control-sm" max="{{item.onHand}}" type="number" step="1" name="qty" id="qty" ng-model="item.quantity" />
+						   							</td>
+						   							<td class="text-center" ng-if="transfer.state == 'NEW'">
+						   								<span ng-click="removeItemFromTransfer(item)"><i class="fa fa-trash" aria-hidden="true"></i></span>
+						   							</td>
+						   						</tr>
+						   						<tr ng-repeat-end ng-show="transfer.state == 'NEW'">
+													<td class="align-middle" colspan="8">
+														<div class="input-group input-group-sm" style="width:200px;">		   					
+									   						<input  class="form-control form-control-sm" ng-disabled="true" required type="text" placeholder="Add Item" id="invId" name="invId">
+								   							<button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#findItemModal">
+								   								<i class="fa fa-search"></i>
+								   							</button>		   						 
+									   					</div> 
+													</td>
+												</tr>
+						   					</tbody>
+						   				</table>
+				   					</div>
+				   				</div>
+				   				
+				   			</div>
+				   		</div>
+					</div>
+				</div>
+			</div>
+	
+			
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="findItemModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<form name="searchForm" id="searchForm">
+				   					<div class="input-group input-group-sm">		   					
+				   						<input class="form-control form-control-sm" minlength="3" ng-focus="focusSearch" required ng-change="findAvailableInventoryByKeyword()"
+				   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');">
+			   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+			   								<i class="fa fa-search"></i>
+			   							</button>			   						 
+				   					</div>        		
+				            	</form>
+				            	<p class="mt-2 small">Type in a product name, product id or SKu id and the list below will update as matches are found. Click on a product in the list to
+				            	add to the purchase order.</p>
+	    					</div>
+	    				</div>
+	    				<div class="row mt-2">
+	    					<div class="col-sm-12">
+	    						<strong><small>Results:</small></strong><small><span class="ms-2 badge bg-dark">{{searchResults.totalResults}}</span></small>
+	    					</div>
+	    				</div>
+		    			<div class="row">
+		    				<div class="col-sm-12">
+		    					<table class="table table-hover table-striped table-responsive small">
+		    						<thead>
+		    							<tr>
+		    								<th class="text-start"><small>SKU ID</small></th>
+		    								<th class="text-start"><small>Name</small></th>
+		    								<th class="text-center"><small>Qty OnHand</small></th>
+		    								<th class="text-center"><small>Lot/Serial</small></th>
+		    							</tr>
+		    						</thead>
+		    						<tbody>
+		    							<!-- If the product is in the current order item list then disable the ng-click functionality and grey out line item -->
+		    							<tr ng-repeat="item in searchResults.results | orderBy: [skuId]" ng-class="{'text-decoration-line-through': containsInventoryItem(item.id)}"
+		    							ng-click="!containsInventoryItem(item.id) && setTransferItem(item)">
+		    								<td class="text-start">{{item.skuId}}</td>
+		    								<td class="text-start">{{item.productName}}</td>
+		    								<td class="text-center">{{item.onhand | number}}</td>
+		    								<td class="text-center">{{item.lotSerial}}</td>
+		    							</tr>
+		    						</tbody>
+		    					</table>    				
+		    				</div>
+		    			</div>
+		    			<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Close</button>
+							</div>
+						</div>	
+	    			</div>		
+	    		</div>
+	    	</div>
+	    </div>	
+	</section>
+</div>					

@@ -1,0 +1,160 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="reportController" ng-init="generatePurchaseReports();">
+	<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="purchaseController">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Purchase Order Dashboard</li>
+			</ol>   
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<div class="row mt-2">
+						<div class="col-sm-6 mt-2">
+							<div class="card card-body h-100">
+								<strong class="">Waiting For Approval</strong>	
+								<table class="table table-sm table-striped table-hover small">
+									<thead>
+										<tr>
+											<th>Id</th>
+											<th>Supplier</th>
+											<th>Warehouse</th>
+											<th>Creation Date</th>
+											<th>Created By</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-show="posForApproval.length == 0">
+											<td colspan="5" class="text-center text-danger fw-bold">No Purchase Orders To Approve</td>
+										</tr>
+										<tr ng-repeat="item in posForApproval" ng-click="viewPurchaseOrder(item.id)">
+											<td>{{item.id}}</td>
+											<td>{{item.supplier.name}}</td>
+											<td>{{item.warehouse.name}}</td>
+											<td>{{item.creationDate | date:'mediumDate'}}</td>
+											<td>{{item.createdBy.name}}</td>
+										</tr>
+									</tbody>
+								</table>
+								<div class="">
+									<div class="text-success charth2">
+										<strong>{{posForApproval.length}}</strong>
+									</div>
+									Total Purchase Orders Waiting Approval
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6 mt-2">
+							<div class="card card-body h-100">
+								<strong class="">Waiting for Receipt</strong>
+								<table class="table table-sm table-striped table-hover small">
+									<thead>
+										<tr>
+											<th>Id</th>
+											<th>Supplier</th>
+											<th>Warehouse</th>
+											<th>Issue Date</th>
+											<th>Created By</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-show="posForReceipt.length == 0">
+											<td colspan="5" class="text-center text-danger fw-bold">No Purchase Orders To Receive</td>
+										</tr>
+										<tr ng-repeat="item in posForReceipt.results" ng-click="viewPurchaseOrder(item.id)">
+											<td>{{item.id}}</td>
+											<td>{{item.supplierName}}</td>
+											<td>{{item.warehouseName}}</td>
+											<td>{{item.issueDate | date:'mediumDate'}}</td>
+											<td>{{item.createdBy.name}}</td>
+										</tr>
+									</tbody>
+								</table> 
+								<div class="">
+									<div class="text-success charth2">
+										<strong>{{posForReceipt.totalResults}}</strong>
+									</div>
+									Total Purchase Orders Waiting Receipt. <span ng-if="posForReceipt.totalResults > 0"><a href="#/purchase/state/ISSUED">Click here to see full list.</a></span>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-8 mt-2">
+							<div class="card card-body h-100">
+								<strong class="">Backordered Stock</strong>	
+								<table class="table table-sm table-striped table-hover small">
+									<thead>
+										<tr>
+											<th>SKU ID</th>
+											<th>Name</th>
+											<th>Supplier</th>
+											<th class="text-center">Quantity Back Ordered</th>
+											<th class="text-center">Quantity on PO</th>
+											<th class="text-center">Back Ordered Since</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-show="backorderedItems.length == 0">
+											<td colspan="6" class="text-center text-danger fw-bold">No Back Ordered Stock</td>
+										</tr>
+										<tr ng-repeat="item in backorderedItems | orderBy: '+backorderedSince'" ng-click="viewBackorderedSKU(item.skuId)">
+											<td>{{item.skuId}}</td>
+											<td>{{item.name}}</td>
+											<td>{{item.supplier.name}}</td>
+											<td class="text-center">{{item.quantity | number}}</td>
+											<td class="text-center">{{item.quantityOnPO | number}}</td>
+											<td class="text-center">{{item.backorderedSince | date:'mediumDate'}}</td>
+										</tr>
+									</tbody>
+								</table>
+								<div class="">
+									<div class="text-success charth2">
+										<strong>{{backorderedItems.total}}</strong>
+									</div>
+									Total back ordered stock count
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-4 mt-2">
+							<div class="card card-body h-100">
+								<span><strong class="">Average Purchase Lifecycle</strong>
+									<div class="float-end me-2">
+										<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+										<ul class="dropdown-menu">
+											<li>
+												<a class="dropdown-item" href="" ng-click="findAvgPurchaseLifecycleLast30()">
+													Last 30 Days
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item" href="" ng-click="findAvgPurchaseLifecycleLastYear()">
+													Last 12 Months
+												</a>
+											</li>
+										</ul>
+									</div>
+								</span>
+								<p>
+									<h2 class="text-success"><strong>{{avgLifecycle | number:2}} Days</strong></h2>
+									{{avgLifecycleMessage}}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

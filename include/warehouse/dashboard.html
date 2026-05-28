@@ -1,0 +1,209 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="reportController" ng-init="findWMSOrders()">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="warehouseController">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item active" aria-current="page">WMS Dashboard</li>
+				</ol>   
+			</nav>
+			<div class="row">
+				<div class="card col-xs-12 col-sm-12 col-md-12">
+					<div class="card-body">
+						<div class="row mt-2">
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span>
+										<strong class="">Waiting To Pick</strong><a href="#/picking" class="float-end me-2">View All</a>
+									</span>
+									<table class="table table-sm table-striped table-hover small">
+										<thead>
+											<tr>
+												<th>Id</th>
+												<th>Customer</th>
+												<th>Warehouse</th>
+												<th>Submitted Date</th>
+												<th>Ship By Date</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-show="wmsOrders.ordersToPick.length == 0">
+												<td colspan="5" class="text-center text-danger fw-bold">No Orders To Pick</td>
+											</tr>
+											<tr ng-repeat="item in wmsOrders.ordersToPick | orderBy:'-item.submittedDate'" ng-click="viewPickslip(item.id)">
+												<td>{{item.id}}</td>
+												<td>{{item.customerName}}</td>
+												<td>{{item.warehouseName}}</td>
+												<td>{{item.submittedDate | date:'mediumDate'}}</td>
+												<td>{{item.shipRequestDate | date:'mediumDate'}}</td>
+											</tr>
+										</tbody>
+									</table>
+									<div class="text-end" ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+										<div class="text-success charth2">
+											<strong><span ng-bind-html="wmsOrders.ordersToPickTotal | supercurrency"></span></strong>
+										</div>
+										Total Sales Orders Waiting For Picking
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span>
+										<strong class="">Waiting To Pack</strong><a href="#/packing" class="float-end me-2">View All</a>
+									</span>
+									<table class="table table-sm table-striped table-hover small">
+										<thead>
+											<tr>
+												<th>Id</th>
+												<th>Customer</th>
+												<th>Warehouse</th>
+												<th>Submitted Date</th>
+												<th>Ship By Date</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-show="wmsOrders.ordersToPack.length == 0">
+												<td colspan="5" class="text-center text-danger fw-bold">No Orders To Pack</td>
+											</tr>
+											<tr ng-repeat="item in wmsOrders.ordersToPack | orderBy:'-item.submittedDate'" ng-click="viewPackslip(item.id)">
+												<td>{{item.id}}</td>
+												<td>{{item.customerName}}</td>
+												<td>{{item.warehouseName}}</td>
+												<td>{{item.submittedDate | date:'mediumDate'}}</td>
+												<td>{{item.shipRequestDate | date:'mediumDate'}}</td>
+											</tr>
+										</tbody>
+									</table>
+									<div class="text-end" ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+										<div class="text-success charth2">
+											<strong><span ng-bind-html="wmsOrders.ordersToPackTotal | supercurrency"></span></strong>
+										</div>
+										Total Sales Orders Waiting For Packing
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2">
+								<div class="card card-body h-100">
+									<span>
+										<strong class="">Waiting To Ship</strong><a href="#/shipping" class="float-end me-2">View All</a>
+									</span>	
+									<table class="table table-sm table-striped table-hover small">
+										<thead>
+											<tr>
+												<th>Id</th>
+												<th>Customer</th>
+												<th>Warehouse</th>
+												<th>Submitted Date</th>
+												<th>Ship By Date</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-show="wmsOrders.ordersToShip.length == 0">
+												<td colspan="5" class="text-center text-danger fw-bold">No Orders To Ship</td>
+											</tr>
+											<tr ng-repeat="item in wmsOrders.ordersToShip | orderBy:'-item.submittedDate'" ng-click="shipOrder(item.id)">
+												<td>{{item.id}}</td>
+												<td>{{item.customerName}}</td>
+												<td>{{item.warehouseName}}</td>
+												<td>{{item.submittedDate | date:'mediumDate'}}</td>
+												<td>{{item.shipRequestDate | date:'mediumDate'}}</td>
+											</tr>
+										</tbody>
+									</table>
+									<div class="text-end" ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+										<div class="text-success charth2">
+											<strong><span ng-bind-html="wmsOrders.ordersToShipTotal | supercurrency"></span></strong>
+										</div>
+										Total Sales Orders Waiting For Shipping
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">Fulfillment Pipeline</strong></span>
+										<div class="text-success charth2">
+											<strong><span ng-bind-html="(wmsOrders.ordersToShipTotal + wmsOrders.ordersToPackTotal + wmsOrders.ordersToPickTotal) | supercurrency"></span></strong>
+										</div>
+										Total Sales Order Value
+									<div style="justify-content: center;">
+										<canvas class="text-center" id="orderStatusChart" height="150"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">TBD</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="">
+														Last 60 Days
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p>
+										<h2 class="text-success"><strong>$45,987.06</strong></h2>
+										Net Income Last 30 Days
+									</p>
+									<div>
+										<canvas id="poChart" height="100"></canvas>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-4 mt-2" ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+								<div class="card card-body h-100">
+									<span><strong class="">TBD</strong>
+										<div class="float-end me-2">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Period</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="">
+														Last 30 Days
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="">
+														Last 60 Days
+													</a>
+												</li>
+											</ul>
+										</div>
+									</span>
+									<p ng-if="hasRole(['WAREHOUSEMANAGER','ADMIN'])">
+										<h2 class="text-success"><strong>$45,987.06</strong></h2>
+										Net Income Last 30 Days
+									</p>
+									<div>
+										<canvas id="poChart" height="100"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	    </div>	
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

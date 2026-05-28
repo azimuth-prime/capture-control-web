@@ -1,0 +1,1374 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="serviceController" ng-init="findById(); findAllCarriers(); findApplicableTaxesByServiceOrderId();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/serviceorder">Service Orders</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Service Order Details: {{item.id}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<ul class="nav nav-tabs">
+								<li class="nav-item">
+									<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#main" href="">Main</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#address" href="">Address</a>
+								</li>
+							</ul>
+							<div class="tab-content" id="tab">
+								<div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+									<div class="row mt-2">
+										<div class="col-sm-6">
+											<h5 class="ms-2">
+												<span class="me-3"><strong>{{serviceorder.supplier.name}}: </strong></span>
+												<span><strong ng-class="{'text-success': serviceorder.state != 'CANCELLED', 'text-danger': serviceorder.state === 'CANCELLED'}">{{serviceorder.state}}</strong></span>
+											</h5>								
+										</div>
+										<div class="col-sm-6">
+											<h5 class="me-5">
+												<span class="float-end">
+													<strong class="me-3" ng-class="{'text-success': serviceorder.state != 'CANCELLED', 'text-danger': serviceorder.state === 'CANCELLED'}">
+														Total: <span ng-bind-html="serviceorder.priceInfo.total | supercurrency : serviceorder.priceInfo.currency.symbol"></span> {{serviceorder.priceInfo.currency.code}}</strong>
+												</span>
+											</h5>
+										</div>
+									</div>
+									<hr />
+									<form name="poForm" id="poForm" novalidate>
+										<div class="row">
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="id"><strong>Service Order Id</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Service Order's id value.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="serviceorder.id"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="id"><strong>State</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Service Order's current state.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="serviceorder.state"/>
+								   				</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="id"><strong>Supplier</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>The name of the supplier/vendor.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="serviceorder.supplier.name"/>
+								   				</div>
+								   			</div>
+							   				<div class="col-sm-6">
+					   							<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="size"><strong>Physical Warehouse</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   				</div>
+								   				<p><small>The physical warehouse selected for this service order's inventory. Only inventory located in this physical warehouse can be 
+								   				added to the service order.</small></p>
+								   				<div class="input-group mb-3">
+													<input ng-disabled="true" type="text" class="form-control form-control-sm" name="warehouse" id="warehouse" ng-model="serviceorder.warehouse.name" /> 
+												</div>
+					   						</div>
+							   				<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="creationDate"><strong>Creation Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date for when the Service Order was first created within the system.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="serviceorder.creationDate"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="issueDate"><strong>Quote Request Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date that the Service Order was sent for RFQ.</small></p>
+								   					<input ng-disabled="serviceorder.state != 'NEW'" class="form-control form-control-sm" type="date" name="quoteDate" id="quoteDate" ng-model="serviceorder.quoteDate"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="issueDate"><strong>Issue Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date that the Service Order was approved/issued.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="issueDate" id="issueDate" ng-model="serviceorder.issuedDate"/>
+								   				</div>
+								   			</div>					   			
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="receivedDate"><strong>Requested By Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>The date the service order items are requested by.</small></p>
+								   					<input ng-disabled="serviceorder.state != 'NEW'" class="form-control form-control-sm" type="date" name="requestedByDate" id="requestedByDate" ng-model="serviceorder.requestedByDate"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="receivedDate"><strong>Received Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date based on when the Service Order was received in full.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="receivedDate" id="receivedDate" ng-model="serviceorder.receivedDate"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="lastModifiedDate"><strong>Last Modified Date</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Auto generated date for when the Service Order was last updated within the system.</small></p>
+								   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="serviceorder.lastModifiedDate"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-sm-12">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="lastModifiedDate"><strong>Special Instructions / Notes</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<p><small>Any special instructions for the service order.</small></p>
+								   					<textarea class="form-control form-control-sm" rows="4" id="specialInstructions" name="specialInstructions" ng-model="serviceorder.instructions">
+								   					
+								   					</textarea>
+								   				</div>
+								   			</div>
+										</div>
+										<div class="row mt-3">
+											<div class="col-sm-12">
+												<span ng-show="serviceorder.state == 'NEW'">
+													<!-- When the PO is in Created state -->
+													<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveServiceOrder()">Save Changes</button>
+													<button type="button" class="btn btn-outline-primary m-1 btn-sm float-end" data-bs-toggle="modal" data-bs-target="#rfqModal">Send RFQ</button>
+													<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-show="hasRole(['SERVICEMANAGER', 'ADMIN'])"
+													ng-click="issueServiceOrder(serviceorder.id)">Issue Service Order</button>
+												</span>
+												<span ng-show="serviceorder.state == 'RFQ'">
+													<!-- When the PO is in RFQ state -->
+													<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveServiceOrder()">Save Changes</button>
+													<button type="button" class="btn btn-outline-primary m-1 btn-sm float-end" data-bs-toggle="modal" data-bs-target="#rfqModal">ReSend RFQ</button>
+													<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-show="hasRole(['SERVICEMANAGER', 'ADMIN'])"
+													ng-click="issueServiceOrder(serviceorder.id)">Issue Service Order</button>
+												</span>
+												<span ng-show="serviceorder.state == 'ISSUED' || serviceorder.state == 'PARTIAL_RECEIVED'">
+													<!--  When PO is in Issued state -->
+													<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" 
+													data-bs-toggle="modal" data-bs-target="#receiveModal" ng-click="getServiceOrderForReceiving(serviceorder.id)">Receive Service Order</button>
+												</span>  
+												<span ng-show="serviceorder.state != 'PARTIAL_RECEIVED' && serviceorder.state != 'RECEIVED' && serviceorder.state != 'CANCELLED' 
+												&& serviceorder.state != 'COMPLETE'">
+													<button type="button" class="btn btn-outline-danger m-1 btn-sm float-end" ng-click="changeState('CANCELLED')">Cancel Service Order</button>
+												</span> 
+												<span ng-show="serviceorder.items.length > 0">
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false">Print Service Order</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'SERVICEORDER'" >
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadServiceOrderPDF(serviceorder.id)">
+																Download PDF
+															</a>
+														</li>
+													</ul>
+												</span>
+												<span ng-show="serviceorder.state != 'NEW' && serviceorder.state != 'CANCELLED'">
+													<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+													 aria-expanded="false">Print Pack Slip</button>
+													<ul class="dropdown-menu">
+														<li>
+															<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'SERVICEORDERPACKSLIP'" >
+																Print To System Printer
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadServiceOrderPackSlipPDF(serviceorder.id)">
+																Download Pack Slip
+															</a>
+														</li>
+														<li>
+															<a class="dropdown-item" href="" ng-click="downloadServiceOrderIntlPackSlipPDF(serviceorder.id)">
+																Download Intl Pack Slip
+															</a>
+														</li>
+													</ul>
+												</span>
+											</div>
+										</div>
+									</form>
+									
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="card m-1">
+												<div class="card-header">
+													<span class=""><strong>Supplier Invoices</strong> <span class="ms-2 badge bg-dark">{{serviceorder.invoices.length}}</span></span>	
+													<span  ng-show="serviceorder.state == 'ISSUED' || serviceorder.state == 'PARTIAL_RECEIVED'">
+														<span>
+															<button ng-disabled="" class="btn btn-outline-success float-end btn-sm" ng-click="findItemsForServiceOrderInvoice()">Add Supplier Invoice</button>		
+														</span>								
+														<p><small>Add a supplier invoice for this Service Order. In order to be able to receive items a supplier invoice must first be added.</small></p>
+													</span>
+												</div>
+												<div class="card-body">
+													<table class="table table-sm small table-hover table-striped">
+														<thead>
+															<tr>
+																<th>Invoice #</th>
+																<th>Invoice Date</th>
+																<th>Due Date</th>
+																<th>Amount</th>
+																<th class="text-end"><span class="me-3">State</span></th>
+															</tr>
+														</thead>
+														<tbody>
+															<tr ng-repeat="item in serviceorder.invoices | orderBy:'invoiceDate'" ng-click="findSOInvoice(item.id)" data-bs-toggle="modal" data-bs-target="#viewInvoiceDialog">
+																<td>{{item.invoiceId}}</td>
+																<td>{{item.invoiceDate | date:'MMMM d, yyyy'}}</td>
+																<td>{{item.dueDate | date:'MMMM d, yyyy'}}</td>
+																<td><span ng-bind-html="item.priceInfo.total | supercurrency : serviceorder.priceInfo.currency.symbol"></span></td>
+																<td class="text-end"><span class="me-3">{{item.state}}</span></td>
+															</tr>
+														</tbody>
+													</table>
+													<table class="table table-sm small">
+														<tbody>
+															<tr>
+																<td class="text-end text-success fw-bold">
+																	<span class="me-5">Invoiced:</span>
+																	<span ng-bind-html="service.paidInvoiceTotal | supercurrency : serviceorder.priceInfo.currency.symbol" class="m-3"></span>
+																</td>
+															</tr>
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<form name="itemForm" id="itemForm">
+										<div class="col-sm-12">
+											<div class="card m-1">
+												<!-- Header: state = RFQ or CREATED -->
+												<div class="card-header" ng-show="serviceorder.state == 'RFQ' || serviceorder.state == 'NEW'">
+													<span class=""><strong>Service Order Items</strong> <span class="ms-2 badge bg-dark">{{serviceorder.items.length}}</span></span>	
+													<span ng-show="serviceorder.state != 'CANCELLED' && serviceorder.state != 'ISSUED' && serviceorder.state != 'PARTIAL_RECEIVED' && serviceorder.state != 'RECEIVED'">
+														<button class="btn btn-outline-success float-end btn-sm" ng-click="saveServiceOrderItems()">Save Items To Service Order</button>		
+													</span>								
+													<p class="small">Update, add and delete items below. To remove an item, set the quantity ordered to "0" and click the "Save Items" button.</p>
+												</div>
+												<!-- Header: state != RFQ or CREATED -->
+												<div class="card-header" ng-show="serviceorder.state != 'RFQ' && serviceorder.state != 'NEW'">
+													<span class=""><strong>Service Order Items</strong> <span class="ms-2 badge bg-dark">{{serviceorder.items.length}}</span></span>	
+												</div>
+												
+												<div class="card-body">
+													<!-- Start: item list: RFQ or CREATED -->
+													<table class="table table-striped table-sm table-striped table-hover small" ng-show="serviceorder.state == 'RFQ' || serviceorder.state == 'NEW'">
+														<thead>
+															<tr>
+																<th class="">Line</th>
+																<th class="">Product Id</th>
+																<th class="">Product Name</th>
+																<th class="text-center">Lot/Serial</th>
+																<th class="text-center">Quantity</th>
+																<th class="text-center">Unit Price</th>
+																<th class="text-center">Subtotal</th>
+																<th class="text-center">Taxes</th>
+															</tr>
+														</thead>
+														<tbody ng-repeat="item in itemArray track by $index">
+															<tr>
+																<td class="align-middle">{{$index + 1}}</td>
+																<td class="align-middle">
+																	{{item.productId}}
+																</td>
+																<td class="align-middle">
+																	{{item.productName}}
+																</td>
+																<td class="align-middle text-center">
+																	{{item.lotSerial}}
+																</td>
+																<td class="align-middle text-center">
+																	<input style="width:100px;" class="form-control form-control-sm"  ng-min="1" ng-model="item.quantity" type="number" id="quantity" name="quantity"
+																	ng-class="">
+																</td>
+																<td class="align-middle text-center">
+																	<div class="input-group input-group-sm" style="width:100px;">	
+																		<span class="input-group-text">{{serviceorder.priceInfo.currency.symbol}}</span>	   					
+												   						<input class="form-control" required ng-model="item.unitPrice" type="text" step="any" type="number" id="itemPrice" name="itemPrice" 
+												   						ng-disabled="serviceorder.state !== 'NEW' && serviceorder.state !== 'RFQ'">			   						 
+												   					</div> 
+																</td>
+																<td class="align-middle text-center">	
+																	<strong><span ng-bind-html="(item.quantity * item.unitPrice) | supercurrency : serviceorder.priceInfo.currency.symbol"></span></strong>	
+																</td>
+																<td class="align-text-top text-end">  					
+											   						<select class="form-select form-select-sm float-end" ng-model="item.tax" id="itemTax" name="itemTax" style="width:100px;">
+																		<option ng-repeat="item in taxes" value="{{item.name}}">{{item.name}}</option>
+																	</select>
+																</td>
+															</tr>
+															<tr>
+																<td colspan="8">
+																	<div class="form-group">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="lastModifiedDate"><strong>Instructions</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<textarea class="form-control form-control-sm" rows="4" id="instructions" name="instructions" ng-model="item.instructions"></textarea>
+													   				</div>
+																</td>
+															</tr>
+														</tbody>
+														<tbody>
+															<tr ng-repeat-end>
+																<td class="align-middle" colspan="9">
+																	<div class="input-group input-group-sm" style="width:200px;">		   					
+												   						<input  class="form-control " type="text" placeholder="Add Item" id="productId" name="productId">
+											   							<button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#findInventoryModal">
+											   								<i class="fa fa-search"></i>
+											   							</button>		   						 
+												   					</div> 
+																</td>
+															</tr>
+														</tbody>
+													</table>
+													<!-- End: item list: RFQ or CREATED -->
+													<!-- Start: item list: != RFQ or CREATED -->
+													
+													<table class="table table-striped table-sm table-striped table-hover small" ng-show="serviceorder.state != 'RFQ' && serviceorder.state != 'NEW'">
+														<thead>
+															<tr>
+																<th class="">Line</th>
+																<th class="">Product Id</th>
+																<th class="">Product Name</th>
+																<th class="text-center">Lot/Serial</th>
+																<th class="text-center">Quantity</th>
+																<th class="text-center">Unit Price</th>
+																<th class="text-center">Subtotal</th>
+																<th class="text-center">Taxes</th>
+															</tr>
+														</thead>	
+														<tbody ng-repeat="item in serviceorder.items">
+															<tr>
+																<td class="align-middle">{{$index + 1}}</td>
+																<td class="align-middle">
+																	{{item.productId}}
+																</td>
+																<td class="align-middle">
+																	{{item.productName}}
+																</td>
+																<td class="align-middle text-center">
+																	{{item.inventory.lotSerial}}
+																</td>
+																<td class="align-middle text-center">
+																	<input style="width:100px;" class="form-control form-control-sm"  ng-model="item.quantity" type="number" id="quantity" name="quantity"
+																	ng-disabled="true">
+																</td>
+																<td class="align-middle text-center">
+																	<div class="input-group input-group-sm" style="width:100px;">	
+																		<span class="input-group-text">{{serviceorder.priceInfo.currency.symbol}}</span>	   					
+												   						<input class="form-control" required ng-model="item.unitPrice" type="text" step="any" type="number" id="itemPrice" name="itemPrice" 
+												   						ng-disabled="true">			   						 
+												   					</div> 
+																</td>
+																<td class="align-middle text-center">	
+																	<strong><span ng-bind-html="(item.quantity * item.unitPrice) | supercurrency : serviceorder.priceInfo.currency.symbol"></span></strong>	
+																</td>
+																<td class="align-text-top text-end">  					
+											   						<select class="form-select form-select-sm float-end" ng-model="item.tax" id="itemTax" name="itemTax" style="width:100px;" ng-disabled="true">
+																		<option ng-repeat="item in taxes" value="{{item.name}}">{{item.name}}</option>
+																	</select>
+																</td>
+															</tr>
+															<tr>
+																<td colspan="8">
+																	<div class="form-group">
+													   					<div class="input-group">
+													   						<label class="pe-2" for="lastModifiedDate"><strong>Instructions</strong></label>
+													   						<div class="input-group-append">
+											            						<span class="text-danger"></span>
+											            					</div>
+													   					</div>
+													   					<textarea ng-disabled="true" class="form-control form-control-sm" rows="4" id="instructions" name="instructions" ng-model="item.instructions">
+													   					
+													   					</textarea>
+													   				</div>
+																</td>
+															</tr>
+														</tbody>
+														<!-- End: item list: != RFQ or CREATED -->
+													</table>
+													
+													<!-- Subtotal section is universal -->
+													<table class="table table-striped table-sm">		
+														<tbody>
+															<tr class="mt-2 bg-light">
+																<td class="text-end">
+																	<strong class="me-3"><small>Subtotal:</small></strong><strong class="me-2"><span ng-bind-html="serviceorder.priceInfo.subtotal | supercurrency : serviceorder.priceInfo.currency.symbol"></span></strong>
+																</td>
+															</tr>
+														</tbody>
+													</table>
+													
+													<!-- Summary Section: If state is created or RFQ -->
+													<div ng-show="serviceorder.state == 'RFQ' || serviceorder.state == 'NEW'">
+													
+														<table class="table table-sm">
+															<tbody>
+																<tr class="mt-2 bg-light" ng-repeat="item in serviceorder.priceInfo.taxes | orderBy: '+name' track by item.id" ng-if="item.name != 'E'">
+																	<td class="text-end" >
+																		<strong class="me-3" ng-if="$first"><small>Taxes:</small></strong>
+																		<strong class="me-3"><small>{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</small></strong>
+																		<div class="input-group input-group-sm float-end" style="width:100px;">	
+																			<span class="input-group-text">{{serviceorder.priceInfo.currency.symbol}}</span>	   					
+													   						<input ng-disabled="true" class="form-control form-control-sm" step=".01" 
+													   						ng-model="item.amount" type="number" id="tax{{$index}}" name="tax{{$index}}">			   						 
+													   					</div> 
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-end align-middle" width="90%">
+																		<div class="form-group mt-2 float-end">
+																			<div class="input-group mb-3">
+																				<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" 
+																				aria-expanded="false">Select Carrier</button>
+																				<ul class="dropdown-menu">
+																					<li ng-repeat="item in carriers">
+																						<a class="dropdown-item" href="" ng-click="setCarrier(item);">
+																							{{item.name}}
+																						</a>
+																					</li>
+																				</ul>
+																			</div>
+																		</div>
+																	</td>
+																	<td class="text-end" >
+																		<i class="fab fa-fedex fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'FedEx'"></i>
+												   						<i class="fab fa-dhl fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'DHL'"></i>
+												   						<i class="fab fa-ups fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'UPS'"></i>
+												   						<i class="fab fa-usps fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'USPS'"></i> 
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'Canada Post'" />
+																	</td>
+																</tr>
+																<tr class="bg-light">
+																	<td></td>
+																	<td class="text-end">
+																		<strong class=""><small>Account #: {{serviceorder.priceInfo.shipInfo.carrier.account}}</small></strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm">
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Total:</strong><strong class="me-2"><span ng-bind-html="serviceorder.priceInfo.total | supercurrency : serviceorder.priceInfo.currency.symbol"></span> {{serviceorder.priceInfo.currency.code}}</strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+													<!-- End If state is created or RFQ -->
+													
+													<!-- Summary Section: All other states -->
+													<div ng-show="serviceorder.state != 'NEW' && serviceorder.state != 'RFQ'"> 
+														
+														<table class="table table-sm">
+															<tbody>
+																<tr class="mt-2 bg-light" ng-repeat="item in serviceorder.priceInfo.taxes | orderBy: '+name' track by item.id" ng-if="item.name != 'E'">
+																	<td class="text-end" >
+																		<strong class="me-3" ng-if="$first"><small>Taxes:</small></strong>
+																		<strong class="me-3"><small>{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</small></strong>
+																		<strong class="me-3"><small><span ng-bind-html="item.amount | supercurrency : serviceorder.priceInfo.currency.symbol"></span></small></strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm">
+															<tbody>	
+																<tr class="mt-2 bg-light">
+																	<td class="text-end" >
+																		<i class="fab fa-fedex fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'FedEx'"></i>
+												   						<i class="fab fa-dhl fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'DHL'"></i>
+												   						<i class="fab fa-ups fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'UPS'"></i>
+												   						<i class="fab fa-usps fa-3x align-middle me-2" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'USPS'"></i> 
+												   						<img class="me-4 float-end" src="/assets/images/logos/third-party/CP_RGB_E.jpg" width="120px;" ng-show="serviceorder.priceInfo.shipInfo.carrier.name == 'Canada Post'" />
+																	</td>
+																</tr>
+																<tr class="bg-light">
+																	<td class="text-end">
+																		<strong class="ms-2 me-3"><small>Account #: <a href="">{{serviceorder.priceInfo.shipInfo.account}}</a></small></strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+														<table class="table table-sm">
+															<tbody>
+																<tr class="mt-2 bg-light">
+																	<td class="text-end">
+																		<strong class="me-3">Total:</strong><strong class="me-2"><span ng-bind-html="serviceorder.priceInfo.total | supercurrency : serviceorder.priceInfo.currency.symbol"></span> {{serviceorder.priceInfo.currency.code}}</strong>
+																	</td>
+																</tr>
+															</tbody>
+														</table>
+													</div>
+													<!-- EndAll other states -->
+												</div>
+											</div>
+										</div>
+										</form>
+									</div>
+																	
+								</div>
+								
+								<div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+									<div class="row mt-2">
+										<div class="col-sm-12 mt-2">
+											<form name="billToForm" id="billToForm" novalidate>
+											<div class="card card-body">
+												<strong>Supplier Address</strong>
+												<div class="row">
+													<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="billToContactName"><strong>Contact Name</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToContactName" id="billToContactName" ng-model="serviceorder.supplierAddress.contactName"
+										   					ng-class="{'is-invalid': billToForm.billToContactName.$touched && billToForm.billToContactName.$invalid, 
+										   					'is-valid': billToForm.billToContactName.$touched && billToForm.billToContactName.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="billToContactEmail"><strong>Contact Email</strong></label> 
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<div class="input-group input-group-sm">	
+																<span class="input-group-text"><i class="fas fa-envelope"></i></span>	   					
+										   						<input class="form-control form-control-sm" type="text" name="billToContactEmail" id="billToContactEmail" 
+											   					ng-model="serviceorder.supplierAddress.contactEmail"
+											   					ng-class="{'is-invalid': billToForm.billToContactEmail.$touched && billToForm.billToContactEmail.$invalid, 
+											   					'is-valid': billToForm.billToContactEmail.$touched && billToForm.billToContactEmail.$valid }"/>		   						 
+											   				</div>								   					
+										   				</div>
+										   			</div>
+													<div class="col-lg-3 col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="billToAddress1"><strong>Address 1</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   					<input required class="form-control form-control-sm" type="text" name="billToAddress1" id="billToAddress1" ng-model="serviceorder.supplierAddress.address1"
+										   					ng-class="{'is-invalid': billToForm.billToAddress1.$touched && billToForm.billToAddress1.$invalid, 
+										   					'is-valid': billToForm.billToAddress1.$touched && billToForm.billToAddress1.$valid }"/>
+										   				</div>
+									   				</div>
+									   				<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="billToAddress2"><strong>Address 2</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToAddress2" id="billToAddress2" ng-model="serviceorder.supplierAddress.address2"
+										   					ng-class="{'is-invalid': billToForm.billToAddress2.$touched && billToForm.billToAddress2.$invalid, 
+										   					'is-valid': billToForm.billToAddress2.$touched && billToForm.billToAddress2.$valid }"/>
+										   				</div>
+									   				</div>
+									   				<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="billToAddress3"><strong>Address 3</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<input class="form-control form-control-sm" type="text" name="billToAddress3" id="billToAddress3" ng-model="serviceorder.supplierAddress.address3"
+										   					ng-class="{'is-invalid': billToForm.billToAddress3.$touched && billToForm.billToAddress3.$invalid, 
+										   					'is-valid': billToForm.billToAddress3.$touched && billToForm.billToAddress3.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="billToCity"><strong>City</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   					<input required class="form-control form-control-sm" type="text" name="billToCity" id="billToCity" ng-model="serviceorder.supplierAddress.city"
+										   					ng-class="{'is-invalid': billToForm.billToCity.$touched && billToForm.billToCity.$invalid, 
+										   					'is-valid': billToForm.billToCity.$touched && billToForm.billToCity.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="size"><strong>Country</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   				</div>
+							   							<div class="input-group mb-3">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+															<ul class="dropdown-menu">
+																<li class="m-2">  
+																	<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+												   					<input class="form-control form-control-sm" type="text" name="countryFilter" id="countryFilter" ng-model="countryFilter"/>	
+																</li>
+																<li ng-repeat="item in countries | filter: countryFilter | orderBy: '+isoCode'">
+																	<a class="dropdown-item" href="" ng-click="setServiceOrderCountry(item.isoCode)">
+																		{{item.name}}
+																	</a>
+																</li>
+															</ul>
+															<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="bCountry" id="bCountry" ng-model="serviceorder.supplierAddress.country" /> 
+														</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6" >
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="size"><strong>Province/State</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"><span ng-show="serviceorder.supplierAddress.country == 'CA' || serviceorder.supplierAddress.country == 'US'">*</span></span>
+								            					</div>
+										   					</div>
+										   				</div>
+										   				<div class="input-group mb-3" ng-if="serviceorder.supplierAddress.country == 'CA' || serviceorder.supplierAddress.country == 'US'">
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+															<ul class="dropdown-menu">
+																<li class="m-2">  
+																	<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+												   					<input class="form-control form-control-sm" type="text" name="provinceFilter" id="provinceFilter" ng-model="provinceFilter"/>	
+																</li>
+																<li ng-repeat="item in bCountry.provinces | filter: provinceFilter | orderBy: '+isoCode'">
+																	<a class="dropdown-item" href="" ng-click="setServiceOrderProvince(item.isoCode)">
+																		{{item.name}}
+																	</a>
+																</li>
+															</ul>
+															<input ng-required="serviceorder.supplierAddress.country == 'CA' || serviceorder.supplierAddress.country == 'US'" ng-disabled="true" type="text" class="form-control form-control-sm" name="bProvince" id="bProvince" ng-model="serviceorder.supplierAddress.province"/> 
+														</div>
+														<div class="input-group mb-3" ng-if="serviceorder.supplierAddress.country != 'CA' && serviceorder.supplierAddress.country != 'US'">
+															<input type="text" class="form-control form-control-sm" name="bProvince" id="bProvince" ng-model="serviceorder.supplierAddress.province"/>
+														</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Postal Code</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"><span ng-show="serviceorder.supplierAddress.country == 'CA' || serviceorder.supplierAddress.country == 'US'">*</span></span>
+								            					</div>
+										   					</div>
+										   					<input ng-required="serviceorder.supplierAddress.country == 'CA' || serviceorder.supplierAddress.country == 'US'" class="form-control form-control-sm" type="text" name="billToPostalCode" id="billToPostalCode" ng-model="serviceorder.supplierAddress.postalCode"
+										   					ng-class="{'is-invalid': billToForm.billToPostalCode.$touched && billToForm.billToPostalCode.$invalid, 
+										   					'is-valid': billToForm.billToPostalCode.$touched && billToForm.billToPostalCode.$valid }"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-lg-3 col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="id"><strong>Phone</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<div class="input-group input-group-sm">	
+																<span class="input-group-text"><i class="fas fa-phone"></i></span>	   					
+										   						<input class="form-control form-control-sm" type="text" name="billToPhone" id="billToPhone" ng-model="serviceorder.supplierAddress.phone"
+												   					ng-class="{'is-invalid': billToForm.billToPhone.$touched && billToForm.billToPhone.$invalid, 
+												   					'is-valid': billToForm.billToPhone.$touched && billToForm.billToPhone.$valid }"/>			   						 
+											   				</div>
+										   				</div>									   			
+										   			</div>
+								   				</div>
+								   				<div class="row mt-3">
+													<div class="col-sm-12 text-end">
+														<button type="button" class="btn btn-outline-danger m-1 btn-sm">Reset</button>
+														<button type="button" class="btn btn-outline-success m-1 btn-sm" ng-disabled="billToForm.$invalid" ng-click="saveServiceOrderAddress()">Save Changes</button>
+													</div>
+												</div>
+											</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			
+			<!-- Service Order Items when PO is in NEW or RFQ state -->
+			
+			<div ng-include="'/include/components/toast-message.html'"></div>
+		</div>
+		
+		
+		
+		
+		
+		<div class="modal fade" id="findInventoryModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<form name="searchForm" id="searchForm">
+				   					<div class="input-group input-group-sm">		   					
+				   						<input class="form-control form-control-sm" minlength="3" ng-focus="focusSearch" required ng-change="findInventoryByKeyword()"
+				   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');">
+			   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+			   								<i class="fa fa-search"></i>
+			   							</button>			   						 
+				   					</div>        		
+				            	</form>
+				            	<p class="mt-2 small">Type in a product name, product id or lot/serial and the list below will update as matches are found. Click on a product in the list to
+				            	add to the service order.</p>
+	    					</div>
+	    				</div>
+	    				<div class="row mt-2">
+	    					<div class="col-sm-12">
+	    						<strong><small>Results:</small></strong><small><span class="ms-2 badge bg-dark">{{searchResults.totalResults}}</span></small>
+	    					</div>
+	    				</div>
+		    			<div class="row">
+		    				<div class="col-sm-12">
+		    					<table class="table table-hover table-striped table-responsive small">
+		    						<thead>
+		    							<tr>
+		    								<th>Product ID</th>
+		    								<th>Product Name</th>
+		    								<th>Lot/Serial</th>
+		    								<th>Warehouse</th>
+		    								<th>Available</th>
+		    							</tr>
+		    						</thead>
+		    						<tbody>
+		    							<!-- If the product is in the current order item list then disable the ng-click functionality and grey out line item -->
+		    							<tr ng-repeat="result in searchResults.results | orderBy: [productId]" ng-class="{'text-decoration-line-through': containsItem(result.id)}"
+		    							ng-click="!containsItem(result.id) && setItem(result)">
+		    								<td>{{result.productId}}</td>
+		    								<td>{{result.productName}}</td>
+		    								<td>{{result.lotSerial}}</td>
+		    								<td>{{result.warehouseName}}</td>
+		    								<td>{{result.available | number}}</td>
+		    							</tr>
+		    						</tbody>
+		    					</table>    				
+		    				</div>
+		    			</div>
+		    			<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Close</button>
+							</div>
+						</div>	
+	    			</div>		
+	    		</div>
+	    	</div>
+	    </div>		
+	    
+	    <div class="modal" id="receiveModal" role="dialog">
+	    	<div class="modal-dialog modal-xl" role="document">
+	    		<div class="modal-content">
+	    			<div class="card card-body">
+	    				<form name="receiveForm" id="receiveForm" novalidate>
+			    			<div class="row mt-1">
+								<div class="col-sm-12">
+									<span class="float-end me-3" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+								</div>
+							</div>
+			    			<div class="row">
+			    				<div class="col-sm-6">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Service Order #</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>The service order number.</small></p>
+					   					<div class="input-group input-group-sm" style="width:250px;">	
+											<span class="input-group-text">#</span>	   					
+					   						<input ng-disabled="true" class="form-control form-control-sm" type="text" name="poId" id="poId" ng-model="receiveServiceOrder.id"/>  						 
+					   					</div>
+					   					
+					   				</div>
+			    				</div>
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Receive Date</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the receipt date.</small></p>
+					   					<input style="width:250px;" required class="form-control form-control-sm" type="date" name="receiveDate" id="receiveDate" ng-model="receiveServiceOrder.receiveDate"/>
+					   				</div>
+			    				</div>
+			    			</div>
+	    					<div class="row mt-4">
+			    				<div class="col-sm-12">
+			    					<strong>Service Order Line Items</strong>
+			    					<p class="small">
+			    						The items below represent the outstanding receivable items on the Service Order. If the item is not to be received then leave the quantity "0". 
+			    						Only items that have an existing invoice can be received.
+			    					</p>
+			    					<table class="table table-sm small mt-2" >
+			    						<thead>
+			    							<tr>
+			    								<th width="5%">Line #</th>
+			    								<th width="20%">Product Name</th>
+			    								<th width="20%">Lot/Serial</th>
+			    								<th width="20%">Location</th>
+			    								<th width="5%" class="text-center">Quantity</th>
+			    								<th width="10%">Received</th>
+			    								<th width="10">Unit Cost</th>
+			    								<th width="10%">Labels</th>
+			    							</tr>
+			    						</thead>
+			    						<tbody ng-show="receivePO.items.length == 0">
+			    							<tr>
+												<td colspan="8" class="text-center">
+													<span class="text-danger">No Items are available to receive. Ensure that you have added invoices for the items to the Purchase Order.</span>
+												</td>		    							
+			    							</tr>
+			    						</tbody>
+			    						<tbody ng-repeat="item in receiveServiceOrder.items track by $index" ng-if="item.quantity > 0" class="mb-2" ng-show="receiveServiceOrder.items.length > 0">
+			    							<tr >
+			    								<td class="align-middle">{{$index + 1}}</td>
+			    								<td class="align-middle">{{item.productName}}</td>
+			    								<td class="align-middle">{{item.lotSerial}}</td>
+			    								<td class="align-middle">
+			    									<div class="input-group">
+														<span>
+															<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" 
+															aria-expanded="false" ng-disabled="(item.locations.length < 1) || item.locations == undefined">Previous Locations</button>
+															<ul class="dropdown-menu">
+																<li ng-repeat="location in item.locations">
+																	<a class="dropdown-item" href="" ng-click="(item.location = location)">
+																		<small>{{location}}</small>
+																	</a>
+																</li>
+															</ul>
+														</span>
+														<input ng-disabled="false" ng-required="item.received > 0" type="text" class="form-control form-control-sm" name="location" id="location" 
+														ng-model="item.location" /> 
+													</div>
+			    								</td>
+			    								<td class="align-middle text-center"><strong>{{item.quantity}}</strong></td>
+			    								<td class="align-middle">
+			    									<input type="number" id="received" max="{{item.quantity}}" name="received" ng-model="item.received" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<div class="input-group input-group-sm float-end">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="false" type="number" id="unitCost" name="unitCost" ng-model="item.unitCost" class="form-control form-control-sm" />	   						 
+								   					</div> 
+			    								</td>
+			    								<td class="align-middle"> <!-- If no label printer then disable. Value will be zero. -->
+			    									<input ng-disabled="item.labels == 0" type="number" id="labels" name="labels" ng-model="item.labels" class="form-control form-control-sm" />
+			    								</td>
+			    							</tr>
+			    						</tbody>
+			    					</table>
+			    				</div>
+			    			</div>
+							<div class="row mt-5">
+								<div class="col-sm-12">
+									<button type="button" class="btn btn-sm btn-outline-success float-end me-2" ng-disabled="receiveForm.$invalid || processing" ng-click="receiveStock()">Receive Items</button>
+									<button type="button" class="btn btn-sm btn-outline-danger float-end me-2" data-bs-dismiss="modal">Cancel</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+	    </div>
+	
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="invoiceDialog" role="dialog">
+	    	<div class="modal-dialog modal-lg" role="document">
+	    		<div class="modal-content">
+		    		<div class="modal-body">
+		    			<form name="invoiceForm" id="invoiceForm" novalidate>
+			    			<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+			    			<div class="row">
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Invoice #</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the vendor invoice number.</small></p>
+					   					<div class="input-group input-group-sm float-end">	
+											<span class="input-group-text">#</span>	   					
+					   						<input required class="form-control form-control-sm" type="text" name="invoiceId" id="invoiceId" ng-model="invoice.invoiceId"/>  						 
+					   					</div>
+					   					
+					   				</div>
+			    				</div>
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Invoice Date</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the vendor invoice date.</small></p>
+					   					<input required class="form-control form-control-sm" type="date" name="invoiceDate" id="invoiceDate" ng-model="invoice.invoiceDate"/>
+					   				</div>
+			    				</div>
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Invoice Due Date</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the vendor the due date of the invoice.</small></p>
+					   					<input required class="form-control form-control-sm" type="date" name="dueDate" id="dueDate" ng-model="invoice.dueDate"/>
+					   				</div>
+			    				</div>
+			    			</div>
+			    			
+			    			<div class="row mt-4">
+			    				<div class="col-sm-12">
+			    					<strong>Invoice Line Items</strong>
+			    					<p class="small">
+			    						The items below represent the outstanding items on the Purchase Order. If the item is not on the invoice then set the quantity to "0".
+			    					</p>
+			    					<table class="table table-sm small">
+			    						<thead>
+			    							<tr>
+			    								<th width="30">Product Name</th>
+			    								<th width="25">Lot/Serial</th>
+			    								<th width="15">Quantity</th>
+			    								<th width="15">Unit Price</th>
+			    								<th width="15">Subtotal</th>
+			    							</tr>
+			    						</thead>
+			    						<tbody>
+			    							<tr ng-repeat="item in invoice.items track by $index">
+			    								<td>
+			    									<input ng-disabled="true" type="text" id="productName" name="productName" ng-model="item.productName" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<input ng-disabled="true" type="text" id="lot" name="lot" ng-model="item.lotSerial" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<input type="number" ng-blur="repriceInvoice()" id="qty" name="qty" max="{{item.maxQuantity}}" ng-model="item.quantity" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<div class="input-group input-group-sm float-end">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-blur="repriceInvoice()" ng-disabled="false" type="number" id="unitPrice" name="unitPrice" ng-model="item.unitPrice" class="form-control form-control-sm" />	   						 
+								   					</div> 
+			    								</td>
+			    								<td>
+			    									<div class="input-group input-group-sm float-end">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" type="number" id="total" name="total" ng-model="item.priceInfo.subtotal" class="form-control form-control-sm" />   						 
+								   					</div>
+			    								</td>
+			    							</tr>
+			    						</tbody>
+			    					</table>
+			    					<table class="table table-sm small">
+			    						<tbody>
+			    							<tr>
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Subtotal: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" type="number" ng-model="invoice.priceInfo.subtotal" class="form-control form-control-sm float-end" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    							<tr class="mt-2 bg-light" ng-repeat="item in invoice.priceInfo.taxes | orderBy: '+name' track by item.id" ng-if="item.name != 'E'">
+												<td class="text-end" >
+													<strong class="me-3" ng-if="$first">Taxes:</strong>
+													<strong class="me-3"><small>{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</small></strong>
+													<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" class="form-control form-control-sm" step=".01" 
+								   						ng-model="item.amount" type="number" id="tax{{$index}}" name="tax{{$index}}">			   						 
+								   					</div> 
+												</td>
+											</tr>
+											<tr ng-if="invoice.supplierAddress.country != invoice.warehouse.address.country">
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Duty, Tariffs & Risks: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input type="number" ng-model="invoice.priceInfo.shipInfo.dutyTariff" class="form-control form-control-sm float-end" 
+								   						ng-blur="repriceInvoice()" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    							<tr>
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Shipping: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input type="number" ng-model="invoice.priceInfo.shipInfo.amount" class="form-control form-control-sm float-end" 
+								   						ng-blur="repriceInvoice()" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    							<tr>
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Total: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" type="number" ng-model="invoice.priceInfo.total" class="form-control form-control-sm float-end" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    						</tbody>
+			    					</table>
+			    				</div>
+			    			</div>
+			    			<div class="row mt-5">
+								<div class="col-sm-12">
+									<button type="button" class="btn btn-sm btn-outline-success float-end me-2" ng-click="addInvoice()" ng-disabled="invoiceForm.$invalid">Add Invoice</button>
+									<button type="button" class="btn btn-sm btn-outline-danger float-end me-2" data-bs-dismiss="modal">Cancel</button>
+								</div>
+							</div>
+						</form>
+		    		</div>
+		    	</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="viewInvoiceDialog" role="dialog">
+	    	<div class="modal-dialog modal-lg" role="document">
+	    		<div class="modal-content">
+		    		<div class="modal-body">
+		    			<form name="invoiceForm" id="invoiceForm" novalidate>
+			    			<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+			    			<div class="row">
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Invoice #</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the vendor invoice number.</small></p>
+					   					<div class="input-group input-group-sm float-end">	
+											<span class="input-group-text">#</span>	   					
+					   						<input ng-disabled="true" class="form-control form-control-sm" type="text" name="invoiceId" id="invoiceId" ng-model="invoice.invoiceId"/>  						 
+					   					</div>
+					   					
+					   				</div>
+			    				</div>
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Invoice Date</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the vendor invoice date.</small></p>
+					   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="invoiceDate" id="invoiceDate" ng-model="invoice.invoiceDate"/>
+					   				</div>
+			    				</div>
+			    				<div class="col-sm-4">
+			    					<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="invoiceId"><strong>Invoice Due Date</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the vendor the due date of the invoice.</small></p>
+					   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="dueDate" id="dueDate" ng-model="invoice.dueDate"/>
+					   				</div>
+			    				</div>
+			    			</div>
+			    			
+			    			<div class="row mt-4">
+			    				<div class="col-sm-12">
+			    					<strong>Invoice Line Items</strong>
+			    					<p class="small">
+			    						The items below represent the items and costs for this invoice.
+			    					</p>
+			    					<table class="table table-sm small">
+			    						<thead>
+			    							<tr>
+			    								<th width="30">Product Name</th>
+			    								<th width="25">Lot/Serial</th>
+			    								<th width="15">Quantity</th>
+			    								<th width="15">Unit Price</th>
+			    								<th width="15">Subtotal</th>
+			    							</tr>
+			    						</thead>
+			    						<tbody>
+			    							<tr ng-repeat="item in invoice.items track by $index">
+			    								<td>
+			    									<input ng-disabled="true" type="text" id="productName" name="productName" ng-model="item.productName" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<input ng-disabled="true" type="text" id="lot" name="lot" ng-model="item.lotSerial" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<input type="number" ng-disabled="true" id="qty" name="qty" max="{{item.maxQuantity}}" ng-model="item.quantity" class="form-control form-control-sm" />
+			    								</td>
+			    								<td>
+			    									<div class="input-group input-group-sm float-end">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" ng-disabled="false" type="number" id="unitPrice" name="unitPrice" ng-model="item.unitPrice" class="form-control form-control-sm" />	   						 
+								   					</div> 
+			    								</td>
+			    								<td>
+			    									<div class="input-group input-group-sm float-end">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" type="number" id="total" name="total" ng-model="item.priceInfo.subtotal" class="form-control form-control-sm" />   						 
+								   					</div>
+			    								</td>
+			    							</tr>
+			    						</tbody>
+			    					</table>
+			    					<table class="table table-sm small">
+			    						<tbody>
+			    							<tr>
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Subtotal: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" type="number" ng-model="invoice.priceInfo.subtotal" class="form-control form-control-sm float-end" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    							<tr class="mt-2 bg-light" ng-repeat="item in invoice.priceInfo.taxes | orderBy: '+name' track by item.id" ng-if="item.name != 'E'">
+												<td class="text-end" >
+													<strong class="me-3" ng-if="$first">Taxes:</strong>
+													<strong class="me-3"><small>{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</small></strong>
+													<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" class="form-control form-control-sm" step=".01" 
+								   						ng-model="item.amount" type="number" id="tax{{$index}}" name="tax{{$index}}">			   						 
+								   					</div> 
+												</td>
+											</tr>
+											<tr ng-if="invoice.supplierAddress.country != invoice.warehouse.address.country">
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Duty, Tariffs & Risks: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input type="number" ng-model="invoice.priceInfo.shipInfo.dutyTariff" class="form-control form-control-sm float-end" 
+								   						ng-disabled="true" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    							<tr>
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Shipping: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input type="number" ng-model="invoice.priceInfo.shipInfo.amount" class="form-control form-control-sm float-end" 
+								   						ng-disabled="true" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    							<tr>
+			    								<td class="text-end">
+			    									<span class="fw-bold me-3 align-middle">Total: </span>
+			    									<div class="input-group input-group-sm float-end" style="width:100px;">	
+														<span class="input-group-text">$</span>	   					
+								   						<input ng-disabled="true" type="number" ng-model="invoice.priceInfo.total" class="form-control form-control-sm float-end" />			   						 
+								   					</div> 
+			    								</td>
+			    							</tr>
+			    						</tbody>
+			    					</table>
+			    				</div>
+			    			</div>
+			    			<div class="row mt-5">
+								<div class="col-sm-12">
+									<button type="button" class="btn btn-sm btn-outline-danger float-end me-2" data-bs-dismiss="modal">Cancel</button>
+								</div>
+							</div>
+						</form>
+		    		</div>
+		    	</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="rfqModal" tabindex="-1" role="dialog" aria-labelledby="rfqModal">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                	<div class="modal-body">
+                    	<form name="RFQForm">
+	                    	<div class="row mt-1">
+								<div class="col-sm-12">
+									<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group mt-2">					
+			                        	<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Email</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the recipient's email address.</small></p>
+		                                <div class="input-group input-group-sm">	
+											<span class="input-group-text"><i class="fas fa-envelope"></i></span>	   					
+					   						 <input type="email" class="form-control form-control-sm rounded-0" name="email" id="email" required ng-model="rfq.email"
+			                                ng-class="{'is-invalid': RFQForm.email.$touched && RFQForm.email.$invalid, 'is-valid': RFQForm.email.$touched && RFQForm.email.$valid }" />
+			                                <span class="invalid-feedback" ng-show="RFQForm.email.$touched && RFQForm.email.$invalid">You must enter an email address.</span>	   						 
+						   				</div>	
+		                            </div>
+								</div>
+							</div>
+	                        <div class="row mt-3">
+	                        	<div class="col-sm-12">
+	                        		<button type="button" ng-click="sendRFQ()" ng-disabled="RFQForm.$invalid" class="btn btn-sm btn-outline-success float-end me-2">Send RFQ</button>
+	                        		<button type="button" class="btn btn-outline-danger btn-sm float-end me-2" data-bs-dismiss="modal">Cancel</button>	
+	                            	
+	                        	</div>
+	                        </div>
+                    	</form>
+                    </div>
+                </div>	
+            </div>
+        </div>
+        <div class="modal fade" id="printDialog" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="printForm" id="printForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="vendor"><strong><small>Print Quantity</small></strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p class="small">
+					   						This request will print to the system printer defined within the System Configuration section. If you 
+					   						do not have access to that printer then select the download PDF option for a local copy.
+					   					</p>
+					   					<input required class="form-control form-control-sm" type="number" step="1" name="qty" id="qty" ng-model="print.qty"/>
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="printForm.$invalid" ng-click="printServiceOrderPDF()">Print</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>

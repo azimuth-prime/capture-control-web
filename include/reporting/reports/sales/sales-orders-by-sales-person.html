@@ -1,0 +1,137 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="salesReportController" ng-init="init()">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb" class="d-print-none">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/reporting">Reporting</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Sales Orders By Sales Person</li>
+				</ol>  
+			</nav>
+			<div class="row">
+				<div class="card col-xs-12 col-sm-12 col-md-12">
+					<div class="card-body">
+						<!-- keyword search box -->
+						<div class="card d-print-none">
+							<div class="card-header">
+								<small class="float-inline mr-auto">Select a from and to date for the summary listing. Click the generate report button
+								to update the listing results. Click the print button to print a copy of the report. All values are in your main home currency.</small>
+							</div>
+				   			<div class="card-body">
+				   				<form name="searchForm" id="searchForm">
+				   					<div class="row">
+				   						<div class="col-sm-6">
+							   				<div class="form-group mt-2">
+							   					<div class="input-group">
+							   						<label class="pe-2" for="submittedDate"><strong>From Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<p><small>Enter the from date for the sales order report.</small></p>
+							   					<input class="form-control form-control-sm" type="date" name="submittedDate" id="submittedDate" ng-model="report.fromDate"/>
+							   				</div>
+							   			</div>
+							   			<div class="col-sm-6">
+							   				<div class="form-group mt-2">
+							   					<div class="input-group">
+							   						<label class="pe-2" for="submittedDate"><strong>To Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<p><small>Enter the to date for the sales order report.</small></p>
+							   					<input class="form-control form-control-sm" type="date" name="submittedDate" id="submittedDate" ng-model="report.toDate"/>
+							   				</div>
+							   			</div>
+				   					</div>    
+				   					<div class="row">
+				   						<div class="col-sm-12">
+				   							<button type="button" class="btn btn-sm btn-outline-primary m-2 float-end" ng-click="findOrdersBySalesperson()">Generate Report</button>
+				   						</div>
+				   					</div>  		
+				            	</form>
+				   			</div>
+				   		</div>
+				   		
+						<div class="card mt-2">
+							<div class="card-header">
+								<div class="row">
+									<div class="col-sm-12">
+										<h5>
+											<span class="d-none d-print-block"><strong>Sales Orders by Sales Person</strong> <span class="ps-3">{{report.fromDate | date:'mediumDate'}} - {{report.toDate | date:'mediumDate'}}</span></span>
+											<button class="btn btn-sm btn-outline-success float-end me-2 d-print-none" onclick="window.print()" type="button">Print</button>
+										</h5>
+									</div>
+								</div>
+							</div>
+				   			<div class="card-body">		   			
+				   				<table class="table table-sm small">
+				   					<thead>
+				   						<tr>
+				   							<th width="20%">Sales Person</th>
+				   							<th width="80%"> Sales Orders</th>
+				   						</tr>
+				   					</thead>
+				   					<tbody>
+				   						<tr ng-repeat="person in reportResult">
+				   							<td>
+				   								<strong>{{person.firstName + ' ' + person.lastName}}</strong> <br />
+				   								{{person.email}}<br />
+				   							</td>
+				   							<td>
+				   								<table class="table table-sm">
+								   					<thead>
+								   						<tr>
+								   							<th class="text-center" width="20%">Sales Order #</th>
+								   							<th class="text-center" width="20%">Shipped Date</th>
+								   							<th class="text-center" width="20%">Item Count</th>
+								   							<th class="text-end" width="20%">Subtotal</th>
+								   							<th class="text-end" width="20%">Total</th>
+								   						</tr>
+								   					</thead>
+								   					<tbody>
+								   						<tr ng-show="person.orders.length < 1 || person.orders == undefined">
+								   							<td colspan="9"><strong>No Results</strong></td>
+								   						</tr>
+								   						<tr ng-repeat="item in person.orders">
+								   							<td class="text-center">{{item.id}}</td>
+								   							<td class="text-center">{{item.shippedDate | date:'mediumDate'}}</td>
+								   							<td class="text-center">{{item.items.length}}</td>
+								   							<td class="text-end"><span ng-bind-html="item.price.subtotal | supercurrency"></span></td>
+								   							<td class="text-end"><span ng-bind-html="item.price.total | supercurrency : '$'"></span></td>
+								   						</tr>
+								   						<tr>
+								   							<td colspan="3"></td>
+								   							<td class="text-end border-top-1" style="border-top: 2px solid black;"><strong class="fs-5"><span ng-bind-html="person.subtotal | supercurrency"></span></strong></td>
+								   							<td class="text-end border-top-1" style="border-top: 2px solid black;"><strong class="fs-5"><span ng-bind-html="person.total | supercurrency"></span></strong></td>
+								   						</tr>
+								   					</tbody>
+								   				</table>
+				   							</td>
+				   						</tr>
+				   					</tbody>
+				   				</table>
+				   			</div>
+				   		</div>
+					</div>
+				</div>
+			</div>
+	    </div>	
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    
+	</section>
+</div>

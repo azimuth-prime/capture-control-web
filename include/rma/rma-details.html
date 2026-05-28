@@ -1,0 +1,420 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="rmaController" ng-init="findById(); findAllReasons();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/rma">Returns</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Return Details: {{rma.id}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="row mt-2">
+								<div class="col-sm-6">
+									<h5 class="ms-2">
+										<span class="me-3"><strong>{{rma.order.customer.name}}: </strong></span>
+										<span><strong ng-class="{'text-success': rma.state != 'CANCELLED', 'text-danger': rma.state === 'CANCELLED'}">{{rma.state}}</strong></span>
+									</h5>								
+								</div>
+								<div class="col-sm-6">
+									<h5 class="me-5">
+										<span class="float-end">
+											<strong class="me-3" ng-class="{'text-success': rma.state != 'CANCELLED', 'text-danger': rma.state === 'CANCELLED'}">
+												Total: <span ng-bind-html="rma.priceInfo.total | supercurrency : rma.priceInfo.currency.symbol"></span> {{rma.priceInfo.currency.code}}</strong>
+										</span>
+									</h5>
+								</div>
+							</div>
+							<hr />
+							<form name="rmaForm" id="rmaForm" novalidate>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>RMA Id</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>RMA's id value.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="rma.id"/>
+						   				</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Sales Order Id</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>RMA's sales order id.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="rma.order.id"/>
+						   				</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Customer</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>The name of the customer.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="rma.order.customer.name"/>
+						   				</div>
+						   			</div>
+					   				
+					   				<div class="col-sm-6">
+						   				<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="creationDate"><strong>Creation Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date for when the RMA was first created within the system.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="rma.creationDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="issueDate"><strong>Last Modified Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date that the RMA was last modified.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="rma.lastModifiedDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="issueDate"><strong>Issue Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date that the RMA was issued.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="issueDate" id="issueDate" ng-model="rma.issueDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="issueDate"><strong>Return By Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Expected date that the return should be received by the warehouse.</small></p>
+						   					<input ng-disabled="rma.state != 'NEW'" class="form-control form-control-sm" type="date" name="expectedReturnDate" id="expectedReturnDate" ng-model="rma.expectedReturnDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="issueDate"><strong>Received Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date that the RMA was received.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="receivedDate" id="receivedDate" ng-model="rma.receivedDate"/>
+						   				</div>
+						   			</div>
+								</div>
+								<div class="row mt-3">
+									<div class="col-sm-12">
+										<span ng-show="rma.state == 'NEW'">
+											<!-- When the PO is in Created state -->
+											<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveRMA()">Save Changes</button>
+											<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-show="hasRole(['SALESMANAGER', 'ADMIN'])"
+											ng-click="issueServiceOrder(serviceorder.id)">Issue RMA</button>
+										</span>
+										<span ng-show="rma.state == 'ISSUED'">
+											<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveServiceOrder()">Resend RMA</button>
+										</span>
+										<span ng-show="rma.state == 'ISSUED' || rma.state == 'PARTIAL_RECEIVE'">
+											<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" 
+											data-bs-toggle="modal" data-bs-target="#receiveModal" ng-click="getServiceOrderForReceiving(serviceorder.id)">Receive RMA Items</button>
+										</span>  
+										<span ng-show="rma.state != 'PARTIAL_RECEIVE' && rma.state != 'RECEIVED' && rma.state != 'CANCELLED' && rma.state != 'COMPLETE'">
+											<button type="button" class="btn btn-outline-danger m-1 btn-sm float-end" ng-click="changeState('CANCELLED')">Cancel RMA</button>
+										</span> 
+										<span ng-show="rma.items.length > 0">
+											<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+											 aria-expanded="false">Print RMA</button>
+											<ul class="dropdown-menu">
+												<li>
+													<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'RMA'" >
+														Print To System Printer
+													</a>
+												</li>
+												<li>
+													<a class="dropdown-item" href="" ng-click="downloadRMAPDF(rma.id)">
+														Download PDF
+													</a>
+												</li>
+											</ul>
+										</span>
+									</div>
+								</div>
+							</form>
+							<div class="row">
+								<form name="itemForm" id="itemForm">
+								<div class="col-sm-12">
+									<div class="card m-1">
+										<!-- Header: state = RFQ or CREATED -->
+										<div class="card-header" ng-show="rma.state == 'NEW'">
+											<span class=""><strong>RMA Items</strong> <span class="ms-2 badge bg-dark">{{itemArray.length}}</span></span>	
+											<span ng-show="rma.state != 'CANCELLED' && rma.state != 'ISSUED' && rma.state != 'PARTIAL_RECEIVE' && rma.state != 'RECEIVED'">
+												<button class="btn btn-outline-success float-end btn-sm" ng-disabled="itemForm.$invalid" ng-click="saveItemsToRMA()">Save Items To RMA</button>		
+											</span>								
+											<p class="small">Update, add and delete items below. To remove an item, click the delete icon on the right side of the item row. To add an item
+											to the list of returned items, click the add item button.</p>
+										</div>
+										<div class="card-header" ng-show="rma.state != 'NEW'">
+											<span class=""><strong>RMA Items</strong> <span class="ms-2 badge bg-dark">{{itemArray.length}}</span></span>	
+										</div>
+										
+										<div class="card-body">
+											<!-- Start: item list: CREATED -->
+											<table class="table table-sm small table-striped" ng-show="rma.state == 'NEW'">
+												<thead>
+													<tr>
+														<th class="" width="5%">Line</th>
+														<th class="" width="15%">Product Id</th>
+														<th class="" width="15%">Product Name</th>
+														<th class="text-center" width="10%">Lot/Serial</th>
+														<th class="text-center" width="10%">Quantity</th>
+														<th class="text-center" width="8%">Unit Price</th>
+														<th class="text-center" width="10%">Subtotal</th>
+														<th class="text-center" width="10%">Taxes</th>
+														<th class="text-center" width="12%">Reason</th>
+														<th class="text-center" width="5%">Action</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr ng-repeat="item in itemArray | orderBy:'+lineNumber' track by $index">
+														<td class="align-middle">{{item.lineNumber}}</td>
+														<td class="align-middle">
+															{{item.productName}}
+														</td>
+														<td class="align-middle">
+															{{item.productDescription}}
+														</td>
+														<td class="align-middle text-center">
+															{{item.lotSerial}}
+														</td>
+														<td class="align-middle text-center">
+															<div class="input-group input-group-sm">
+																<button class="btn btn-sm btn-outline-secondary" ng-click="changeQty(item, -1)"><i class="fas fa-minus fa-xs"></i></button>	
+																<input ng-disabled="true" class="form-control" style="width:30px;" ng-model="item.quantityReturned" type="number" id="quantity" name="quantity" />
+																<button class="btn btn-sm btn-outline-secondary" ng-click="changeQty(item, 1)"><i class="fas fa-plus fa-xs"></i></button>
+															</div>
+															
+														</td>
+														<td class="align-middle text-center">
+															<strong><span ng-bind-html="item.orderItem.unitPrice | supercurrency : rma.priceInfo.currency.symbol"></span></strong>
+														</td>
+														<td class="align-middle text-center">	
+															<strong><span ng-bind-html="(item.quantityReturned * item.orderItem.unitPrice) | supercurrency : rma.priceInfo.currency.symbol"></span></strong>	
+														</td>
+														<td class="align-middle text-center">  					
+									   						<strong><span ng-bind-html="item.taxes | supercurrency : rma.priceInfo.currency.symbol"></span></strong>	
+														</td>
+														<td class="align-middle text-center">
+    														<select required class="form-select form-select-sm" ng-model="item.reasonId" id="reason" name="reason">
+																<option ng-repeat="reason in reasonCodes | orderBy:'+title'" value="{{reason.id}}">{{reason.title}}</option>
+															</select>
+    													</td>
+														<td class="align-middle text-center">  					
+									   						<i class="fas fa-trash-alt"></i>	
+														</td>
+													</tr>
+												</tbody>
+												<tbody>
+													<tr ng-repeat-end>
+														<td class="align-middle" colspan="10">
+															<button type="button" class="btn btn-sm btn btn-outline-success m-2 float-end" data-bs-toggle="modal"
+															data-bs-target="#returnDialog" ng-click="getUnaddedRMAItems(rma.order.id)">Add Item</button>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+											
+											<!-- Summary Section: All other states -->
+											<div > 
+												
+												<table class="table table-sm">
+													<tbody>
+														<tr class="mt-2 bg-light" ng-repeat="item in rma.priceInfo.taxes | orderBy: '+name' track by item.id" ng-if="item.name != 'E'">
+															<td class="text-end" >
+																<strong class="me-3" ng-if="$first"><small>Taxes:</small></strong>
+																<strong class="me-3"><small>{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</small></strong>
+																<strong class="me-3"><small><span ng-bind-html="item.amount | supercurrency : rma.priceInfo.currency.symbol"></span></small></strong>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+												<table class="table table-sm">
+													<tbody>
+														<tr class="mt-2 bg-light">
+															<td class="text-end">
+																<strong class="me-3">Total:</strong><strong class="me-2"><span ng-bind-html="rma.priceInfo.total | supercurrency : rma.priceInfo.currency.symbol"></span> {{serviceorder.priceInfo.currency.code}}</strong>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+											<!-- EndAll other states -->
+										</div>
+									</div>
+								</div>
+								</form>
+							</div>
+							<div class="row mt-3">
+								<div class="col-sm-12">
+									<span ng-show="rma.state == 'NEW'">
+										<!-- When the PO is in Created state -->
+										<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveRMA()">Save Changes</button>
+										<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-show="hasRole(['SALESMANAGER', 'ADMIN'])"
+										ng-click="issueServiceOrder(serviceorder.id)">Issue RMA</button>
+									</span>
+									<span ng-show="rma.state == 'ISSUED'">
+										<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" ng-click="saveServiceOrder()">Resend RMA</button>
+									</span>
+									<span ng-show="rma.state == 'ISSUED' || rma.state == 'PARTIAL_RECEIVE'">
+										<button type="button" class="btn btn-outline-success m-1 btn-sm float-end" 
+										data-bs-toggle="modal" data-bs-target="#receiveModal" ng-click="getServiceOrderForReceiving(serviceorder.id)">Receive RMA Items</button>
+									</span>  
+									<span ng-show="rma.state != 'PARTIAL_RECEIVE' && rma.state != 'RECEIVED' && rma.state != 'CANCELLED' && rma.state != 'COMPLETE'">
+										<button type="button" class="btn btn-outline-danger m-1 btn-sm float-end" ng-click="changeState('CANCELLED')">Cancel RMA</button>
+									</span> 
+									<span ng-show="rma.items.length > 0">
+										<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+										 aria-expanded="false">Print RMA</button>
+										<ul class="dropdown-menu">
+											<li>
+												<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'RMA'" >
+													Print To System Printer
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item" href="" ng-click="downloadRMAPDF(rma.id)">
+													Download PDF
+												</a>
+											</li>
+										</ul>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			
+			<!-- Service Order Items when PO is in NEW or RFQ state -->
+			
+			<div ng-include="'/include/components/toast-message.html'"></div>
+		</div>
+		
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>	    
+	    
+	    <div class="modal" id="returnDialog" role="dialog" ng-controller="rmaController" ng-init="findAllReasons()">
+	    	<div class="modal-dialog modal-xl" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12 mb-2">
+								<strong>RMA: Sales Order #: {{order.id}}</strong>
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+	    				<form id="returnForm" name="returnForm">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<div class="card">
+	    							<div class="card-header">
+	    							<p class="small">
+	    								Select the items in the list of returnable items below. If the sales order contains final sale items
+	    								they will not appear in the list below. After selecting the items to be returned, set the quantity of each
+	    								or click on "Entire Order" to return everything.
+	    							</p>
+	    							</div>
+	    							<div class="card-body">
+	    								<div class="row mt-3 small">
+	    									<div class="col-sm-12">
+	    										<table class="table table-sm">
+	    											<thead>
+	    												<tr>
+	    													<th width="15%">Name</th>
+	    													<th width="25%">Description</th>
+	    													<th width="10%">SKU</th>
+	    													<th width="10%" class="text-center">Lot/Serial</th>
+	    													<th width="10%" class="text-center">Max Quantity</th>
+	    													<th width="10%" class="text-center">Quantity</th>
+	    													<th width="20%">Reason</th>
+	    												</tr>
+	    											</thead>
+	    											<tbody>
+	    												<tr ng-repeat="item in unaddedRMA.items | orderBy:'+lineNumber' track by $index">
+	    													<td class="align-middle">{{item.inventory.productName}}</td>
+	    													<td class="align-middle">{{item.inventory.productDescription}}</td>
+	    													<td class="align-middle">{{item.inventory.skuId}}</td>
+	    													<td class="text-center align-middle">{{item.inventory.lotSerial}}</td>
+	    													<td class="text-center align-middle">
+	    														<input ng-disabled="true" class="form-control form-control-sm" ng-model="item.maxQuantity" type="number" 
+	    														id="maxQuantity" name="maxQuantity" />
+	    													</td>
+	    													<td class="text-center align-middle">
+	    														<input min="1" max="{{item.maxQuantity}}" ng-disabled="!item.selected" class="form-control form-control-sm" ng-model="item.quantityReturned" 
+	    														type="number" id="itemQuantity" name="itemQuantity" />
+	    													</td>
+	    													<td class="align-middle">
+	    														<select ng-required="item.selected" class="form-select form-select-sm" ng-model="item.reasonId" id="reason" name="reason" ng-disabled="!item.selected">
+																	<option ng-repeat="item in reasonCodes | orderBy:'+title'" value="{{item.id}}">{{item.title}}</option>
+																</select>
+	    													</td>
+	    												</tr>
+	    											</tbody>
+	    										</table>
+	    									</div>
+	    								</div>
+		    						</div>
+		    					</div>
+	    					</div>
+	    				</div>
+	    				<div class="row mt-3">
+	    					<div class="col-sm-12">
+	    						<button type="button" class="btn btn-sm btn-outline-primary float-end m-2" ng-disabled="returnForm.$invalid" ng-click="createRMA()">Create RMA</button>
+	    						<button type="button" class="btn btn-sm btn-outline-danger float-end m-2" data-bs-dismiss="modal">Cancel</button>
+	    					</div>
+	    				</div>
+	    				</form>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+        
+	</section>
+</div>

@@ -1,0 +1,82 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="inventoryReportController" ng-init="findAllPhysicalWarehouses()">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb" class="d-print-none">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href="#/reporting">Reporting</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Inventory Audit - New</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<!-- keyword search box -->
+					<div class="card d-print-none">
+						<div class="card-header">
+							<small class="float-inline mr-auto">
+							<p>The inventory audit process assists you in completing a full inventory audit of
+							a physical warehouse. When the audit is created, it will remain open until complete. You can cancel an audit at any time
+							by clicking the "Cancel Audit" button the audit details screen. After an audit is created, it will be populated with all
+							inventory items that have stock within the physical warehouse. You can either print audit pages containing count sheets
+							or use a mobile or tablet device to update values in real-time.</p>
+							<p>
+								The audit system will track your progress as you update inventory values. You can come back to an open audit at any time
+								and continue your count.
+							</p>
+							
+							</small>
+						</div>
+			   			<div class="card-body">
+			   				<form name="searchForm" id="searchForm">
+			   					<div class="row">
+			   						<div class="col-sm-6">
+			   							<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="size"><strong>Physical Warehouse</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>Select the physical warehouse for the audit.</small>
+						   				</div>
+						   				<div class="input-group mb-3">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Warehouse</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="item in warehouses">
+													<a class="dropdown-item" href="" ng-click="setAuditWarehouse(item)">
+														{{item.name}} 
+													</a>
+												</li>
+											</ul>
+											<input ng-disabled="true" type="text" class="form-control form-control-sm" name="warehouse" id="warehouse" ng-model="audit.warehouse.name" /> 
+										</div>
+			   						</div>
+			   					</div>    
+			   					<div class="row">
+			   						<div class="col-sm-12">
+			   							<button type="button" class="btn btn-sm btn-outline-success m-2 float-end" ng-click="saveAudit()">Save Audit</button>
+			   						</div>
+			   					</div>  		
+			            	</form>
+			   			</div>
+			   		</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</section>

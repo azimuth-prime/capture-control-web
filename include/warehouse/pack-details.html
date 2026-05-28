@@ -1,0 +1,159 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="warehouseController" ng-init="findOrderForPacking()" ng-keyup="keyup($event)">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li> 
+					<li class="breadcrumb-item"><a href="#/wms-dashboard">WMS</a></li>
+					<li class="breadcrumb-item"><a href="#/packing">Packing</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Pack Details: {{packslip.orderid}}</li>
+				</ol>  
+			</nav>
+			<div data-barcode-scanner="barcodeScanned"></div>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card card-body">
+						<div class="row">
+							<div class="col-sm-6">
+								<h5 class="float-start ms-2 fw-bold">Pack Slip</h5>
+							</div>
+							<div class="col-sm-6">
+								<h5 class="float-end me-2 fw-bold">Sales Order #: {{order.orderId}}</h5>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="card card-body">
+									<div class="row align-items-center">
+										<div class="col-sm-4">
+											<h6 class="ms-3 fw-bold">
+												{{order.customer.name}} <br />
+												{{order.shipToAddress.address1}} <br />
+												{{order.shipToAddress.city}}, {{order.shipToAddress.province}} <br />
+												{{order.shipToAddress.country}}, {{order.shipToAddress.postalCode}} <br />
+												ATTN: {{order.shipToAddress.contactName}}
+											</h6>						
+										</div>
+										<div class="col-sm-4 text-center">
+											<svg id="orderBarcode"></svg>							
+										</div>
+										<div class="col-sm-4">
+											<h6 class="float-end me-3 ">
+												<span><strong>Sales Order Date: {{order.submittedDate | date:'mediumDate'}}</strong></span>
+											</h6>							
+										</div>
+									</div>					
+								</div>
+							</div>
+						</div>
+						<div class="row mt-2">
+							<div class="col-sm-12">
+								<div class="card card-body">
+									<form name="packForm" id="pickForm">
+										<div class="row">
+											<div class="col-sm-12">
+												<table class="table table-condensed table-responsive table-borderless">
+													<thead>
+														<tr>
+															<th style="width:8%" class="text-start">Line #</th>
+															<th style="width:23%" class="text-start">Product</th>
+															<th style="width:16%" class="text-start">Sku Id</th>
+															<th style="width:21%" class="text-center">Lot/Serial</th>
+															<th style="width:10%" class="text-center">Quantity Ordered</th>
+															<th style="width:14%" class="text-center">Quantity Packed</th>
+															<th style="width:6%" class="text-end">Pack All</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr class="border" ng-repeat="item in itemArray | orderBy:'+lineNumber' track by $index" ng-class="{'border-success': (item.quantityOrdered == item.quantityPacked) && item.lotSerial != undefined, 
+														'border-danger': (item.quantityPacked < item.quantityOrdered) || item.lotSerial == undefined}">
+															<td data-th="Line #" class="text-start align-middle">
+																<span class="ms-1">{{item.lineNumber + 1}}</span>
+															</td>
+															<td data-th="Product" class="align-middle">
+																<strong>{{item.productName}}</strong>
+																<p class="font-weight-light">{{item.productId}}</p>
+															</td>
+															<td data-th="skuId" class="text-start align-middle">
+																<div class="row">
+																	<div class="col-md-12 text-left mt-sm-2">
+																		<strong>{{item.skuId}}</strong>
+																	</div>
+																</div>
+															</td>
+															<td class="actions text-center align-middle" data-th="Location">
+									                            <div class="input-group mb-3">
+																	<span ng-show="item.lots.length > 0">
+																		<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Lots / Serials</button>
+																		<ul class="dropdown-menu">
+																			<li class="m-2">  
+																				<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+															   					<input class="form-control form-control-sm" type="text" name="lotFilter" id="lotFilter" ng-model="lotFilter"/>	
+																			</li>
+																			<li ng-repeat="lot in item.lots | filter: lotFilter">
+																				<a class="dropdown-item" href="" ng-click="checkLotQty(item, lot)">
+																					{{lot.warehouseName}} : {{lot.location}} : {{lot.name}}
+																				</a>
+																			</li>
+																		</ul>
+																	</span>
+																	<input required ng-disabled="false" type="text" class="form-control form-control-sm" name="lotSerial" id="lotSerial" 
+																	ng-model="item.lotSerial" ng-change="validateLotSerial(item.skuId, item.lotSerial);"/> 
+																</div>
+									                        </td>
+									                        <td data-th="Quantity Ordered" class="text-center align-middle">
+									                            <strong>{{(item.quantityOrdered - item.quantityBackordered) | number}}</strong>
+									                        </td>
+									                        <td class="actions align-middle" data-th="Quantity Packed">
+									                            <input ng-disabled="item.quantityOrdered == item.quantityPacked" type="number" required step="1"
+									                            ng-min="item.quantityOrdered" class="form-control form-control-sm text-center" value="1" 
+									                            ng-model="item.quantityPacked" ng-max="item.quantityOrdered">
+									                        </td>
+									                        <td class="text-end align-middle" data-th="Pack All">
+									                            <div class="form-check text-end">
+																	<input class="form-check-input float-end" type="checkbox" 
+																	ng-disabled="item.quantityOrdered == item.quantityPacked" ng-click="packAllItem(item.id, item.inventoryId)">
+																</div>
+									                        </td>
+														</tr>
+													
+													</tbody>
+												
+												</table>
+												
+											</div>
+										</div>	
+										<div class="row mt-3">
+											<div class="col-sm-12"> 
+												<button type="button" ng-show="order.state == 'PACKING'" class="btn btn-sm btn-outline-success float-end me-2" ng-click="submitPackedOrder()" 
+												ng-disabled="packForm.$invalid">Pack Order</button>
+												<button type="button" class="btn btn-sm btn-outline-success float-end me-2" ng-click="printPackSlip(order.orderId);">Print PackSlip</button>
+												<button type="button" ng-show="order.state == 'PACKED'" class="btn btn-sm btn-outline-success float-end me-2" ng-click="shipOrder(order.orderId);">Ship Order</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>					

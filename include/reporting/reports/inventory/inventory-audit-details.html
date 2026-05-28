@@ -1,0 +1,263 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="inventoryReportController" ng-init="findAllPhysicalWarehouses(); findAuditById();">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb" class="d-print-none">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li> 
+				<li class="breadcrumb-item"><a href="#/reporting">Reporting</a></li>
+				<li class="breadcrumb-item"><a href="#/reporting/inventory-audit">Inventory Audits</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Inventory Audit Details - {{audit.startDate | date:'mediumDate'}}</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<!-- keyword search box -->
+					<div class="card d-print-none">
+						<div class="card-header">
+							<small class="float-inline mr-auto">
+								<p>
+									The details below display the current state of this audit. For audits that have been completed, it will display
+									a list of all the items contained within the audit that had stock discrepancies only. Items that were accurate will
+									not be displayed in the list.
+								</p>
+								<p>
+									For currently open audits, the list will only contain the audit inventory items that have not yet been counted and updated
+									in the system. The list can be viewed in two modes 1) Mobile Mode where the items are listed in a page by page basis. In order to
+									move to the next page you will need to complete the count on the current page. 2) Print mode where all results are available to
+									print in pages that can be passed to staff for counting.
+								</p>
+							</small>
+						</div>
+			   			<div class="card-body">
+			   				<form name="searchForm" id="searchForm">
+			   					<div class="row">
+			   						<div class="col-sm-4">
+			   							<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="size"><strong>Physical Warehouse</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>Select the physical warehouse for the audit.</small>
+						   				</div>
+						   				<div class="input-group mb-3">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Physical Warehouse</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="stockUnit in skuConfig.stockUnits" ng-init="setUnitByName('EACH')">
+													<a class="dropdown-item" href="" ng-click="setUnit(stockUnit.id)">
+														{{stockUnit.name}} 
+													</a>
+												</li>
+											</ul>
+											<input type="text" class="form-control form-control-sm" name="warehouse" id="warehouse" ng-model="audit.warehouse.name" /> 
+										</div>
+			   						</div>
+			   						<div class="col-sm-4">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Start Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>(Optional) Add a an alternate product Id. Often used when connected to external ERP systems.</small>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="altId" id="altId" ng-model="audit.startDate" />
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-4">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>End Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>(Optional) Add a an alternate product Id. Often used when connected to external ERP systems.</small>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="altId" id="altId" ng-model="audit.endDate" />
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-4">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Last Modified Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>(Optional) Add a an alternate product Id. Often used when connected to external ERP systems.</small>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="altId" id="altId" ng-model="audit.lastModifiedDate" />
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-4">
+										<div class="form-group mt-2">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>State</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>(Optional) Add a an alternate product Id. Often used when connected to external ERP systems.</small>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="altId" id="altId" ng-model="audit.state" />
+						   				</div>
+						   			</div>
+						   		</div>
+						   		<div class="row mt-2">
+			   						<div class="col-sm-12">
+			   							<div class="form-group float-end">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="productType"><strong>Audit Mode</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<small>Select your audit mode.</small> 
+						   					<div class="input-group input-group-sm">
+							   					<div class="form-check form-check-inline btn-sm ms-3">
+				 										<input class="form-check-input " type="radio" name="mode" id="mode" value="MOBILE" ng-model="audit.mode"
+				 										ng-change="setParameter('backorder', 'true')">
+				 										<label class="form-check-label" for="inlineCheckbox1">Mobile</label>
+												</div>
+												<div class="form-check form-check-inline btn-sm ms-3">
+				 										<input class="form-check-input" type="radio" name="mode" id="mode" value="PRINT" ng-model="audit.mode"
+				 										ng-change="setParameter('backorder', 'false')">
+				 										<label class="form-check-label" for="inlineCheckbox1">Print</label>
+												</div>
+											</div>
+						   				</div>
+			   						</div>
+			   					</div>
+			            	</form>
+			   			</div>
+			   		</div>
+			   		
+					<div class="card mt-2">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-sm-12">
+									<h5>
+										<span class="d-print-none"><strong>Results - {{getCurrentDate() | date:'mediumDate'}}</strong></span>	
+										<span class="ms-2 badge bg-dark d-print-none">{{ results.length }}</span>
+										<button class="btn btn-sm btn-outline-success float-end me-2 d-print-none" onclick="window.print()" type="button">Print</button>
+									</h5>
+								</div>
+							</div>
+						</div>
+			   			<div class="card-body">		   			
+			   				
+			   				<!-- If type of sheet is defined as location use this section -->
+			   				<table class="table table-sm small" ng-if="spotCheckType == 'location'">
+			   					<thead>
+			   						<tr>
+			   							<th class="text-center" width="5%">Item #</th>
+			   							<th class="text-center" width="10%">Location</th>
+			   							<th class="text-center" width="85%"></th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-repeat="item in results">
+			   							<td class="text-center"><strong>{{$index + 1}}</strong></td>
+			   							<td class="text-center"><strong>{{item.location}}</strong></td>
+			   							<td class="text-center">
+			   								<table class="table table-sm table-borderless">
+			   									<thead>
+			   										<tr>
+			   											<th>Product</th>
+			   											<th>SKU Id</th>
+			   											<th>Color / Size</th>
+			   											<th>Lot/Serial</th>
+			   											<th>Stock Unit</th>
+			   											<th>System Qty</th>
+			   											<th>Actual Qty</th>
+			   										</tr>
+			   									</thead>
+			   									<tbody>
+			   										<tr ng-repeat="inventory in item.inventory">
+			   											<td class="text-center">
+							   								<strong>{{inventory.productId}}</strong><br />
+							   								<strong>{{inventory.productName}}</strong>
+							   								<p class="font-weight-light small">{{inventory.productDescription}}</p>
+							   							</td>
+			   											<td class="text-center">{{inventory.skuId}}</td>
+			   											<td class="text-center">{{inventory.color}} {{inventory.size}}</td>
+			   											<td class="text-center">{{inventory.lotSerial}}</td>
+			   											<td class="text-center">{{inventory.stockUnit}}</td>
+			   											<td class="text-center">{{inventory.onhand | number}}</td>
+			   											<td class="align-bottom"><hr style="border-top: 1px solid black;"/></td>
+			   										</tr>
+			   									</tbody>
+			   								</table>
+			   							</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   				<!-- End of location section -->
+			   				<!-- If sheet type is product based then use this section -->
+			   				<table class="table table-sm small" ng-if="spotCheckType == 'product'">
+			   					<thead>
+			   						<tr>
+			   							<th class="text-center" width="5%">Item #</th>
+			   							<th class="text-center" width="20%">Product</th>
+			   							<th class="text-center" width="75%"></th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-repeat="item in results">
+			   							<td class="text-center"><strong>{{$index + 1}}</strong></td>
+			   							<td class="text-center">
+			   								<strong>{{item.productId}}</strong><br />
+			   								<strong>{{item.productName}}</strong>
+			   								<p class="font-weight-light small">{{item.productDescription}}</p>
+			   							</td>
+			   							<td class="text-center">
+			   								<table class="table table-sm table-borderless">
+			   									<thead>
+			   										<tr>
+			   											<th class="text-center" width="15%">SKU Id</th>
+			   											<th class="text-center" width="15%">Color / Size</th>
+			   											<th class="text-center" width="15%">Lot/Serial</th>
+			   											<th class="text-center" width="15%">Locations</th>
+			   											<th class="text-center" width="10%">Stock Unit</th>
+			   											<th class="text-center" width="10%">System Qty</th>
+			   											<th class="text-center" width="10%">Actual Qty</th>
+			   										</tr>
+			   									</thead>
+			   									<tbody>
+			   										<tr ng-repeat="inventory in item.inventory">
+			   											<td class="text-center">{{inventory.skuId}}</td>
+			   											<td class="text-center">{{inventory.color}} {{inventory.size}}</td>
+			   											<td class="text-center">{{inventory.lotSerial}}</td>
+			   											<td class="text-center">{{inventory.locations}}</td>
+			   											<td class="text-center">{{inventory.stockUnit}}</td>
+			   											<td class="text-center">{{inventory.onhand | number}}</td>
+			   											<td class="align-bottom"><hr style="border-top: 1px solid black;"/></td>
+			   										</tr>
+			   									</tbody>
+			   								</table>
+			   							</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   				<!-- End of product section -->
+			   			</div>
+			   		</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</section>

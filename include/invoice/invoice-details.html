@@ -1,0 +1,464 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="invoiceController" ng-init="findById()">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/order">Sales Orders</a></li>
+					<li class="breadcrumb-item"><a href="#/invoice">Invoices</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Invoice Details: {{invoice.id}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="row">
+								<div class="col-sm-6">
+									<h5 class="ms-5">
+										<span><strong class="text-success">{{invoice.id}} - {{invoice.state}} - {{invoice.order.customer.name}}</strong></span>
+									</h5>								
+								</div>
+								<div class="col-sm-6">
+									<h5 class="me-5">
+										<span class="float-end">
+											<strong class="text-success me-3">Amount Total: <span ng-bind-html="invoice.total | supercurrency : invoice.order.price.currency.symbol"></span> {{invoice.order.price.currency.code}}</strong>
+										</span>
+									</h5>
+								</div>
+							</div>
+							<hr />
+							<form name="poForm" id="poForm" novalidate>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Invoice Id</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Invoice's id value.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="invoice.id"/>
+						   				</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Order Id</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Order id for this invoice.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="invoice.order.id"/>
+						   				</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>State</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Invoice's state value.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="invoice.state"/>
+						   				</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Customer Id</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger">*</span>
+				            					</div>
+						   					</div>
+						   					<p><small>The name of the customer.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="supplierName" id="supplierName" ng-model="invoice.order.customer.id"/>
+						   					
+						   				</div>
+						   			</div>
+					   				<div class="col-sm-6">
+										<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="id"><strong>Customer Name</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger">*</span>
+				            					</div>
+						   					</div>
+						   					<p><small>The name of the customer.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="supplierName" id="supplierName" ng-model="invoice.order.customer.name"/>
+						   					
+						   				</div>
+						   			</div>
+					   				<div class="col-sm-6">
+						   				<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="creationDate"><strong>Creation Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date for when the invoice was first created within the system.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="invoice.creationDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="issueDate"><strong>Invoice Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>The date that the invoice was issued.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="issueDate" id="issueDate" ng-model="invoice.invoiceDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="lastModifiedDate"><strong>Last Modified Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date for when the invoice was last updated within the system.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="invoice.lastModifiedDate"/>
+						   				</div>
+						   			</div>
+						   			<div class="col-sm-6">
+						   				<div class="form-group mt-1">
+						   					<div class="input-group">
+						   						<label class="pe-2" for="receivedDate"><strong>Due Date</strong></label>
+						   						<div class="input-group-append">
+				            						<span class="text-danger"></span>
+				            					</div>
+						   					</div>
+						   					<p><small>Auto generated date based upon customer payment terms.</small></p>
+						   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="dueDate" id="dueDate" ng-model="invoice.dueDate"/>
+						   				</div>
+						   			</div>
+								</div>
+								<div class="row mt-3">
+									<div class="col-sm-12 text-end">
+										<span ng-show="invoice.state != 'PAID'">
+											<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="cancelInvoice(invoice.id)">Cancel Invoice</button>
+											<button type="button" class="btn btn-outline-primary m-1 btn-sm" data-bs-toggle="modal" ng-click="prepEmail('INVOICE')" data-bs-target="#emailDialog">Email Invoice</button>
+										</span>
+										
+										<button class="btn btn-outline-primary dropdown-toggle btn-sm m-1 float-end align-middle" type="button" data-bs-toggle="dropdown" 
+										 aria-expanded="false">Print Invoice</button>
+										<ul class="dropdown-menu">
+											<li>
+												<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#printDialog" ng-click="print.type = 'INVOICE'" >
+													Print To System Printer
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item" href="" ng-click="downloadInvoicePDF(invoice.id)">
+													Download PDF
+												</a>
+											</li>
+										</ul>
+										<button type="button" class="btn btn-outline-success m-1 btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal"
+										ng-show="(invoice.state == 'NEW' || invoice.state == 'INVOICED') && !globalConfig.qboEnabled" ng-click="setPaymentObj()">Receive Payment</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card m-1">
+						<div class="card-header">
+							<h5>
+								<span class=""><strong>Items</strong></span>			
+								<span class="ms-2 badge bg-dark">{{invoice.order.items.length | number}}</span>
+							</h5>
+							<h6>The list below contains all of the items that are included in this order.</h6>
+						</div>
+						<div class="card-body">
+							<table class="table table-sm table-striped small">
+								<thead>
+									<tr>
+										<th class="">Product Name</th>
+										<th class="">Description</th>
+										<th class="text-center">Quantity</th>
+										<th class="text-center">Unit Price</th>
+										<th class="text-end">Item Subtotal</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="mt-2" ng-repeat="item in invoice.order.items">
+										<td class="align-middle">{{item.sku.productId}}</td>
+										<td class="align-middle ">{{item.sku.productName}}</td>
+										<td class="align-middle text-center">{{item.quantityShipped}}</td>
+										<td class="align-middle text-center"><span ng-bind-html="item.sku.price | supercurrency : invoice.order.price.currency.symbol"></span></td>
+										<td class="align-middle text-end fw-bold"><span ng-bind-html="item.priceInfo.subtotal | supercurrency : invoice.order.price.currency.symbol"></span></td>
+									</tr>
+									<tr>
+										<td colspan="4"></td>
+										<td class="text-end">
+											<strong>Item Subtotal: <span ng-bind-html="invoice.order.price.rawSubtotal | supercurrency : invoice.order.price.currency.symbol"></span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<table class="table table-sm mt-2 small" ng-if="invoice.order.price.discounts.length > 0">
+								<tbody>
+									<tr class="bg-light">
+										<td colspan="2">
+											<span class=""><strong>Discounts</strong> <span class="ms-2 badge bg-dark">{{invoice.order.price.discounts.length}}</span></span>
+										</td>
+									</tr>
+									<tr class="m-0" ng-repeat="item in invoice.order.price.discounts">
+										<td class="text-end">
+											
+										</td>
+										<td class="text-end">
+											<strong class="me-3">{{item.name}} (-{{item.amount}} %): </strong> <strong class="me-2">- <span ng-bind-html="item.savings | supercurrency : invoice.order.price.currency.symbol"></span></strong>
+										</td>
+									</tr>
+								</tbody>
+							</table>	
+							<table class="table table-sm small">
+								<tbody>
+									<tr class="bg-light">
+										<td colspan="2">
+											<span class=""><strong>Taxes</strong></span>	
+										</td>
+									</tr>
+									<tr class="" ng-repeat="item in invoice.order.price.taxes | orderBy: '+name'">
+										<td class="text-end" >
+											<span><strong class="me-3">{{item.name}} ( {{(item.rate * 100) | number:2}} % ):</strong>
+											<strong class="me-2"><span ng-bind-html="item.amount | supercurrency : invoice.order.price.currency.symbol"></span></strong></span>
+										</td>
+									</tr>
+								</tbody>
+							</table>		
+							<table class="table table-sm mt-2 small">
+								<tbody>
+									<tr class="bg-light">
+										<td colspan="2">
+											<span class=""><strong>Summary</strong></span>		
+											<p>The cost summary breakdown for the sales order.</p>
+										</td>
+									</tr>
+									<tr class="mt-2 bg-light">
+										<td class="text-end">
+											<strong class="me-3">Discounts:</strong><strong class="me-2"> - <span ng-bind-html="(invoice.order.price.discountTotal == undefined ? 0.00 : invoice.order.price.discountTotal) | supercurrency : invoice.order.price.currency.symbol"></span></strong>
+										</td>
+									</tr>
+									<tr class="mt-2 bg-light">
+										<td class="text-end">
+											<strong class="me-3">Subtotal:</strong><strong class="me-2"><span ng-bind-html="invoice.order.price.subtotal | supercurrency : invoice.order.price.currency.symbol"></span></strong>
+										</td>
+									</tr>
+									<tr class="mt-2 bg-light">
+										<td class="text-end">
+											<strong class="me-3">Taxes:</strong><strong class="me-2"><span ng-bind-html="invoice.order.price.taxTotal | supercurrency : invoice.order.price.currency.symbol"></span></strong>
+										</td>
+									</tr>
+									<tr class="mt-2 bg-light">
+										<td class="text-end">
+											<strong class="me-3">Shipping:</strong><strong class="me-2"><span ng-bind-html="invoice.order.price.shipInfo.amount | supercurrency : invoice.order.price.currency.symbol"></span></strong>
+										</td>
+									</tr>
+									<tr class="mt-2 bg-light">
+										<td class="text-end">
+											<strong class="me-3">Total:</strong><strong class="me-2"><span ng-bind-html="invoice.order.price.total | supercurrency : invoice.order.price.currency.symbol"></span> {{invoice.order.price.currency.code}}</strong>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Toast messaging: set messaging, set whether danger or success -->
+			<div ng-include="'/include/components/toast-message.html'"></div>
+	    </div>	
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	     <div class="modal" id="emailDialog" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<form id="emailForm" name="emailForm">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<div class="card card-body">
+	    							<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailTo"><strong>To:</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the email to value. Add multiple email addresses separated by commas with no spaces.</small></p>
+					   					<input required class="form-control form-control-sm" type="text" name="emailTo" id="emailTo" ng-model="email.to"
+					   					ng-class="{'is-invalid': emailForm.emailTo.$touched && emailForm.emailTo.$invalid, 
+								   		'is-valid':emailForm.emailTo.$touched && emailForm.emailTo.$valid }" ng-change="validateEmails(email.to, 'to')"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailCc" ><strong>Copy:</strong> </label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the email copy value. Add multiple email addresses separated by commas with no spaces.</small></p>
+						   				<input class="form-control form-control-sm" type="text" name="emailCc" id="emailCc" ng-model="email.cc"
+						   				ng-class="{'is-invalid': emailForm.emailCc.$touched && emailForm.emailCc.$invalid, 
+								   		'is-valid':emailForm.emailCc.$touched && emailForm.emailCc.$valid }" ng-change="validateEmails(email.cc, 'cc')"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailBcc"><strong>BCC:</strong> </label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the email bcc value. Add multiple email addresses separated by commas with no spaces.</small></p>
+						   				<input class="form-control form-control-sm" type="text" name="emailBcc" id="emailBcc" ng-model="email.bcc"
+						   				ng-class="{'is-invalid': emailForm.emailBcc.$touched && emailForm.emailBcc.$invalid, 
+								   		'is-valid':emailForm.emailBcc.$touched && emailForm.emailBcc.$valid }" ng-change="validateEmails(email.bcc, 'bcc')"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailBcc"><strong>Subject:</strong> </label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter a custom subject or leave the default subject.</small></p>
+						   				<input required class="form-control form-control-sm" type="text" name="emailSubject" id="emailSubject" ng-model="email.subject"
+						   				ng-class="{'is-invalid': emailForm.emailSubject.$touched && emailForm.emailSubject.$invalid, 
+								   		'is-valid':emailForm.emailSubject.$touched && emailForm.emailSubject.$valid }"/>
+					   				</div>
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="emailContent"><strong>Message:</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Add an optional message. If left blank, the template will use the default content.</small></p>
+					   					<!-- <textarea class="form-control form-control-sm" rows="5" name="emailContent" id="emailContent" ng-model="email.content"></textarea> -->
+					   					<div id="emailContent">
+											
+										</div>
+					   				</div>
+	    						</div>
+	    					</div>
+	    				</div>
+	    				<div class="row mt-3">
+	    					<div class="col-sm-12">
+	    						<button type="button" class="btn btn-sm btn-outline-primary float-end m-2" ng-disabled="emailForm.$invalid" ng-click="sendEmail()">Send Email</button>
+	    						<button type="button" class="btn btn-sm btn-outline-danger float-end m-2" data-bs-dismiss="modal">Cancel</button>
+	    					</div>
+	    				</div>
+	    				</form>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="printDialog" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="printForm" id="printForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="vendor"><strong><small>Print Quantity</small></strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<p class="small">
+					   						This request will print to the system printer defined within the System Configuration section. If you 
+					   						do not have access to that printer then select the download PDF option for a local copy.
+					   					</p>
+					   					<input required class="form-control form-control-sm" type="number" step="1" name="qty" id="qty" ng-model="print.qty"/>
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="printForm.$invalid" ng-click="printPDF()">Print</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal" id="paymentModal" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<form name="paymentForm" id="emailInvoiceForm">
+		    				<div class="row">
+		    					<div class="col-sm-12">
+		    						<strong>Receive Payment</strong>
+		    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></span>
+		    						<p><small>Enter the total funds received for this invoice.</small></p>
+		    					</div>
+		    				</div>
+		    				<div class="row">
+		    					<div class="col-sm-12">
+		    						<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="creditLimit"><strong>Amount</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<div class="input-group input-group-sm">	
+											<span class="input-group-text">$</span>	   					
+					   						<input class="form-control form-control-sm" type="number" step=".01" name="amount" id="amount" ng-model="payment.amount"
+							   					ng-max="{{invoice.total - invoice.amountPaid}}" min="1.00" ng-class="{'is-invalid': paymentForm.amount.$touched && paymentForm.amount.$invalid, 
+							   					'is-valid': paymentForm.amount.$touched && paymentForm.amount.$valid }"/>			   						 
+						   				</div>
+					   				</div>	
+								</div>
+		    				</div>
+		    				<div class="row mt-3">
+								<div class="col-sm-12">
+									<button type="button" class="btn btn-outline-success btn-sm float-end me-1" ng-disabled="paymentForm.$invalid" ng-click="receivePayment()">Receive Payment</button>
+									<button type="button" class="btn btn-outline-danger btn-sm float-end me-1" data-bs-dismiss="modal">Cancel</button>
+								</div>	
+							</div>
+						</form>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>

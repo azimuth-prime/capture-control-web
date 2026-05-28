@@ -1,0 +1,349 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="solrController" ng-init="isExisting(); findAllIndexes();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Search Administration</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="card card-body h-100 d-flex">
+								<div class="text-center m-auto" ng-show="indexJob.id == undefined">
+									<button class="btn btn-sm btn-outline-success me-1" ng-click="startIndex()" type="button" ng-disabled="indexJob.id != undefined">Start Indexing</button>
+									<button class="btn btn-sm btn-outline-success me-1" ng-click="startIncrementalIndex()" type="button" ng-disabled="indexJob.id != undefined">Start Incremental Indexing</button>
+								</div>
+								<div ng-show="indexJob.id != undefined">
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Organizations</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalOrgs > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.orgsIndexed/indexJob.totalOrgs) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.orgsIndexed/indexJob.totalOrgs) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.orgsIndexed/indexJob.totalOrgs) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalOrgs == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Organization Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Users</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalUsers > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.usersIndexed/indexJob.totalUsers) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.usersIndexed/indexJob.totalUsers) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.usersIndexed/indexJob.totalUsers) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalUsers == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No User Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Products</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalProducts > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.productsIndexed/indexJob.totalProducts) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.productsIndexed/indexJob.totalProducts) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.productsIndexed/indexJob.totalProducts) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalProducts == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Product Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>SKUs</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalSkus > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.skusIndexed/indexJob.totalSkus) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.skusIndexed/indexJob.totalSkus) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.skusIndexed/indexJob.totalSkus) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalSkus == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No SKU Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Inventory</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalLots > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.lotsIndexed/indexJob.totalLots) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.lotsIndexed/indexJob.totalLots) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.lotsIndexed/indexJob.totalLots) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalLots == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Inventory Lot Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Service Orders</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalServiceOrders > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.serviceOrdersIndexed/indexJob.totalServiceOrders) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.serviceOrdersIndexed/indexJob.totalServiceOrders) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.serviceOrdersIndexed/indexJob.totalServiceOrders) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalServiceOrders == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Service Order Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Sales Orders</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalSos > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.sosIndexed/indexJob.totalSos) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.sosIndexed/indexJob.totalSos) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.sosIndexed/indexJob.totalSos) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalSos == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Sales Order Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Invoices</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalInvoices > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.invoicesIndexed/indexJob.totalInvoices) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.invoicesIndexed/indexJob.totalInvoices) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.invoicesIndexed/indexJob.totalInvoices) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalInvoices == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Invoice Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Purchase Orders</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalPos > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.posIndexed/indexJob.totalPos) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.posIndexed/indexJob.totalPos) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.posIndexed/indexJob.totalPos) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalPos == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Purchase Order Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-1">
+			   							<div class="col-sm-4">
+			   								<strong><small>Supplier Restock</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;" ng-show="indexJob.totalRestock > 0">
+												<div class="progress-bar bg-success" role="progressbar" style="width:{{((indexJob.restockIndexed/indexJob.totalRestock) * 100)}}%;" 
+												aria-valuenow="{{((indexJob.restockIndexed/indexJob.totalRestock) * 100)}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.restockIndexed/indexJob.totalRestock) * 100) | number:2}}%</div>
+											</div>
+											<div class="progress" style="height:30px;" ng-show="indexJob.totalRestock == 0">
+												<div class="progress-bar bg-light text-dark" role="progressbar" style="width:100%;" 
+												aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">No Restock Records to Index</div>
+											</div>
+			   							</div>
+			   						</div>
+			   						<div class="row mt-5">
+			   							<div class="col-sm-4">
+			   								<strong><small>Index Job Status</small></strong>
+			   							</div>
+			   							<div class="col-sm-8">
+			   								<div class="progress" style="height:30px;">
+												<div class="progress-bar bg-dark" role="progressbar" style="width:{{((indexJob.currentItem/indexJob.totalItems) * 100) | number:2}}%;" 
+												aria-valuenow="{{((indexJob.currentItem/indexJob.totalItems) * 100) | number:2}}" aria-valuemin="0" aria-valuemax="100">{{((indexJob.currentItem/indexJob.totalItems) * 100) | number:2}}%</div>
+											</div>
+			   							</div>
+			   						</div>	
+			   					</div>	
+					   		</div>
+				   		</div>
+				   		<div class="col-sm-6">
+				   			<div class="card card-body h-100">
+				   				<div class="mb-2">
+				   					<strong>Last Index: {{searchResults.results[0].startDate | date:'medium'}}</strong>
+				   				</div>
+				   				<table class="table table-sm table-striped small">
+				   					<thead>
+				   						<tr>
+				   							<th width="50%">Entity</th>
+				   							<th width="50%" class="text-center">Total Record Count</th>
+				   						</tr>
+				   					</thead>
+				   					<tbody>
+				   						<tr>
+				   							<td>Organizations</td>
+				   							<td class="text-center">{{searchResults.results[0].orgsIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Users</td>
+				   							<td class="text-center">{{searchResults.results[0].usersIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Products</td>
+				   							<td class="text-center">{{searchResults.results[0].productsIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>SKUs</td>
+				   							<td class="text-center">{{searchResults.results[0].skusIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Inventory Lots</td>
+				   							<td class="text-center">{{searchResults.results[0].lotsIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Service Orders</td>
+				   							<td class="text-center">{{searchResults.results[0].serviceOrdersIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Sales Orders</td>
+				   							<td class="text-center">{{searchResults.results[0].sosIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Invoices</td>
+				   							<td class="text-center">{{searchResults.results[0].invoicesIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Purchase Orders</td>
+				   							<td class="text-center">{{searchResults.results[0].posIndexed | number}}</td>
+				   						</tr>
+				   						<tr>
+				   							<td>Supplier Restock</td>
+				   							<td class="text-center">{{searchResults.results[0].restockIndexed | number}}</td>
+				   						</tr>
+				   					</tbody>
+				   				</table>
+				   			</div>
+				   		</div>
+				   	</div>
+			   		<div class="row mt-3">
+			   			<div class="col-sm-12">
+			   				<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="float-right">
+										<ul class="pagination">
+											<li class="page-item">
+												<button type="button" class="btn btn-link page-link" ng-click="findAll(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+											</li>
+											<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+												<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link" ng-click="findAll($index)">{{$index + 1}}</button>
+											</li>
+											<li>
+												<button type="button" class="btn btn-link page-link" ng-click="findAll(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+											</li>
+										</ul>
+									</div>
+								</div>		
+							</div>
+				   		
+							<div class="card mt-2">
+								<div class="card-header">
+									<div class="row">
+										<div class="col-sm-12">
+											<h6>
+												<span class="font-weight-bold">Index History</span> 
+												<span class="badge bg-dark">{{ searchResults.totalResults }}</span>
+												<button type="button" class="btn btn-sm btn-outline-success float-end" ng-click="clearOldIndexJobs()">Clear Old Indexes</button>
+											</h6>
+										</div>
+									</div>
+								</div>
+					   			<div class="card-body">
+					   				<div class="row">
+					   					
+					   					<div class="col-sm-12">
+					   						<table class="table table-striped table-hover table-sm small">
+							   					<thead>
+							   						<tr>
+							   							<th>Index Date</th>
+							   							<th class="text-center">Elapsed Time</th>
+							   							<th class="text-center">Records Indexed</th>
+							   							<th class="text-center">Job Type</th>
+							   							<th class="text-center">State</th>
+							   							<th class="text-center">Message</th>
+							   						</tr>
+							   					</thead>
+							   					<tbody>
+							   						<tr ng-repeat="item in searchResults.results">
+							   							<td>{{item.startDate | date:'medium'}}</td>
+							   							<td class="text-center">
+								   							<span ng-if="item.elapsedTime > 60">{{item.elapsedTime / 60 | number:2 }} mins</span>
+								   							<span ng-if="item.elapsedTime <= 60 && item.elapsedTime > 0">{{item.elapsedTime | number:2 }} seconds</span>
+								   						</td>
+							   							<td class="text-center">{{item.totalItems | number}}</td>
+							   							<td class="text-center">{{item.jobType}}</td>
+							   							<td class="text-center">{{item.state}}</td>
+							   							<td class="text-center">{{item.message}}</td>
+							   						</tr>
+							   					</tbody>
+							   				</table>
+					   					</div>
+					   				</div>
+					   				
+					   			</div>
+					   		</div>
+					   		<div class="row mt-2">
+								<div class="col-sm-12">
+									<div class="float-right">
+										<ul class="pagination">
+											<li class="page-item">
+												<button type="button" class="btn btn-link page-link" ng-click="findAll(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+											</li>
+											<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+												<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link" ng-click="findAll($index)">{{$index + 1}}</button>
+											</li>
+											<li>
+												<button type="button" class="btn btn-link page-link" ng-click="findAll(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+											</li>
+										</ul>
+									</div>
+								</div>	
+							</div>	
+			   			</div>
+			   		</div>
+			   	</div>
+			   	<!-- Toast messaging: set messaging, set whether danger or success -->
+				<div ng-include="'/include/components/toast-message.html'"></div>
+			</div>
+			
+		</div>
+		
+		<div class="modal fade" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	
+	    
+	</section>
+</div>

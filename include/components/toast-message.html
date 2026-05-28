@@ -1,0 +1,15 @@
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+	<div id="toastMessage" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+		<div class="toast-header">
+		<!-- Set either success or fail -->
+			<span ng-show="!toastStatus"><i class="fas fa-exclamation-circle me-2 text-danger"></i></span>
+			<span ng-show="toastStatus"><i class="fas fa-check-circle me-2 text-success"></i></span>
+			<strong class="me-auto">{{toastActivity}}</strong>
+			<small>{{ toastTime | date:'shortTime'}}</small>
+			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+		<div class="toast-body">
+		{{toastMessage}}
+		</div>
+	</div>	
+</div>

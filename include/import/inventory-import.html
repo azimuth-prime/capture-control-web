@@ -1,0 +1,603 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="importController" ng-init="findSkuConfigInfo(); findAllPaymentConfigData(); findAllWarehouses();">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Data Import</li>
+			</ol>  
+		</nav>
+		<div class="row mb-2">
+			<div class="col-xs-12 col-sm-12 col-md-12">
+				<div class="card m-1 h-100">
+					<div class="card-body">
+						
+						<div class="col-sm-12">
+		   					<div class="card mt-2">
+  								<div class="card-header">
+  									<h6><strong>Data Import</strong></h6>
+  									<p class="small">Import data into the system using the provided excel templates. The template downloads provide a description of the
+  									fields within the excel template as well as the excel template itself. Items that are "required" are marked with a 
+  									<span class="text-danger">*</span>. After upload the data will be presented for editing and approval prior to final import.</p>
+  								</div>
+  								<div class="card-body">
+	  								<div class="row" ng-show="listData.length < 1">
+										<div class="col-sm-6 mt-2">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+													<h6><strong>Import Products</strong></h6>	
+													<p class="small">Import via Excel file, product information. If you use a single SKU model then make sure that you
+													have that set in the product configuration section. When products are imported a generic SKU will be created for each.</p>
+												</div>
+												<div class="card-body">
+													<div class="row">
+														<div class="col-sm-6">
+															<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="productImport"><strong>Select File</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   				</div>
+											   			</div>
+											   			<div class="col-sm-6">
+											   				<span class="float-end me-2">
+											   					<a href="/assets/files/import/productImport.xlsx"><i class="fas fa-file-excel fa-3x float-end me-2"></i></a>
+											   				</span>
+											   			</div>
+											   		</div>
+											   		<div class="row">
+											   			<div class="col-sm-12">
+											   				<p class="">
+										   						<small>Select the file for import. You can download the template by clicking on the link to the right.</small> 
+										   					</p>
+											   			</div>
+											   		</div>
+											   		<div class="row">
+											   			<div class="col-sm-12">
+										   					<input class="form-control form-control-sm" id="productImportFile" type="file" id="productImportFile" accept=".xls,.xlsx" file-model="productExcelFile">
+															<script>
+																// Add the following code if you want the name of the file appear on select
+																$("productImportFile").on("change", function() {
+																  var fileName = $(this).val().split("\\").pop();
+																  $(this).siblings("productImportFile").addClass("selected").html(fileName);
+																});
+															</script>
+											   			</div>
+													</div>
+													<div class="row mt-3">
+											   			<div class="col-sm-12">
+											   				<button type="button" ng-disabled="productExcelFile == undefined" class="btn btn-sm btn-outline-success float-end me-3" ng-click="parseProductImportFile()">Upload</button>
+											   			</div>
+											   		</div>
+												</div>
+			  								</div>
+		  								</div>
+	  									<div class="col-sm-6 mt-2">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+													<h6><strong>Import SKUs</strong></h6>		
+													<p class="small">Import via Excel file, SKU information. </p>
+												</div>
+												<div class="card-body">
+													<div class="row">
+														<div class="col-sm-6">
+															<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="productImport"><strong>Select File</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   				</div>
+											   			</div>
+											   			<div class="col-sm-6">
+											   				<span class="float-end me-2">
+											   					<a href="/assets/files/import/skuImport.xlsx"><i class="fas fa-file-excel fa-3x float-end me-2"></i></a>
+											   				</span>
+											   			</div>
+											   		</div>
+											   		<div class="row">
+											   			<div class="col-sm-12">
+											   				<p class="">
+										   						<small>Select the file for import. You can download the template by clicking on the link to the right.</small> 
+										   					</p>
+											   			</div>
+											   		</div>
+											   		<div class="row">
+											   			<div class="col-sm-12">
+										   					<input class="form-control form-control-sm" id="skuImportFile" type="file" id="skuImportFile" accept=".xls,.xlsx" file-model="skuExcelFile">
+															<script>
+																// Add the following code if you want the name of the file appear on select
+																$("skuImportFile").on("change", function() {
+																  var fileName = $(this).val().split("\\").pop();
+																  $(this).siblings("skuImportFile").addClass("selected").html(fileName);
+																});
+															</script>
+											   			</div>
+													</div>
+													<div class="row mt-3">
+											   			<div class="col-sm-12">
+											   				<button type="button" ng-disabled="skuExcelFile == undefined" class="btn btn-sm btn-outline-success float-end me-3" ng-click="parseSkuImportFile()">Upload</button>
+											   			</div>
+											   		</div>
+												</div>
+		  									</div>
+	  									</div>
+	  									<div class="col-sm-6 mt-2">
+		  									<div class="card h-100">
+		  										<div class="card-header">
+													<h6><strong>Import Inventory Lots</strong></h6>		
+													<p class="small">Import via Excel file, inventory/lot information. </p>
+												</div>
+												<div class="card-body">
+													<div class="row">
+														<div class="col-sm-6">
+															<div class="form-group mt-2">
+											   					<div class="input-group">
+											   						<label class="pe-2" for="productImport"><strong>Select File</strong></label>
+											   						<div class="input-group-append">
+									            						<span class="text-danger"></span>
+									            					</div>
+											   					</div>
+											   				</div>
+											   			</div>
+											   			<div class="col-sm-6">
+											   				<span class="float-end me-2">
+											   					<a href="/assets/files/import/inventoryImport.xlsx"><i class="fas fa-file-excel fa-3x float-end me-2"></i></a>
+											   				</span>
+											   			</div>
+											   		</div>
+											   		<div class="row">
+											   			<div class="col-sm-12">
+											   				<p class="">
+										   						<small>Select the file for import. You can download the template by clicking on the link to the right.</small> 
+										   					</p>
+											   			</div>
+											   		</div>
+											   		<div class="row">
+											   			<div class="col-sm-12">
+										   					<input class="form-control form-control-sm" id="inventoryImportFile" type="file" id="inventoryImportFile" accept=".xls,.xlsx" file-model="inventoryExcelFile">
+															<script>
+																// Add the following code if you want the name of the file appear on select
+																$("inventoryImportFile").on("change", function() {
+																  var fileName = $(this).val().split("\\").pop();
+																  $(this).siblings("inventoryImportFile").addClass("selected").html(fileName);
+																});
+															</script>
+											   			</div>
+													</div>
+													<div class="row mt-3">
+											   			<div class="col-sm-12">
+											   				<button type="button" ng-disabled="inventoryExcelFile == undefined" class="btn btn-sm btn-outline-success float-end me-3" ng-click="parseInventoryImportFile()">Upload</button>
+											   			</div>
+											   		</div>
+												</div>
+		  									</div>
+	  									</div>
+  									</div>
+  									
+  									<div class="row mt-2" ng-show="productExcelFile != undefined && listData.length > 0"> <!-- Product Listing -->
+  										<div class="col-sm-12">
+  											<div class="card h-100">
+		  										<div class="card-header">
+													<h6><strong>Import File</strong></h6>		
+													<p class="small">Verify and adjust the data below. Once it has been checked you can complete the upload process by clicking the 
+													'Confirm Upload' button at the bottom.</p>
+													<p class="small">
+														<strong>Field Set:</strong> 
+														<ul class="list-group list-group-horizontal small">
+															<li class="list-group-item">
+																id (Optional - default = System Generated Id)
+															</li>
+															<li class="list-group-item">
+																Name ( <span class="text-danger">*</span> )
+															</li>
+															<li class="list-group-item">
+																altId (Optional)
+															</li>
+															<li class="list-group-item">
+																description (Optional)
+															</li>
+															<li class="list-group-item">
+																availabilityDate (Optional - Default value = Now)
+															</li>
+															<li class="list-group-item">
+																taxable (Optional = default value = Yes)
+															</li>
+															<li class="list-group-item">
+																controlType (Optional - default value = LOT)
+															</li>
+															<!-- 
+															<li class="list-group-item">
+																productType (Optional - default value = FINISHED)
+															</li>
+															<li class="list-group-item">
+																saleable (Optional - default value = Yes)
+															</li>
+															 -->
+															<li class="list-group-item">
+																stockUnit (Optional - default value = EACH, Make sure that stock units used are defined in the system)
+															</li>
+														</ul>
+													</p>
+													<strong><small>Items to Upload: </small></strong><span class="badge bg-dark">{{listData.length}}</span>
+												</div>
+	  											<div class="card-body">
+	  												<div class="row">
+	  													<div class="col-sm-12">
+															<table class="table table-striped table-sm table-striped table-hover">
+																<thead>
+																	<tr>
+																		<th class="">Id</th>
+																		<th class="">Name</th>
+																		<th class="">Alt Id</th>
+																		<th class="text-center">Description</th>
+																		<th class="text-center">Availability Date</th>
+																		<th class="text-center">Taxable</th>
+																		<th class="text-center">Control Type</th>
+																		<th class="text-center">Stock Unit</th>
+																		<th></th>
+																	</tr>
+																</thead>
+																<tbody>
+																	
+																	<tr ng-repeat="item in listData track by $index">
+																		<td class="align-middle">		   					
+													   						<input class="form-control form-control-sm" minlength="3" required 
+													   						ng-model="item.id" type="text" id="id" name="id">	
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.name" type="text" id="productName" name="productName">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.altId" type="text" id="altId" name="altId">
+																		</td>
+																		<td class="align-middle">
+																			<textarea class="form-control form-control-sm" ng-model="item.description" id="description" name="description">
+																			
+																			</textarea>
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.availabilityDate" type="date" id="pAvailabilityDate" name="pAvailabilityDate">
+																		</td>
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.taxable" id="taxable" name="taxable">
+																				<option ng-value="true">Yes</option>
+																				<option ng-value="false">No</option>
+																			</select>
+																		</td>
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.controlType" id="controlType" name="controlType">
+																				<option value="LOT">LOT</option>
+																				<option value="SERIAL">SERIAL</option>
+																			</select>
+																		</td>
+																		<!-- 
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.productType" id="productType" name="productType"> 
+																				<option value="RAW_MATERIALS">RAW MATERIALS</option>
+																				<option value="PACKING_MATERIALS">PACKING MATERIALS</option>
+																				<option value="COMPONENTS">COMPONENTS</option>
+																				<option value="WIP">WIP</option>
+																				<option value="FINISHED">FINISHED</option>
+																				<option value="MRO">MRO</option>
+																			</select>
+																		</td>
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.saleable" id="saleable" name="saleable">
+																				<option ng-value="true">Yes</option>
+																				<option ng-value="false">No</option>
+																			</select>
+																		</td>
+																		 -->
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.stockUnit" id="stockUnit" name="stockUnit">
+																				<option ng-repeat="item in skuConfig.stockUnits" value="{{item.name}}">{{item.name}}</option>
+																			</select>
+																		</td>
+																		<td class="text-center align-middle ps-5 pe-5"><span ng-click="deleteImportItem($index)"><i class="fas fa-times text-danger"></i></span></td>
+																	</tr>
+																</tbody>
+															</table>
+														</div>
+													</div>
+													<div class="row mt-3">
+														<div class="col-sm-12">
+											   				<button type="button" class="btn btn-sm btn-outline-success float-end me-3" ng-click="importProductData()">Confirm Upload</button>
+											   				<button type="button" class="btn btn-sm btn-outline-danger float-end me-3" ng-click="listData = []; productExcelFile = undefined;">Cancel Upload</button>
+											   			</div>
+													</div>
+												</div>
+											</div>
+  										</div>
+  									</div>
+  									
+  									<div class="row mt-2" ng-show="skuExcelFile != undefined && listData.length > 0"> <!-- Product Listing -->
+  										<div class="col-sm-12">
+  											<div class="card h-100">
+		  										<div class="card-header">
+													<span class=""><strong>Import File</strong></span>			
+													<h6>Verify and adjust the data below. Once it has been checked you can complete the upload process by clicking the 
+													'Confirm Upload' button at the bottom.</h6>
+													<p class="small">
+														<strong>Field Set:</strong> 
+														<ul class="list-group list-group-horizontal small">
+															<li class="list-group-item">
+																id (Optional - default = System Generated Id)
+															</li>
+															<li class="list-group-item">
+																productId ( <span class="text-danger">*</span> )
+															</li>
+															<li class="list-group-item">
+																stockThreshold (Optional - default value = -1)
+															</li>
+															<li class="list-group-item">
+																availabilityDate (Optional - Default value = Now)
+															</li>
+															<li class="list-group-item">
+																price ( <span class="text-danger">*</span> )
+															</li>
+															<!-- 
+															<li class="list-group-item">
+																currency (Optional - default value = System Defined Default Currency)
+															</li>
+															 -->
+															<li class="list-group-item">
+																color (Optional - If entered then must match an existing system defined color)
+															</li>
+															<li class="list-group-item">
+																sizing (Optional - If entered then must match an existing system defined sizing)
+															</li>
+															<li class="list-group-item">
+																Default Cost (<span class="text-danger">*</span>)
+															</li>
+														</ul>
+													</p>
+													<strong><small>Items to Upload: </small></strong><span class="badge bg-dark">{{listData.length}}</span>
+												</div>
+	  											<div class="card-body">
+	  												<div class="row">
+	  													<div class="col-sm-12">
+															<table class="table table-striped table-sm table-striped table-hover">
+																<thead>
+																	<tr>
+																		<th class="">Id</th>
+																		<th class="">Product Id</th>
+																		<th class="">Stock Threshold</th>
+																		<th class="text-center">Availability Date</th>
+																		<th class="text-center">Price</th>
+																		<th class="text-center">Currency</th>
+																		<th class="text-center">Color</th>
+																		<th class="text-center">Sizing</th>
+																		<th class="text-center">Default Cost</th>
+																		<th></th>
+																	</tr>
+																</thead>
+																<tbody>
+																	
+																	<tr ng-repeat="item in listData track by $index">
+																		<td class="align-middle">		   					
+													   						<input class="form-control form-control-sm" minlength="3" required 
+													   						ng-model="item.id" type="text" id="id" name="id">	
+																		</td>
+																		<td class="align-middle">
+																			<input required class="form-control form-control-sm" ng-model="item.productId" type="text" id="productId" name="productId">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" step="1" ng-model="item.stockThreshold" type="number" id="stockThreshold" name="stockThreshold">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.availabilityDate" type="date" id="pAvailabilityDate" name="pAvailabilityDate">
+																		</td>
+																		<td class="align-middle">
+																			<div class="input-group input-group-sm">
+												   								<span class="input-group-text"><strong>$</strong></span>
+															   					<input class="form-control form-control-sm" step=".01" ng-model="item.price" type="number" id="price" name="price" />
+															   				</div>
+																		</td>
+																		 
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.currency" id="currency" name="currency">
+																				<option ng-repeat="item in paymentConfigData.currencies | orderBy:'name'" value="{{item.code}}">{{item.code}}</option>
+																			</select>
+																		</td>
+																		
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.colorId" id="color" name="color">
+																				<option ng-repeat="item in skuConfig.colorSwatches" value="{{item.id}}">{{item.name}}</option>
+																			</select>
+																		</td>
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.sizingId" id="sizing" name="sizing"> 
+																				<option ng-repeat="item in skuConfig.sizings" value="{{item.id}}">{{item.name}}</option>
+																			</select>
+																		</td>
+																		<td class="align-middle">
+																			<div class="input-group input-group-sm">
+												   								<span class="input-group-text"><strong>$</strong></span>
+																				<input class="form-control form-control-sm" step=".01" ng-model="item.defaultCost" type="number" id="cost" name="cost">
+																			</div>
+																		</td>
+																		
+																		<td class="text-center align-middle ps-5 pe-5"><span ng-click="deleteImportItem($index)"><i class="fas fa-times text-danger"></i></span></td>
+																	</tr>
+																</tbody>
+															</table>
+														</div>
+													</div>
+													<div class="row mt-3">
+														<div class="col-sm-12">
+											   				<button type="button" class="btn btn-sm btn-outline-success float-end me-3" ng-click="importSkuData()">Confirm Upload</button>
+											   				<button type="button" class="btn btn-sm btn-outline-danger float-end me-3" ng-click="listData = []; skuExcelFile = undefined;">Cancel Upload</button>
+											   			</div>
+													</div>
+												</div>
+											</div>
+  										</div>
+  									</div>
+  									
+  									<div class="row mt-2" ng-show="inventoryExcelFile != undefined && listData.length > 0"> <!-- Product Listing -->
+  										<div class="col-sm-12">
+  											<div class="card h-100">
+		  										<div class="card-header">
+													<h6><strong>Import File</strong></h6>		
+													<p class="small">Verify and adjust the data below. Once it has been checked you can complete the upload process by clicking the 
+													'Confirm Upload' button at the bottom.</p>
+													<p class="small">
+														<strong>Field Set:</strong> 
+														<ul class="list-group list-group-horizontal small">
+															<li class="list-group-item">
+																id (Optional - default = System Generated Id)
+															</li>
+															<li class="list-group-item">
+																skuId ( <span class="text-danger">*</span> )
+															</li>
+															<li class="list-group-item">
+																lotSerial (Optional - default value = today's date for lot. Serial type inventory requires a unique value)
+															</li>
+															<li class="list-group-item">
+																location (Optional)
+															</li>
+															<li class="list-group-item">
+																receivedDate (Optional - default = today's date)
+															</li>
+															<li class="list-group-item">
+																expiryDate (Optional)
+															</li>
+															<!-- 
+															<li class="list-group-item">
+																itemType (Optional - default = 'Inventoried')
+															</li>
+															 -->
+															<li class="list-group-item">
+																specification (Optional)
+															</li>
+															<li class="list-group-item">
+																condition (Optional)
+															</li>
+															<li class="list-group-item">
+																reference (Optional)
+															</li>
+															<li class="list-group-item">
+																price (Optional - default = parent SKU price)
+															</li>
+															<li class="list-group-item">
+																warehouseName (<span class="text-danger">*</span> Warehouse must exist in the system)
+															</li>
+														</ul>
+													</p>
+													<strong><small>Items to Upload: </small></strong><span class="badge bg-dark">{{listData.length}}</span>
+												</div>
+	  											<div class="card-body">
+	  												<div class="row">
+	  													<div class="col-sm-12">
+															<table class="table table-sm small">
+																<thead>
+																	<tr>
+																		<th class="">Id</th>
+																		<th class="">SKU Id</th>
+																		<th class="">Lot/Serial</th>
+																		<th class="text-center">Quantity</th>
+																		<th class="text-center">Location</th>
+																		<th class="text-center">Received Date</th>
+																		<th class="text-center">Expiry Date</th>
+																		<!-- <th class="text-center">Item Type</th>  -->
+																		<th class="text-center">Warehouse Name</th>
+																		<th></th>
+																	</tr>
+																</thead>
+																<tbody ng-repeat="item in listData track by $index">
+																	<tr >
+																		<td class="align-middle">		   					
+													   						<input class="form-control form-control-sm" minlength="3" required 
+													   						ng-model="item.id" type="text" id="id" name="id">	
+																		</td>
+																		<td class="align-middle">
+																			<input required class="form-control form-control-sm" ng-model="item.skuId" type="text" id="skuId" name="skuId">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.lotSerial" type="text" id="lotSerial" name="lotSerial">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.quantity" type="number" step="1" id="quantity" name="quantity">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.location" type="text" id="location" name="location">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.receivedDate" type="date" id="receivedDate" name="receivedDate">
+																		</td>
+																		<td class="align-middle">
+																			<input class="form-control form-control-sm" ng-model="item.expiryDate" type="date" id="expiryDate" name="expiryDate">
+																		</td>
+																		<!-- 
+																		<td class="align-middle text-center">
+																			<select class="form-select form-select-sm" ng-model="item.itemType" id="itemType" name="itemType">
+																				<option value="INVENTORIED">INVENTORIED</option>
+																				<option value="DROPSHIP">DROPSHIP</option>
+																				<option value="INFINITE">INFINITE</option>
+																			</select>
+																		</td>
+																		 -->
+																		<td class="align-middle text-center">
+																			<select required class="form-select form-select-sm" ng-model="item.warehouseId" id="warehouseName" name="warehouseName"> 
+																				<option ng-repeat="item in warehouses" value="{{item.id}}">{{item.name}}</option>
+																			</select>
+																		</td>
+																		
+																		<td class="text-center align-middle ps-5 pe-5"><span ng-click="deleteImportItem($index)"><i class="fas fa-times text-danger"></i></span></td>
+																	</tr>
+																	<tr>
+																		<td colspan="2" class="align-middle">
+																			<strong><small>Specification:</small></strong> <input class="form-control form-control-sm" step="1" ng-model="item.specification" type="text" id="specification" name="specification">
+																		</td>
+																		<td colspan="2" class="align-middle">
+																			<strong><small>Condition:</small></strong> <input class="form-control form-control-sm" step="1" ng-model="item.condition" type="text" id="condition" name="condition">
+																		</td>
+																		<td colspan="2" class="align-middle">
+																			<strong><small>Reference:</small></strong> <input class="form-control form-control-sm" step="1" ng-model="item.reference" type="text" id="reference" name="reference">
+																		</td>
+																		<td colspan="2" class="align-middle">
+																			<strong><small>Price:</small></strong> <input class="form-control form-control-sm" step=".01" ng-model="item.price" type="number" id="price" name="price">
+																		</td>
+																		<td></td>
+																	</tr>
+																</tbody>
+															</table>
+														</div>
+													</div>
+													<div class="row mt-3">
+														<div class="col-sm-12">
+											   				<button type="button" class="btn btn-sm btn-outline-success float-end me-3" ng-click="importInventoryData()">Confirm Upload</button>
+											   				<button type="button" class="btn btn-sm btn-outline-danger float-end me-3" ng-click="listData = []; skuExcelFile = undefined;">Cancel Upload</button>
+											   			</div>
+													</div>
+												</div>
+											</div>
+  										</div>
+  									</div>
+  								</div>
+  							</div>
+  						</div>
+  					</div>
+  				</div>
+  			</div>
+  		</div>
+  		
+	    <!-- Toast messaging: set messaging, set whether danger or success -->
+		<div ng-include="'/include/components/toast-message.html'"></div>
+  	</div>
+  	<div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div class="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

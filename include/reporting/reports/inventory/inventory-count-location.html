@@ -1,0 +1,132 @@
+<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="inventoryReportController">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb" class="d-print-none">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href="#/reporting">Reporting</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Inventory Count / Location</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="card col-xs-12 col-sm-12 col-md-12">
+				<div class="card-body">
+					<!-- keyword search box -->
+					<div class="card d-print-none">
+						<div class="card-header">
+							<small class="float-inline mr-auto">Type in a lot/serial, location, product name, product id or sku id to filter the result listing.</small>
+						</div>
+			   			<div class="card-body">
+			   				<form name="searchForm" id="searchForm">
+			   					<div class="input-group input-group-sm">		   					
+			   						<input class="form-control form-control-sm" ng-focus="focusSearch" required ng-change="findInventoryByKeyword()"
+			   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword" ng-init="focusField('keyword');">
+		   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+		   								<i class="fa fa-search"></i>
+		   							</button>			   						 
+			   					</div> 
+			   					          		
+			            	</form>
+			   			</div>
+			   		</div>
+			   		
+			   		<div class="row mt-2 d-print-none" ng-show="searchResults != undefined">
+						<div class="col-sm-12">
+							<div class="">
+								<ul class="pagination">
+									<li class="page-item">
+										<button type="button" class="btn btn-link page-link" ng-click="findInventoryByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+									</li>
+									<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+										<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link me-1" ng-click="findInventoryByKeyword($index)">{{$index + 1}}</button>
+									</li>
+									<li>
+										<button type="button" class="btn btn-link page-link" ng-click="findInventoryByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+									</li>
+								</ul>
+							</div>
+						</div>		
+					</div>
+			   		
+					<div class="card mt-2">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-sm-12">
+									<h5>
+										<span class="d-none d-print-block"><strong>Inventory Counts by Location Report</strong></span>
+										<span class="d-print-none"><strong>Results</strong></span>	
+										<span class="ms-2 badge bg-dark d-print-none">{{ searchResults.totalResults }}</span>
+										<button class="btn btn-sm btn-outline-success float-end me-2 d-print-none" onclick="window.print()" type="button">Print</button>
+									</h5>
+								</div>
+							</div>
+						</div>
+			   			<div class="card-body">		   			
+			   				<table class="table table-striped table-hover table-sm small">
+			   					<thead>
+			   						<tr>
+			   							<th class="text-center" width="15%">Location<i class="fas fa-sort m-1" ng-click="sortResults('location')"></i></th>
+			   							<th class="text-center" width="15%">Product Id<i class="fas fa-sort m-1" ng-click="sortResults('productId')"></i></th>
+			   							<th class="text-center" width="20%">Product Name <i class="fas fa-sort m-1" ng-click="sortResults('productName')"></i></th>
+			   							<th class="text-center" width="15%">SKU Id <i class="fas fa-sort m-1" ng-click="sortResults('skuId')"></i></th>
+			   							<th class="text-center" width="15%">Lot / Serial<i class="fas fa-sort m-1" ng-click="sortResults('lotSerial')"></i></th>
+			   							<th class="text-center" width="5%">On Hand</th>
+			   							<th class="text-center" width="15%">Warehouse<i class="fas fa-sort m-1" ng-click="sortResults('warehouseName')"></i></th>
+			   						</tr>
+			   					</thead>
+			   					<tbody>
+			   						<tr ng-show="searchResults.results.length < 1 || searchResults.results == undefined">
+			   							<td colspan="9"><strong>No Results</strong></td>
+			   						</tr>
+			   						<tr ng-repeat="item in searchResults.results" ng-click="viewProduct(item.id)">
+			   							<td class="text-center">{{item.location}}</td>
+			   							<td class="text-center">{{item.productId}}</td>
+			   							<td class="text-center">
+			   								{{item.productName}}
+			   								<p class="font-weight-light small">{{item.productDescription}}</p>
+			   							</td>
+			   							<td class="text-center">{{item.skuId}}</td>
+			   							<td class="text-center">{{item.lotSerial}}</td>
+			   							<td class="text-center">{{item.onhand | number}}</td>
+			   							<td class="text-center">{{item.warehouseName}}</td>
+			   						</tr>
+			   					</tbody>
+			   				</table>
+			   			</div>
+			   		</div>
+			   		<div class="row mt-2 d-print-none" ng-show="searchResults != undefined"> <!-- x in [].constructor(searchResults.pages) -->
+						<div class="col-sm-12">
+							<div class="">
+								<ul class="pagination">
+									<li class="page-item">
+										<button type="button" class="btn btn-link page-link" ng-click="findInventoryByKeyword(searchResults.page - 1)" ng-disabled="searchResults.hasPrevious == false">Previous</button>
+									</li>
+									<li class="page-item" ng-repeat="x in [].constructor(searchResults.pages) track by $index">
+										<button type="button" ng-disabled="$index == searchResults.page" class="btn btn-link page-link me-1" ng-click="findInventoryByKeyword($index)">{{$index + 1}}</button>
+									</li>
+									<li>
+										<button type="button" class="btn btn-link page-link" ng-click="findInventoryByKeyword(searchResults.page + 1)" ng-disabled="searchResults.hasNext == false">Next</button>
+									</li>
+								</ul>
+							</div>
+						</div>		
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</section>

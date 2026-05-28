@@ -1,0 +1,550 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="orderController" ng-init="findAllCountries(); findAllPhysicalWarehouses(); findAllSalesUsers();">
+		<div class="col-xs-12 col-sm-12 col-md-12" ng-controller="configController" ng-init="findGlobalConfig()">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/order">Sales Orders</a></li>
+					<li class="breadcrumb-item active" aria-current="page">New Sales Order</li>
+				</ol>  
+			</nav>
+			<form name="orderForm" id="orderForm" novalidate ng-submit="saveOrder()">
+			<div class="row mb-2">			
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<div class="row">
+					   			<div class="col-sm-6">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="poNumber"><strong>Purchase Order Number</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter customer's Purchase Order Number.</small></p>
+					   					<input class="form-control form-control-sm" type="text" name="poNumber" id="poNumber" ng-model="order.poNumber"/>
+					   				</div>
+					   			</div>
+					   			<div class="col-sm-6">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="lastModifiedDate"><strong>Customer</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Click the search button to search for the customer organization.</small></p>
+					   					<div class="input-group">
+	  										<input ng-disabled="true" class="form-control form-control-sm" type="text" name="customerId" id="customerId" ng-model="customerName"/>
+	  										<button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#customerModal">
+	  											<i class="fa fa-search"></i>
+	  										</button>
+										</div>
+					   					
+					   				</div>
+					   			</div>
+					   			<div class="col-sm-6" ng-show="!globalConfig.multiWarehouse">
+		   							<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="size"><strong>Physical Warehouse</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">{{(warehouses.length > 1 ? '*' : '')}}</span>
+			            					</div>
+					   					</div>
+					   				</div>
+					   				<p><small>Select a warehouse to fulfill this order. If warehouse auto fulfillment is enabled then this value
+					   				will be ignored and the system will handle warehouse assignment based on the automation mode selected.</small></p>
+					   				<div class="input-group mb-3">
+										<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Warehouse</button>
+										<ul class="dropdown-menu">
+											<li ng-repeat="item in warehouses">
+												<a class="dropdown-item" href="" ng-click="setWarehouse(item);">
+													{{item.name}}
+												</a>
+											</li>
+										</ul>
+										<input ng-required="warehouses.length > 1 && !globalConfig.multiWarehouse" ng-disabled="true" type="text" class="form-control form-control-sm" name="warehouse" id="warehouse" ng-model="order.warehouse.name" /> 
+									</div>
+		   						</div>
+		   						<div class="col-sm-6">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="submittedDate"><strong>Sales Order Date</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Enter the date of the sales order. If left blank then the sales order date will be set to the current date and 
+					   					time when the order is officially booked in the sales order details screen.</small></p>
+					   					<input class="form-control form-control-sm" type="date" name="submittedDate" id="submittedDate" ng-model="order.submittedDate"/>
+					   				</div>
+					   			</div>
+					   			<div class="col-sm-6">
+					   				<div class="form-group mt-2">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="salesRep"><strong>Sales Representative</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<p><small>Select the sales representative for this sales order.</small></p>
+					   					<div class="input-group mb-3">
+											<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Sales Rep</button>
+											<ul class="dropdown-menu">
+												<li ng-repeat="item in salesusers">
+													<a class="dropdown-item" href="" ng-click="setSalesRep(item);">
+														{{item.name}}
+													</a>
+												</li>
+											</ul>
+											<input ng-disabled="true" type="text" class="form-control form-control-sm" name="salesRep" id="salesRep" ng-model="order.soldBy.name" /> 
+										</div>
+					   				</div>
+					   			</div>
+							</div>
+							<div class="row mt-3">							
+								<div class="col-sm-6 h-100">
+									<strong>Bill To:</strong>
+									<div class="card card-body">
+										<div class="row">
+											<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obContactName"><strong>Contact Name</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="obContactName" id="obContactName" ng-model="order.billToAddress.contactName"
+								   					ng-class="{'is-invalid': orderForm.obContactName.$invalid, 'is-valid':orderForm.obContactName.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obContactEmail"><strong>Contact Email</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="email" name="obContactEmail" id="obContactEmail" ng-model="order.billToAddress.contactEmail"
+								   					ng-class="{'is-invalid': orderForm.obContactEmail.$invalid, 'is-valid': orderForm.obContactEmail.$valid }"
+								   					ng-pattern="/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/"/>
+								   				</div>
+								   			</div>
+											<div class="col-lg-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obAddress1"><strong>Address 1</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input required class="form-control form-control-sm" type="text" name="obAddress1" id="obAddress1" ng-model="order.billToAddress.address1"
+								   					ng-class="{'is-invalid': orderForm.obAddress1.$invalid, 'is-valid': orderForm.obAddress1.$valid }"/>
+								   				</div>
+							   				</div>
+							   				<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obAddress2"><strong>Address 2</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="obAddress2" id="obAddress2" ng-model="order.billToAddress.address2"
+								   					ng-class="{'is-invalid': orderForm.obAddress2.$invalid, 'is-valid': orderForm.obAddress2.$valid }"/>
+								   				</div>
+							   				</div>
+							   				<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obAddress3"><strong>Address 3</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="obAddress3" id="obAddress3" ng-model="order.billToAddress.address3"
+								   					ng-class="{'is-invalid': orderForm.obAddress3.$invalid, 'is-valid': orderForm.obAddress3.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obCity"><strong>City</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input required class="form-control form-control-sm" type="text" name="obCity" id="obCity" ng-model="order.billToAddress.city"
+								   					ng-class="{'is-invalid': orderForm.obCity.$invalid, 'is-valid': orderForm.obCity.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+					   							<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="country"><strong>Country</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   				</div>
+								   				<div class="input-group mb-3">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+													<ul class="dropdown-menu">
+														<li class="m-2">  
+															<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+										   					<input class="form-control form-control-sm" type="text" name="bCountryFilter" id="bCountryFilter" ng-model="bCountryFilter"/>	
+														</li>
+														<li ng-repeat="item in countries | filter: bCountryFilter | orderBy: '+isoCode'">
+															<a class="dropdown-item" href="" ng-click="setOrderCountry(item.isoCode, 'bill')">
+																{{item.name}}
+															</a>
+														</li>
+													</ul>
+													<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="bCountry" id="bCountry" ng-model="order.billToAddress.country" 
+													ng-class="{'is-invalid': orderForm.bCountry.$invalid, 'is-valid': orderForm.bCountry.$valid }"/> 
+												</div>
+					   						</div>
+					   						<div class="col-lg-6">
+					   							<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="bProvince"><strong>Province/State</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"><span ng-show="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'">*</span></span>
+						            					</div>
+								   					</div>
+								   				</div>
+								   				<div class="input-group mb-3" ng-if="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+													<ul class="dropdown-menu">
+														<li class="m-2">  
+															<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+										   					<input class="form-control form-control-sm" type="text" name="bProvinceFilter" id="bProvinceFilter" ng-model="bProvinceFilter"/>	
+														</li>
+														<li ng-repeat="item in bCountry.provinces| filter: bProvinceFilter | orderBy: '+isoCode'">
+															<a class="dropdown-item" href="" ng-click="setOrderProvince(item.isoCode, 'bill')">
+																{{item.name}}
+															</a>
+														</li>
+													</ul>
+													<input ng-required="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'" ng-disabled="true" type="text" class="form-control form-control-sm" 
+													name="bProvince" id="bProvince" ng-model="order.billToAddress.province" ng-class="{'is-invalid': orderForm.bProvince.$invalid, 'is-valid': orderForm.bProvince.$valid }"/> 
+												</div>
+												<div class="input-group mb-3" ng-if="order.billToAddress.country != 'CA' && order.billToAddress.country != 'US'">
+													<input type="text" class="form-control form-control-sm" name="bProvince" id="bProvince" ng-model="order.billToAddress.province"
+													ng-class="{'is-invalid': orderForm.bProvince.$invalid, 'is-valid': orderForm.bProvince.$valid }"/>
+												</div>
+					   						</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obPostalCode"><strong>Postal Code</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"><span ng-show="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'">*</span></span>
+						            					</div>
+								   					</div>
+								   					<input ng-required="order.billToAddress.country == 'CA' || order.billToAddress.country == 'US'" class="form-control form-control-sm" type="text" name="obPostalCode" id="obPostalCode" ng-model="order.billToAddress.postalCode"
+								   					ng-class="{'is-invalid': orderForm.obPostalCode.$invalid, 'is-valid': orderForm.obPostalCode.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="obPhone"><strong>Phone</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="obPhone" id="obPhone" ng-model="order.billToAddress.phone"
+								   					ng-class="{'is-invalid': orderForm.obPhone.$invalid, 'is-valid': orderForm.obPhone.$valid }"/>
+								   				</div>
+								   			</div>
+						   				</div>
+									</div>
+								</div>
+								<div class="col-sm-6 h-100">
+									<strong>Ship To:</strong>
+									<div class="card card-body">
+										<div class="row" ng-show="organization.shipToAddresses.length > 1">
+											<div class="col-lg-12" ng-show="organization.shipToAddresses != undefined && organization.shipToAddresses.length > 0">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="address"><strong>ShipTo Addresses</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<p><small>Select a shipping address from the dropdown to populate the order. You can manually change the order shipping address 
+								   					values at any time.</small></p>
+								   				</div>
+								   				<div class="input-group mb-3">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Shipping Address</button>
+													<ul class="dropdown-menu">
+														<li ng-repeat="shipTo in organization.shipToAddresses">
+															<a class="dropdown-item" href="" ng-click="setShipTo(shipTo.id)">
+																{{ (shipTo.nickname != undefined ? shipTo.nickname + ' - ' : '')}}{{shipTo.address1}} {{shipTo.city}}
+															</a>
+														</li>
+													</ul>
+													<input type="text" class="form-control form-control-sm" name="address" id="address" ng-model="order.shipToAddress.address1" /> 
+												</div>
+								   			</div>
+								   		</div>
+								   		<div class="row">
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osCompanyName"><strong>ShipTo Name</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input required class="form-control form-control-sm" type="text" name="osCompanyName" id="osCompanyName" ng-model="order.shipToAddress.companyName"
+								   					ng-class="{'is-invalid': orderForm.osCompanyName.$invalid, 'is-valid': orderForm.osCompanyName.$valid }"/>
+								   				</div>
+								   			</div>
+											<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osContactName"><strong>ATTN</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="osContactName" id="osContactName" ng-model="order.shipToAddress.contactName"
+								   					ng-class="{'is-invalid': orderForm.osContactName.$invalid, 'is-valid': orderForm.osContactName.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osContactEmail"><strong>Contact Email</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="email" name="osContactEmail" id="osContactEmail" ng-model="order.shipToAddress.contactEmail"
+								   					ng-class="{'is-invalid': orderForm.osContactEmail.$invalid, 'is-valid': orderForm.osContactEmail.$valid }"
+								   					ng-pattern="/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/"/>
+								   				</div>
+								   			</div>
+											<div class="col-lg-6">
+												<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osAddress1"><strong>Address 1</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input required class="form-control form-control-sm" type="text" name="osAddress1" id="osAddress1" ng-model="order.shipToAddress.address1"
+								   					ng-class="{'is-invalid': orderForm.osAddress1.$invalid, 'is-valid': orderForm.osAddress1.$valid }"/>
+								   				</div>
+							   				</div>
+							   				<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osAddress2"><strong>Address 2</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="osAddress2" id="osAddress2" ng-model="order.shipToAddress.address2"
+								   					ng-class="{'is-invalid': orderForm.osAddress2.$invalid, 'is-valid': orderForm.osAddress2.$valid }"/>
+								   				</div>
+							   				</div>
+							   				<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osAddress3"><strong>Address 3</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="osAddress3" id="osAddress3" ng-model="order.shipToAddress.address3"
+								   					ng-class="{'is-invalid': orderForm.osAddress3.$invalid, 'is-valid': orderForm.osAddress3.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osCity"><strong>City</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   					<input required class="form-control form-control-sm" type="text" name="osCity" id="osCity" ng-model="order.shipToAddress.city"
+								   					ng-class="{'is-invalid': orderForm.osCity.$invalid, 'is-valid': orderForm.osCity.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="sCountry"><strong>Country</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger">*</span>
+						            					</div>
+								   					</div>
+								   				</div>
+					   							<div class="input-group mb-3">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Country</button>
+													<ul class="dropdown-menu">
+														<li class="m-2">  
+															<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+										   					<input class="form-control form-control-sm" type="text" name="sCountryFilter" id="sCountryFilter" ng-model="sCountryFilter"/>	
+														</li>
+														<li ng-repeat="item in countries | filter: sCountryFilter | orderBy: '+isoCode'">
+															<a class="dropdown-item" href="" ng-click="setOrderCountry(item.isoCode, 'ship')">
+																{{item.name}}
+															</a>
+														</li>
+													</ul>
+													<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="sCountry" id="sCountry" ng-model="order.shipToAddress.country" 
+													ng-class="{'is-invalid': orderForm.sCountry.$invalid, 'is-valid': orderForm.sCountry.$valid }"/> 
+												</div>
+					   						</div>
+					   						<div class="col-lg-6">
+					   							<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="province"><strong>Province/State</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"><span ng-show="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'">*</span></span>
+						            					</div>
+								   					</div>
+								   				</div>
+								   				<div class="input-group mb-3" ng-if="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'">
+													<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Province/State</button>
+													<ul class="dropdown-menu">
+														<li class="m-2">  
+															<label class="pe-2" for="cFilter"><strong>Filter: </strong></label> 					
+										   					<input class="form-control form-control-sm" type="text" name="sProvinceFilter" id="sProvinceFilter" ng-model="sProvinceFilter"/>	
+														</li>
+														<li ng-repeat="item in sCountry.provinces | filter: sProvinceFilter | orderBy: '+isoCode'">
+															<a class="dropdown-item" href="" ng-click="setOrderProvince(item.isoCode, 'ship')">
+																{{item.name}}
+															</a>
+														</li>
+													</ul>
+													<input ng-required="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'" ng-disabled="true" type="text" class="form-control form-control-sm" 
+													name="sProvince" id="sProvince" ng-model="order.shipToAddress.province" ng-class="{'is-invalid': orderForm.sProvince.$invalid, 'is-valid': orderForm.sProvince.$valid }"/> 
+												</div>
+												<div class="input-group mb-3" ng-if="order.shipToAddress.country != 'CA' && order.shipToAddress.country != 'US'">
+													<input type="text" class="form-control form-control-sm" name="sProvince" id="sProvince" ng-model="order.shipToAddress.province"
+													ng-class="{'is-invalid': orderForm.sProvince.$invalid, 'is-valid': orderForm.sProvince.$valid }"/>
+												</div>
+					   						</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osPostalCode"><strong>Postal Code</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"><span ng-show="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'">*</span></span>
+						            					</div>
+								   					</div>
+								   					<input ng-required="order.shipToAddress.country == 'CA' || order.shipToAddress.country == 'US'" class="form-control form-control-sm" type="text" name="osPostalCode" id="osPostalCode" ng-model="order.shipToAddress.postalCode"
+								   					ng-class="{'is-invalid': orderForm.osPostalCode.$invalid, 'is-valid': orderForm.osPostalCode.$valid }"/>
+								   				</div>
+								   			</div>
+								   			<div class="col-lg-6">
+								   				<div class="form-group mt-2">
+								   					<div class="input-group">
+								   						<label class="pe-2" for="osPhone"><strong>Phone</strong></label>
+								   						<div class="input-group-append">
+						            						<span class="text-danger"></span>
+						            					</div>
+								   					</div>
+								   					<input class="form-control form-control-sm" type="text" name="osPhone" id="osPhone" ng-model="order.shipToAddress.phone"
+								   					ng-class="{'is-invalid': orderForm.osPhone.$invalid, 'is-valid': orderForm.osPhone.$valid }"/>
+								   				</div>
+								   			</div>
+						   				</div>
+									</div>
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<a href="#/order"><button type="button" class="btn btn-outline-danger m-1 btn-sm">Cancel</button></a>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="orderForm.$invalid">Save Order</button>
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			</form>
+	    </div>	
+	    
+	    <div class="modal" id="customerModal" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content" ng-controller="organizationController">
+	    			<div class="modal-body">
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<strong>Select Customer</strong>
+	    						<span class="float-end" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times text-danger"></i></span>
+	    						<p><small>Type in a customer name and the list below will update as matches are found. Click on a customer in the list to
+								assign to the order.</small></p>
+	    					</div>
+	    				</div>
+	    				<div class="row">
+	    					<div class="col-sm-12">
+	    						<div class="row mt-1">
+				    				<div class="col-sm-12">
+				                        <form name="searchForm" id="searchForm">
+						   					<div class="input-group input-group-sm">		   					
+						   						<input class="form-control form-control-sm" ng-focus="focusSearch" required ng-change="findCustomersByKeyword()"
+						   						ng-model="keyword" type="text" placeholder="Keyword Search" id="keyword" name="keyword">
+					   							<button class="btn btn-outline-secondary btn-sm" type="submit" ng-disabled="searchForm.$invalid">
+					   								<i class="fa fa-search"></i>
+					   							</button>			   						 
+						   					</div>  		
+						            	</form>
+				    				</div>
+			    				</div>
+			    			</div>
+			    		</div>
+						<div class="row mt-3">
+							<div class="col-sm-12">
+								<small class="ms-1"><strong>Results</strong> <span class="ms-2 badge bg-dark">{{ searchResults.totalResults }}</span></small>
+								<table class="table table-striped table-hover table-sm small">
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Location</th>
+										</tr>
+									</thead>
+									<tbody>
+				   						<tr ng-repeat="item in searchResults.results" ng-click="setOrganization(item.id, item.name)">
+				   							<td>{{item.name}}</td>
+				   							<td>{{item.address}}, {{item.city}}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>   	
+		            	<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Close</button>
+							</div>
+						</div>			
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div class="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+</div>

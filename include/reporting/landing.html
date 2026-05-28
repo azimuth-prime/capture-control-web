@@ -1,0 +1,133 @@
+<section class="row container-fluid ml-0 mr-0 pl-0 pr-0" ng-controller="userController" ng-init="init();">
+	<div class="col-xs-12 col-sm-12 col-md-12">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb bg-white">
+				<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Reporting</li>
+			</ol>  
+		</nav>
+		<div class="row">
+			<div class="col-sm-6 p-2">
+				<div class="card m-2 p-0 h-100">
+					<div class="card-header text-center" style="background-color:#f8f9fa;color:#343a40">
+						<h2>
+							<i class="fas fa-box"></i>
+						</h2>				
+						<h6>Inventory</h6>
+					</div>
+					<div class="card-body small"> 
+						<div class="row">
+							<div class="col-sm-12">
+								<p>
+									Below is a listing of inventory reports. Click on the individual reports to access each.
+								</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-6">
+								<ul class="list-group">
+									<a href="#/reporting/inventory-adjustments" class="list-group-item list-group-item-action">Inventory Adjustments</a>
+									<a href="#/reporting/inventory-spot-count" class="list-group-item list-group-item-action">Inventory Spot Count</a>
+									<a href="#/reporting/product-availability" class="list-group-item list-group-item-action">Product Availability</a>
+									<a href="#/reporting/inventory-receipts" class="list-group-item list-group-item-action">Inventory Receipts</a>
+									<a href="#/reporting/inventory-count-location" class="list-group-item list-group-item-action">Inventory Count / Location</a>
+								</ul>
+							</div>
+							<div class="col-sm-6">
+								<ul class="list-group">
+									<a href="#/reporting/inventory-transfers" class="list-group-item list-group-item-action">Inventory Transfers</a>
+									<a href="#/reporting/inventory-availability" class="list-group-item list-group-item-action">Inventory Availability</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Inventory Value Summary</a>
+									<a href="#/reporting/inventory-audit" class="list-group-item list-group-item-action disabled">Inventory Audit</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Inventory Monthly Demand Summary</a>
+								</ul>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 p-2">
+				<div class="card m-2 p-0 h-100">
+					<div class="card-header text-center" style="background-color:#f8f9fa;color:#343a40">
+						<h2>
+							<i class="fas fa-cash-register"></i>
+						</h2>				
+						<h6>Sales</h6>
+					</div>
+					<div class="card-body small">
+						<div class="row">
+							<div class="col-sm-12">
+								<p class="">
+									Click on a sales report below to access more detail.
+								</p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-6">
+								<ul class="list-group">
+									<a href="#/reporting/cancelled-sales-orders" class="list-group-item list-group-item-action">Order Cancellation Report</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Sales Invoice Summary By Period</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Top N Sales Invoice Summary</a>
+									<a href="#/reporting/backordered-sales-orders" class="list-group-item list-group-item-action">Backordered Sales Orders</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Booked Orders</a>
+									<a href="#/reporting/sales-orders-by-customer" class="list-group-item list-group-item-action">Sales Orders By Customer Summary</a>
+								</ul>
+							</div>
+							<div class="col-sm-6">
+								<ul class="list-group">
+									<a href="#/reporting/sales-orders-by-dates" class="list-group-item list-group-item-action">Sales Order Summary By Period</a>
+									<a href="#/reporting/overdue-sales-orders" class="list-group-item list-group-item-action">Overdue Sales Orders</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Sales By Product</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Open Sales Quotes</a>
+									<a href="#/reporting/sales-orders-by-salesperson" class="list-group-item list-group-item-action">Sales Orders By Salesperson</a>
+									<a href="#" class="list-group-item list-group-item-action disabled">Completed Orders</a>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 p-2">
+				<div class="card m-2 p-0 h-100">
+					<div class="card-header text-center" style="background-color:#f8f9fa;color:#343a40">
+						<h2>
+							<i class="fas fa-shopping-cart"></i>
+						</h2>				
+						<h6>Purchase</h6>
+					</div>
+					<div class="card-body">
+						
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-6 p-2">
+				<div class="card m-2 p-0 h-100">
+					<div class="card-header text-center" style="background-color:#f8f9fa;color:#343a40">
+						<h2>
+							<i class="fas fa-shopping-cart"></i>
+						</h2>				
+						<h6>Customer / Supplier</h6>
+					</div>
+					<div class="card-body">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+    
+    
+    <div class="modal" id="processingDialog" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="loader"></div>
+                    <div clas="loader-txt">
+                        <p>{{loadingMessage}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

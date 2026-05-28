@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sales Order # - ${(order.id)!}</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta name="description" content="">
+    	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap" rel="stylesheet">
+    	
+        <style>
+        	@page {
+        		size: 11in 8.5in;
+				margin-bottom: 0.2in;
+				margin-left: 0.2in;
+				margin-right: 0.2in;
+				margin-top: 0.2in;	
+			}
+			
+			.card {
+				width: 279.4 mm;
+				padding-left: 10px;
+				padding-right: 10px;
+				border: 1px solid #CCCCCC;
+				margin-left: 10px;
+				margin-right: 10px;
+			}
+			
+			.center {
+				text-align: center;
+			}
+			
+			.left {
+				text-align: left;
+			}
+			
+			.right {
+				text-align: right;
+				
+			}
+			
+			.grid-container {
+				display: grid;
+				grid: auto auto auto auto auto auto auto auto auto auto auto auto;
+				grid-row-gap: 5px;
+				grid-column-gap: 5px;
+			}
+			
+			.row {
+				display: flex;
+				grid-row: span 12;
+				padding-top: 5px;
+				padding-bottom: 5px;
+				width: 100%;
+				align-items:center;
+			}
+			
+			.upper {
+				text-transform: uppercase;
+			}
+			
+			.vertical-text {
+				text-align: center; 
+				transform: rotate(270deg);
+			}
+			
+			.text-left {
+				text-align:left;
+			}
+			
+			.text-right {
+				text-align:right;
+			}
+			
+			.text-center {
+				text-align:center;
+			}
+			
+			.me-1 {
+				margin-right: 5px;
+			}
+			
+			.me-2 {
+				margin-right: 10px;
+			}
+			
+			.me-3 {
+				margin-right: 15px;
+			}
+			
+			.sup {
+				position: relative; 
+				top: -0.5em; 
+				font-size: 70%; 
+			}
+        	
+        </style>	
+	</head>
+	<body style="font-size: 12px;font-family: 'Open Sans', sans-serif;">
+		<section class="page">
+				<div class="grid-container">
+					<div class="card" style="min-height: 80px;">
+						<div class="row" style="height:50px;">
+							<table style="width: 100%;table-layout: fixed;">
+								<tbody>
+									<tr>
+										<td class="text-left">
+											<img src="https://gap-bizhub.globalairparts.ca/assets/images/logos/gap-logo.png" style="width:100px;height:auto;" />
+										</td>
+										<td class="text-center">
+											<strong>
+												${company.name} <br />
+												${company.address.address1} <br />
+												${company.address.city}, ${company.address.province}, ${company.address.country}, ${company.address.postalCode}<br />
+												${company.address.phone}
+											</strong>
+										</td>
+										<td class="text-center">
+											<img src="https://gap-bizhub.globalairparts.ca/capture/util/barcode/${order.id}/200/25"/>
+										</td>
+										<td class="text-right">
+											<h2 class="upper" style="font-size:14px"><strong>Sales Order #: ${(order.id)!}</strong></h2>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="card">
+						<div class="row upper">
+							<table style="width:100%;font-size:10px">
+								<tbody>
+									<tr>
+										<td class="text-center">
+											<strong>Sales Order #:</strong> ${(order.id)!}
+										</td>
+										<td class="text-center">
+											<strong>Status:</strong> ${(order.state)!}
+										</td>
+										<td class="text-center">
+											<strong>Sales Order Date:</strong> ${(order.submittedDate?date)!}
+										</td>
+										<td class="text-center">
+											<strong>Shipped Date:</strong> ${(order.shippedDate?date)!}
+										</td>
+										<td class="text-center">
+											<strong>Purchase Order #:</strong> ${(order.poNumber)!}
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="card">
+						<div class="row upper" style="height:100px;">
+							<table width="100%" style="border-collapse: collapse;table-layout: fixed;">
+								<tbody>
+									<tr>
+										<td class="text-center" style="font-size:14px"><strong>Bill To</strong></td>
+										<td class="text-center" style="font-size:14px"><strong>Ship To</strong></td>
+									</tr>
+									<tr>
+										<td class="text-center" style="vertical-align: top;font-size:10px">
+											<strong>
+												${(order.customer.name)!} <br />
+												${(order.billToAddress.address1)!} <#if order.billToAddress.address2??></#if> <#if order.billToAddress.address3??></#if><br />
+												${(order.billToAddress.city)!}, ${(order.billToAddress.province)!} <br />
+												${(order.billToAddress.country)!}, ${(order.billToAddress.postalCode)!} 
+											</strong>
+										</td>
+										<td class="text-center" style="vertical-align: top;font-size:10px">
+											<strong>
+												${(order.customer.name)!} <br />
+												${(order.shipToAddress.address1)!} <#if order.shipToAddress.address2??></#if> <#if order.shipToAddress.address3??></#if><br />
+												${(order.shipToAddress.city)!}, ${(order.shipToAddress.province)!} <br />
+												${(order.shipToAddress.country)!}, ${(order.shipToAddress.postalCode)!} <br />
+												ATTN: ${(order.shipToAddress.contactName)!}
+											</strong>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="card" style="min-height: 300px;">
+						<div class="row">
+							<table style="width:100%;font-size:9px;font-weight:400;">
+								<thead>
+									<tr>
+										<th class="text-left">Line #</th>
+										<th class="text-left">Part Number</th>
+										<th class="text-center">Description</th>
+										<th class="text-center">Serial Number / Condition</th>
+										<th class="text-center">Unit Price</th>
+										<th class="text-center">Qty</th>
+										<th class="text-center">UoM</th>
+										<th class="text-center">Total</th>
+										<th class="text-center">Sales Terms</th>
+									</tr>
+								</thead>
+								<tbody>
+									<#list order.items?sort_by("lineNumber") as item>
+										<tr>
+											<td class="text-left">${(item.lineNumber + 1)!}</td>
+											<td class="text-left">${(item.sku.productName)!}</td>
+											<td class="text-center">${(item.sku.description)!}</td>
+											<td class="text-center"> <!-- Loop through lots to get serial -->
+												<#list item.inventoryLots as lot>
+													<span> ${(lot.inventory.lotSerial)!}${(" - " + lot.inventory.condition)!} </span>
+												</#list>
+											</td>
+											<td class="text-center">${(item.unitPrice?string.currency)!}</td>
+											<td class="text-center">${(item.quantityShipped)!}</td>  
+											<td class="text-center">${(item.sku.stockUnit)!}</td>
+											<td class="text-center">${(item.priceInfo.subtotal?string.currency)!}</td>
+											<td class="text-center">${(item.salesTerms)!}</td>
+										</tr>
+									</#list>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="card">
+						<div class="row">
+							<table style="width: 100%;table-layout: fixed;">
+								<tbody>
+									<tr>
+										<td width="65%" class="text-left" style="vertical-align: top;">
+											<table style="width:100%;margin-left:none;">
+												<tbody>
+													<tr>
+														<td class="text-left" style=" font-size:10px;">
+															<div class="card">
+																${(order.instructions)!}
+															</div>
+														</td>
+													</tr>
+													<tr>
+														<td class="text-left" style=" font-size:7px; font-weight:300">
+															<div class="card">
+																BY ISSUING A PURCHASE ORDER THE BUYER AGREES TO THE FOLLOWING Buyer certifies that any export or re-export from the United States of Aircraft or Aircraft Parts will be in compliance with all applicable laws and regulations, including, but not limited to
+																the U.S. Export Administration Regulations (EAR), International Traffic in Arms Regulations (ITAR), regulations promulgated by the U.S. Office of Foreign Asset Control (OFAC), and the Foreign Trade Statistics Regulations (FTSR). Buyer expressly assumes
+																responsibility for determining the export classification of all Aircraft and Aircraft Parts and further acknowledges that it is the exporter of record pursuant to 15 CFR 758.3(b). Buyer has or will issue a Power of Attorney to Buyer’s U.S. agent to file an Automated
+																Export System (AES) entry of Shipper’s Export Declaration (SED) filing on Seller’s behalf. Buyer also expressly assumes responsibility for ITAR compliance, including obtaining proper export licenses when required . Buyer’s freight forwarder will file an accurately
+																completed AES or SED with the U.S. Census when required. Buyer will provide a copy of the Power of Attorney and AES filing to Seller, upon request. ALL FUNDS IN USD. FUNDS RECEIVED IN CANADIAN DOLLARS WILL BE REJECTED AND RESENT TO THE
+																PURCHASER AT THEIR EXPENSE. Cores not returned within 30 days will incur rental fees of $1000/month or partial month after core return due date
+															</div>
+														</td>
+													</tr>
+													<tr>
+														<td class="text-left" style="font-size:8px;">
+															<div class="card">
+																<b>CONTAINER INITIAL PACKER ADDRESS AND RESPONSIBLE PARTY:</b> 
+																Global Airparts Inc. #15-3275 McCallum Rd, Abbotsford, B.C., Canada, V2S 7W8	
+															</div>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</td>
+										<td width="35%" style="vertical-align: top;">
+											<table style="width:100%;border-collapse: collapse;table-layout: fixed; font-size:11px;">
+												<tbody class="text-right upper">
+													<tr>
+														<td><strong>Subtotal</strong></td>
+														<td><strong>${(order.price.subtotal?string.currency)!}</strong></td>
+													</tr>
+													<#list order.price.taxes as tax>
+														<tr class="mt-2">
+															<td><strong>
+																	<#if tax?index == 0>
+																	  Taxes
+																	</#if>
+																</strong>
+															</td>
+															<td class="text-right">
+																<strong class="me-3"><small>${tax.name} ( ${tax.rate} % ):</small></strong>
+																<strong class="">${tax.amount?string.currency}</strong>
+															</td>
+														</tr>
+													</#list>
+													<tr style="border-top:1px solid black;">
+														<td></td>
+														<td></td>
+													</tr>
+													<tr>
+														<td><strong>Total</strong></td>
+														<td><strong>${(order.price.total?string.currency)!}</strong></td>
+													</tr>
+												</tbody>
+											</table>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+        </section>
+  	</body>
+</html>

@@ -1,0 +1,974 @@
+<div ng-controller="userController" ng-init="init()">
+	<section class="row container-fluid ms-0 me-0 pe-0 ps-0 mt-2" ng-controller="skuController" ng-init="findGlobalConfig(); findSkuConfigInfo(); 
+	findInventoryById(); findTransactionsByInventoryId();">
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<nav aria-label="breadcrumb">
+				<ol class="breadcrumb bg-white">
+					<li class="breadcrumb-item"><a href="#/">Dashboard</a></li>
+					<li class="breadcrumb-item"><a href="#/products">Products</a></li>
+					<li class="breadcrumb-item"><a href="#/products/{{invitem.productId}}">{{invitem.productName}}</a></li>
+					<li class="breadcrumb-item"><a href="#/products/skus/{{invitem.skuId}}">{{invitem.skuId}}</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Inventory Lot/Serial: {{invitem.lotSerial}}</li>
+				</ol>  
+			</nav>
+			<div class="row mb-2">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<div class="card m-1 h-100">
+						<div class="card-body">
+							<ul class="nav nav-tabs">
+								<li class="nav-item">
+									<a class="nav-link active" aria-current="page" data-bs-toggle="tab" data-bs-target="#main" href="">Main</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#media" href="">Media</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#transactions" href="">Transactions</a>
+								</li>
+								<li class="nav-item" ng-show="globalConfig.rfidEnabled">
+									<a class="nav-link" data-bs-toggle="tab" data-bs-target="#rfid" href="" ng-click="findRFIDTagsByInventoryId(invitem.id)">RFID</a>
+								</li>
+							</ul>
+							<div class="tab-content" id="tab">
+								<div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+									<div class="card m-1 h-100">
+										<div class="card-body">
+											<form name="newLotForm" id="newLotForm" novalidate ng-submit="updateLot()">
+												
+												<div class="row mt-3">
+													 <div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="lotSerial"><strong>Lot/Serial</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>Enter a Lot or Serial Number. If no value is entered a default Lot number will be generated using today's date. LOT and Serial numbers
+										   					must be unique.</small>
+										   					<input class="form-control form-control-sm" type="text" name="nLotSerial" id="nLotSerial" 
+										   					ng-model="invitem.lotSerial" required ng-change="serialLotExists()"
+										   					ng-class="{'is-invalid': newLotForm.nLotSerial.$touched && newLotForm.nLotSerial.$invalid, 
+										   					'is-valid' : newLotForm.nLotSerial.$touched && newLotForm.nLotSerial.$valid}" ng-change="serialLotExists()"/> 
+										   					<p class="mt-1" ng-show="serialMessage != undefined">
+										   						<small class="text-danger">{{serialMessage}}</small>
+										   					</p>
+										   				</div>
+										   			</div>
+													<div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="productName"><strong>SKU Id</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<small>The parent SKU of this inventory/lot.</small>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="productName" id="productName" ng-model="invitem.skuId"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="productName"><strong>Product Name</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<small>The parent product's name of this inventory/lot.</small>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="productName" id="productName" ng-model="invitem.productName"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6 ">
+										   				<div class="form-group mt-2 h-100 align-text-bottom">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="creationDate"><strong>Warehouse</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger"></span>
+								            					</div>
+										   					</div>
+										   					<small>Auto generated date for when this SKU was first created within the system.</small>
+										   					<div class="input-group mb-3">
+																<button ng-disabled="true" class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Select Warehouse</button>
+																<ul class="dropdown-menu">
+																	<li ng-repeat="warehouseOption in skuConfig.warehouses">
+																		<a class="dropdown-item" href="" ng-click="setWarehouse(warehouseOption.id, newItem)">
+																			{{warehouseOption.name}}
+																		</a>
+																	</li>
+																</ul>
+																<input required ng-disabled="true" type="text" class="form-control form-control-sm" name="warehouse" id="warehouse" ng-model="invitem.warehouse.name" /> 
+															</div>
+										   					
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="lotSerial"><strong>State</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>The inventory item's state. The item can be 'ACTIVE', 'INACTIVE' or 'OUTFORSERVICE'. State
+										   					changes can only be made via workflows ie: sending an item for servicing.</small>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="state" id="state" 
+										   					ng-model="invitem.state"/>
+										   				</div>
+										   			</div>
+									   				<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="location"><strong>Location</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   					<small>The location of the item in the physical warehouse.</small>
+										   					<div class="input-group">
+																<span ng-show="locations.length > 0">
+																	<button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">Previous Locations</button>
+																	<ul class="dropdown-menu">
+																		<li ng-repeat="location in locations">
+																			<a class="dropdown-item" href="" ng-click="invitem.location = location;">
+																				{{location}}
+																			</a>
+																		</li>
+																	</ul>
+																</span>
+																<input required ng-disabled="false" type="text" class="form-control form-control-sm" name="location" id="location" 
+																ng-model="invitem.location" ng-class="{'is-invalid': newLotForm.location.$touched && newLotForm.location.$invalid,
+										   						'is-valid' : newLotForm.location.$touched && newLotForm.location.$valid }"/> 
+															</div>
+										   				</div>
+										   			</div>
+										   			
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="onhand"><strong>Quantity</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="text-danger">*</span>
+								            					</div>
+										   					</div>
+										   					<small>Enter the quantity value of the new lot. Serial Number tracked products can only enter a value of 1.</small>
+										   					<input ng-required="(invitem.itemType == 'INVENTORIED')" ng-disabled="(invitem.itemType == 'INFINITE' || invitem.itemType == 'DROPSHIP')" 
+										   					class="form-control form-control-sm" type="number" max="{{(sku.controlType === 'SERIAL') ? 1 : 10000000}}" name="onhand" id="onhand" ng-model="invitem.onHand"
+										   					ng-class="{'is-invalid': newLotForm.onhand.$touched && newLotForm.onhand.$invalid, 
+										   					'is-valid' : newLotForm.onhand.$touched && newLotForm.onhand.$valid}"/>
+										   					
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+														<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pr-2" for="receivedDate"><strong>Received Date</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>Date the inventory/lot was received in the system.</small>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="date" name="receivedDate" id="receivedDate" ng-model="invitem.receivedDate"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pr-2" for="receivedDate"><strong>Expiry Date</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>If applicable, the expiry date of the inventory lot.</small>
+										   					<input class="form-control form-control-sm" type="date" name="expiryDate" id="expiryDate" ng-model="invitem.expiryDate"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pe-2" for="poNumber"><strong>Purchase Order Number</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>The number/id for the Purchase Order used to for this inventory/lot.</small>
+										   					<input ng-disabled="true" class="form-control form-control-sm" type="text" name="poNumber" id="poNumber" ng-model="invitem.poNumber"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pr-2" for="condition"><strong>Condition</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>A field for the condition value.</small>
+										   					<input class="form-control form-control-sm" type="text" name="condition" id="condition" ng-model="invitem.condition"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pr-2" for="reference"><strong>Reference</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>A field to contain a reference value.</small>
+										   					<input class="form-control form-control-sm" type="text" name="reference" id="reference" ng-model="invitem.reference"/>
+										   				</div>
+										   			</div>
+										   			<div class="col-sm-6">
+										   				<div class="form-group mt-2">
+										   					<div class="input-group">
+										   						<label class="pr-2" for="specifications"><strong>Specification</strong></label>
+										   						<div class="input-group-append">
+								            						<span class="require"></span>
+								            					</div>
+										   					</div>
+										   					<small>A field to contain any specification value.</small>
+										   					<input class="form-control form-control-sm" type="text" name="specifications" id="specifications" ng-model="invitem.specifications"/>
+										   				</div>
+										   			</div>
+												</div>
+												<div class="row mt-3">
+													<div class="col-sm-12 text-end">
+														<button type="button" class="btn btn-outline-success m-1 btn-sm" data-bs-toggle="modal" data-bs-target="#printModal">Print Labels</button>
+														<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="findSkuById()">Reset</button>
+														<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="newLotForm.$invalid">Save Changes</button>
+													</div>
+												</div>
+											</form>		
+										</div>
+									</div>						
+								</div>
+								<div class="tab-pane fade" id="media" role="tabpanel" aria-labelledby="media-tab">
+									<div class="card m-1">
+										<div class="card-header">
+											<span class=""><strong>Media</strong></span>			
+											<span class="ms-2 badge bg-dark">{{invitem.media.length}}</span>		
+											<button class="btn btn-outline-dark float-end btn-sm" data-bs-toggle="modal" data-bs-target="#mediaModal">Add Media</button>
+											<p class="small">Manage lot/serial media. You can add images in png or jpg format as well as PDF documents. Use the 
+											buttons in the table below to remove any media items.</p>
+										</div>
+										<div class="card-body">
+											<table class="table table-hover table-sm table-striped small">
+												<thead>
+													<tr>
+														<th class="text-start"></th>
+														<th class="text-center">Name</th>
+														<th class="text-center">Size</th>
+														<th class="text-center">Type</th>
+														<th class="text-center">Creation Date</th>
+														<th class="text-center">Action</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr ng-repeat="media in invitem.media | orderBy:'creationDate'">
+														<td class="align-middle text-center">
+															<img class="img-thumbnail" src="{{media.path}}" width="50" ng-if="media.type =='IMAGE'"/>
+															<i class="fas fa-file-pdf fa-3x img-thumbnail" ng-if="media.type == 'PDF'"></i> 
+														</td>
+														<td class="align-middle text-center">{{media.name}}</td>   
+														<td class="align-middle text-center">{{media.size / 1024 | number:2}} KBs</td>
+														<td class="align-middle text-center">
+															{{media.type}}
+														</td>
+														<td class="align-middle text-center">{{media.creationDate | date:'medium'}}</td>
+														<td class="align-middle text-center">
+															<a href="{{media.path}}" target="_blank"><i class="fas fa-download m-2"></i></a>
+															<i class="far fa-trash-alt m-2" ng-click="deleteInventoryMediaById(media.id)"></i>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								<div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+									<div class="m-1">
+										<div class="card-header">
+											<span class=""><strong>Transactions</strong></span>			
+											<span class="ms-2 badge bg-dark">{{transactions.length}}</span>		
+											<p class="small">The below listing shows all transactions that pertain to this inventory lot item. Click on the supplied links to 
+											access further information.</p>
+										</div>
+									</div>
+									<div class="card-body">
+										<table class="table table-hover table-sm table-striped small">
+											<thead>
+												<tr>
+													<th class="text-start">Transaction Date</th>
+													<th class="text-center">Transaction Type</th>
+													<th class="text-center">Quantity</th>
+													<th class="text-center">Warehouse</th>
+													<th class="text-center">Location</th>
+													<th class="text-center">To Location</th>
+													<th class="text-center">Purchase Order</th>
+													<th class="text-center">Sales Order</th>
+													<th class="text-center">Service Order</th>
+													
+												</tr>
+											</thead>
+											<tbody>
+												<tr ng-repeat="item in transactions">
+													<td class="align-middle text-start">{{item.transactionDate | date:'medium'}}</td>
+													<td class="align-middle text-center">{{item.type}}</td>
+													<td class="align-middle text-center">{{item.quantity | number}}</td>   
+													<td class="align-middle text-center">{{item.warehouse.name}}</td>
+													<td class="align-middle text-center">{{item.location}}</td>
+													<td class="align-middle text-center">{{item.toLocation}}</td>
+													<td class="align-middle text-center"><a href="#/purchase/{{item.purchaseOrderId}}">{{item.purchaseOrderId}}</a></td>
+													<td class="align-middle text-center"><a href="#/order/{{item.orderId}}">{{item.orderId}}</a></td>
+													<td class="align-middle text-center"><a href="#/serviceorder/{{item.serviceOrderId}}">{{item.serviceOrderId}}</a></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div class="tab-pane fade" id="rfid" role="tabpanel" aria-labelledby="rfid-tab" ng-show="globalConfig.rfidEnabled">
+									<div class="card m-1">
+										<div class="card-header">
+											<span class=""><strong>RFID</strong></span>			
+											<span class="ms-2 badge bg-dark">{{tags.length}}</span>		
+											<button class="btn btn-outline-dark float-end btn-sm" data-bs-toggle="modal" data-bs-target="#newTagModal">Add RFID Tag</button>
+											<p class="small">Manage your RFID tags for this lot/serial item. Click on the tag in the list below to see additional
+											information, edit the data or to delete it.</p>
+										</div>
+										<div class="card-body">
+											<small>
+											<table class="table table-hover table-sm table-striped">
+												<thead>
+													<tr>
+														<th class="text-start">Tag Id</th>
+														<th class="text-center">Last Found</th>
+														<th class="text-center">State</th>
+														<th class="text-center">Reader</th>
+														<th class="text-center">Antenna</th>
+														<th class="text-center">RSSI</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr ng-repeat="tag in tags" ng-click="viewTag(tag.id)">
+														<td class="align-middle text-start">{{tag.id}}</td>
+														<td class="align-middle text-center">{{tag.lastFoundDate | date:'medium'}}</td>
+														<td class="align-middle text-center">{{tag.status}}</td>   
+														<td class="align-middle text-center">{{tag.reader}}</td>
+														<td class="align-middle text-center">{{tag.antenna}}</td>
+														<td class="align-middle text-center">{{tag.rssi}}</td>
+													</tr>
+												</tbody>
+											</table>
+											</small>
+										</div>
+									</div>
+								</div>
+							</div> <!-- End Tab Content -->		
+						</div>
+					</div>
+				</div>
+			</div>
+			<div ng-include="'/include/components/toast-message.html'"></div>
+			
+	    </div>	
+	    
+	    <div class="modal" id="processingDialog" role="dialog">
+	        <div class="modal-dialog modal-sm" role="document">
+	            <div class="modal-content">
+	                <div class="modal-body text-center">
+	                    <div class="loader"></div>
+	                    <div clas="loader-txt">
+	                        <p>{{loadingMessage}}</p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    
+	    <div class="modal fade" id="tagModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="card card-body">
+						<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+						<form name="tagForm" id="tagForm" novalidate>
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-borderless table-sm">
+									<thead>
+										<tr>
+											<th width="50%"></th>
+											<th width="50%"></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pe-2" for="id"><strong>Tag Id: </strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The tag id used by the Edgehub system. This id is used for searches and filtering of tags within the system.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="tag.id"/>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pe-2" for="status"><strong>Status</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The tag status. <span class="fw-bold">'NEW'</span> - The tag has been created but has not yet been found in a warehouse scan. <span class="fw-bold text-success">'ACTIVE'</span>
+							   					 - The tag is in the warehouse and has been found by the latest warehouse scan. <span class="fw-bold text-danger">'MISSING'</span> - The tag was previously found in a scan making it ACTIVE but 
+							   					was not found in the last warehouse scan. <span class="fw-bold text-warning">'INACTIVE'</span> - The tag has been deactivated for reuse in the warehouse.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="status" id="status" ng-model="tag.status"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="location"><strong>Location</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The warehouse location of the tag. This value is set on creation of the tag.</small>
+							   				</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="onhand"><strong>Quantity</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The quantity entered when the tag was created. The tag quantity defaults to the inventory lot value.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="location" id="location" ng-model="tag.location"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="number" name="quantity" id="quantity" ng-model="tag.quantity"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="receivedDate"><strong>Creation Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The date that the tag was created in the system.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="receivedDate"><strong>Last Modified Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The date of the last modification to the tag.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="tag.creationDate"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="tag.lastModifiedDate"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="poNumber"><strong>Last Found Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The last date that the tag was found in a warehouse scan.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="price"><strong>Capture Reader</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The physical reader that found the tag during the warehouse scan.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastFoundDate" id="lastFoundDate" ng-model="tag.lastFoundDate"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="reader" id="reader" ng-model="tag.reader"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="currency"><strong>RSSI</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>RSSI is the signal strength value. The lower the number the stronger the signal.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="condition"><strong>Antenna</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The antenna number that had the best signal performance. Usually, but not always, this is the closest antenna to the tag.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="rssi" id="rssi" ng-model="tag.rssi"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="antenna" id="antenna" ng-model="tag.antenna"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="reference"><strong>Phase</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The phase value provides an angle of degree to help in locating the tag based on the antenna. This only applied to linear
+							   					antennas.</small>
+											</td>
+											<td></td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="phase" id="phase" ng-model="tag.phase"/>
+											</td>
+											<td></td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pr-2" for="specifications"><strong>User Data Bank</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The data that is stored in the tag's user data bank. Data size is dependent on tag specs and capbilities.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<textarea ng-disabled="true" rows="5" class="form-control form-control-sm" id="userbank" name="userbank" ng-model="tag.userDataBank"></textarea>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="printRFIDTag(tag.id, invitem.id)">Reprint RFID Tag</button>
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+							</div>
+						</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="newTagModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="card card-body">
+						<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+						<form name="tagForm" id="tagForm" novalidate>
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-borderless table-sm">
+									<thead>
+										<tr>
+											<th width="50%"></th>
+											<th width="50%"></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="location"><strong>Location</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The warehouse location of the tag. This value is set on creation of the tag.</small>
+							   				</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="onhand"><strong>Quantity</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The quantity entered when the tag was created. The tag quantity defaults to the inventory lot value.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input class="form-control form-control-sm" type="text" name="location" id="location" ng-model="tag.location"/>
+											</td>
+											<td>
+												<input class="form-control form-control-sm" type="number" name="quantity" id="quantity" ng-model="tag.quantity"/>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pr-2" for="specifications"><strong>User Data Bank</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The data that is stored in the tag's user data bank. Data size is dependent on tag specs and capbilities.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<textarea rows="5" class="form-control form-control-sm" id="userbank" name="userbank" ng-model="tag.userDataBank"></textarea>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="printRFIDTag(tag.id, invitem.id)">Create RFID Tag</button>
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+							</div>
+						</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    <!-- Print Label Modal. If RFID enabled then allow RFID tag quantity -->
+	    <div class="modal fade" id="printModal" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="printForm" id="printForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="vendor"><strong><small>Product Label Quantity</small></strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger">*</span>
+			            					</div>
+					   					</div>
+					   					<input required class="form-control form-control-sm" type="number" step="1" name="pLabelQty" id="pLabelQty" ng-model="label.pLabelQty"/>
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="printForm.$invalid" ng-click="printLabels()">Print Labels</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="mediaModal" role="dialog">
+	    	<div class="modal-dialog modal-sm" role="document">
+	    		<div class="modal-content">
+	    			<div class="modal-body">
+	    				<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+		    			<form name="mediaForm" id="mediaForm">
+			    			<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group">
+					   					<div class="input-group">
+					   						<label class="pe-2" for="id"><strong>Media Files</strong></label>
+					   						<div class="input-group-append">
+			            						<span class="text-danger"></span>
+			            					</div>
+					   					</div>
+					   					<small>Select an inventory image or PDF. After selecting click the upload button to attach it to the inventory item.</small>
+					   					<input class="form-control form-control-sm" id="formFileSm" type="file" name="mediaFile" id="mediaFile" accept=".png,.jpg,.pdf" onchange="angular.element(this).scope().getFileDetails(this)">
+					   				</div>
+					   			</div>
+					   		</div>
+					   		<div class="row mt-3">
+								<div class="col-sm-12 text-end">
+									<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+									<button type="submit" class="btn btn-outline-success m-1 btn-sm" ng-disabled="mediaForm.$invalid" ng-click="uploadInventoryMedia(invitem.id)">Upload</button>
+								</div>
+							</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="modal fade" id="tagModal" role="dialog">
+	    	<div class="modal-dialog" role="document">
+	    		<div class="modal-content">
+	    			<div class="card card-body">
+						<div class="row mt-1">
+							<div class="col-sm-12">
+								<span class="float-end me-2" data-bs-dismiss="modal"><i class="fas fa-times text-danger"></i></span>
+							</div>
+						</div>
+						<form name="tagForm" id="tagForm" novalidate>
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-borderless table-sm">
+									<thead>
+										<tr>
+											<th width="50%"></th>
+											<th width="50%"></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pe-2" for="id"><strong>Tag Id: </strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The tag id used by the Edgehub system. This id is used for searches and filtering of tags within the system.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="id" id="id" ng-model="tag.id"/>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pe-2" for="status"><strong>Status</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The tag status. <span class="fw-bold">'NEW'</span> - The tag has been created but has not yet been found in a warehouse scan. <span class="fw-bold text-success">'ACTIVE'</span>
+							   					 - The tag is in the warehouse nad has been found by the latest warehouse scan. <span class="fw-bold text-danger">'MISSING'</span> - The tag was previously found in a scan making it ACTIVE but 
+							   					was not found in the last warehouse scan. <span class="fw-bold text-warning">'INACTIVE'</span> - The tag has been deactivated for reuse in the warehouse.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="status" id="status" ng-model="tag.status"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="location"><strong>Location</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The warehouse location of the tag. This value is set on creation of the tag.</small>
+							   				</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="onhand"><strong>Quantity</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The quantity entered when the tag was created. The tag quantity is the total amount on the inventory lot.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="location" id="location" ng-model="tag.location"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="number" name="quantity" id="quantity" ng-model="tag.quantity"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="receivedDate"><strong>Creation Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The date that the tag was created in the system.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="receivedDate"><strong>Last Modified Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The date of the last modification to the tag.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="creationDate" id="creationDate" ng-model="tag.creationDate"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastModifiedDate" id="lastModifiedDate" ng-model="tag.lastModifiedDate"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="poNumber"><strong>Last Found Date</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The last date that the tag was found in a warehouse scan.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="price"><strong>Capture Reader</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>The physical reader that found the tag during the warehouse scan.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="date" name="lastFoundDate" id="lastFoundDate" ng-model="tag.lastFoundDate"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="reader" id="reader" ng-model="tag.reader"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pe-2" for="currency"><strong>RSSI</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="text-danger"></span>
+					            					</div>
+							   					</div>
+							   					<small>RSSI is the signal strength value. The lower the number the stronger the signal.</small>
+											</td>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="condition"><strong>Antenna</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The antenna number that had the best signal performance. Usually, but not always, this is the closest antenna to the tag.</small>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="rssi" id="rssi" ng-model="tag.rssi"/>
+											</td>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="antenna" id="antenna" ng-model="tag.antenna"/>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<div class="input-group">
+							   						<label class="pr-2" for="reference"><strong>Phase</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The phase value provides an angle of degree to help in locating the tag based on the antenna. This only applied to linear
+							   					antennas.</small>
+											</td>
+											<td></td>
+										</tr>
+										<tr>
+											<td>
+												<input ng-disabled="true" class="form-control form-control-sm" type="text" name="phase" id="phase" ng-model="tag.phase"/>
+											</td>
+											<td></td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<div class="input-group">
+							   						<label class="pr-2" for="specifications"><strong>User Data Bank</strong></label>
+							   						<div class="input-group-append">
+					            						<span class="require"></span>
+					            					</div>
+							   					</div>
+							   					<small>The data that is stored in the tag's user data bank. Data size is dependent on tag specs and capbilities.</small>
+											</td>
+										</tr>
+										<tr>
+											<td colspan="2">
+												<textarea ng-disabled="true" rows="5" class="form-control form-control-sm" id="userbank" name="userbank" ng-model="tag.userDataBank"></textarea>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="row mt-3">
+							<div class="col-sm-12 text-end">
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" ng-click="printRFIDTag(tag.id, invitem.id)">Reprint RFID Tag</button>
+								<button type="button" class="btn btn-outline-danger m-1 btn-sm" data-bs-dismiss="modal">Cancel</button>
+							</div>
+						</div>
+						</form>
+					</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</section>
+</div>
