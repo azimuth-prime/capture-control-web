@@ -1,17 +1,10 @@
-import { defineConfig } from 'vite';
-
-// ADD AFTER FRAMEWORK DECISION:
-// React:  import react from '@vitejs/plugin-react'
-// Angular: import analog from '@analogjs/vite-plugin-angular'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [
-    // ADD: react() or analog()
-  ],
+  plugins: [react()],
   resolve: {
-    alias: {
-      '@': '/src',
-    },
+    alias: { '@': '/src' },
   },
   server: {
     proxy: {
@@ -21,4 +14,15 @@ export default defineConfig({
       },
     },
   },
-});
+  build: {
+    chunkSizeWarningLimit: 250,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          query: ['@tanstack/react-query', 'axios', 'zustand'],
+        },
+      },
+    },
+  },
+})
