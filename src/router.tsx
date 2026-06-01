@@ -21,6 +21,37 @@ const MyAccount          = lazy(() => import('./modules/crm/components/MyAccount
 const InvoiceList   = lazy(() => import('./modules/invoice/components/InvoiceList').then((m) => ({ default: m.InvoiceList })))
 const InvoiceDetail = lazy(() => import('./modules/invoice/components/InvoiceDetail').then((m) => ({ default: m.InvoiceDetail })))
 
+// RMA
+const RmaList   = lazy(() => import('./modules/rma/components/RmaList').then((m) => ({ default: m.RmaList })))
+const RmaDetail = lazy(() => import('./modules/rma/components/RmaDetail').then((m) => ({ default: m.RmaDetail })))
+
+// Service Orders
+const ServiceOrderList   = lazy(() => import('./modules/service/components/ServiceOrderList').then((m) => ({ default: m.ServiceOrderList })))
+const ServiceOrderDetail = lazy(() => import('./modules/service/components/ServiceOrderDetail').then((m) => ({ default: m.ServiceOrderDetail })))
+
+// Edge Hubs
+const EdgeHubList   = lazy(() => import('./modules/edgehub/components/EdgeHubList').then((m) => ({ default: m.EdgeHubList })))
+const EdgeHubDetail = lazy(() => import('./modules/edgehub/components/EdgeHubDetail').then((m) => ({ default: m.EdgeHubDetail })))
+
+// Warehouse
+const Picking      = lazy(() => import('./modules/warehouse/components/Picking').then((m) => ({ default: m.Picking })))
+const PickDetail   = lazy(() => import('./modules/warehouse/components/PickDetail').then((m) => ({ default: m.PickDetail })))
+const Packing      = lazy(() => import('./modules/warehouse/components/Packing').then((m) => ({ default: m.Packing })))
+const PackDetail   = lazy(() => import('./modules/warehouse/components/PackDetail').then((m) => ({ default: m.PackDetail })))
+const Shipping     = lazy(() => import('./modules/warehouse/components/Shipping').then((m) => ({ default: m.Shipping })))
+const ShipDetail   = lazy(() => import('./modules/warehouse/components/ShipDetail').then((m) => ({ default: m.ShipDetail })))
+const TransferList = lazy(() => import('./modules/warehouse/components/TransferList').then((m) => ({ default: m.TransferList })))
+const TransferDetail = lazy(() => import('./modules/warehouse/components/TransferDetail').then((m) => ({ default: m.TransferDetail })))
+
+// Purchase Orders
+const PurchaseList         = lazy(() => import('./modules/purchase/components/PurchaseList').then((m) => ({ default: m.PurchaseList })))
+const PurchaseDetail       = lazy(() => import('./modules/purchase/components/PurchaseDetail').then((m) => ({ default: m.PurchaseDetail })))
+const PurchaseByState      = lazy(() => import('./modules/purchase/components/PurchaseByState').then((m) => ({ default: m.PurchaseByState })))
+const NewPurchaseOrder     = lazy(() => import('./modules/purchase/components/NewPurchaseOrder').then((m) => ({ default: m.NewPurchaseOrder })))
+const PurchaseReorder      = lazy(() => import('./modules/purchase/components/PurchaseReorder').then((m) => ({ default: m.PurchaseReorder })))
+const VendorPriceLists     = lazy(() => import('./modules/purchase/components/VendorPriceLists').then((m) => ({ default: m.VendorPriceLists })))
+const VendorPriceListDetail = lazy(() => import('./modules/purchase/components/VendorPriceListDetail').then((m) => ({ default: m.VendorPriceListDetail })))
+
 // Order
 const OrderList   = lazy(() => import('./modules/order/components/OrderList').then((m) => ({ default: m.OrderList })))
 const OrderDetail = lazy(() => import('./modules/order/components/OrderDetail').then((m) => ({ default: m.OrderDetail })))
@@ -51,13 +82,13 @@ export const router = createBrowserRouter([
   { path: '/import',                         element: ph('Inventory Import') },
 
   // --- Purchase Orders ---
-  { path: '/purchase',                 element: ph('Purchase Orders') },
-  { path: '/purchase/:id',             element: ph('Purchase Order Detail') },
-  { path: '/purchase/state/:state',    element: ph('Purchase Orders by State') },
-  { path: '/new-purchase-order',       element: ph('New Purchase Order') },
-  { path: '/purchase-reorder/:id',     element: ph('Re-Order') },
-  { path: '/vendor-price-lists',       element: ph('Vendor Price Lists') },
-  { path: '/vendor-price-list/:id',    element: ph('Vendor Price List Detail') },
+  { path: '/purchase',                 element: guard(<PurchaseList />) },
+  { path: '/purchase/:id',             element: guard(<PurchaseDetail />) },
+  { path: '/purchase/state/:state',    element: guard(<PurchaseByState />) },
+  { path: '/new-purchase-order',       element: guard(<NewPurchaseOrder />) },
+  { path: '/purchase-reorder/:id',     element: guard(<PurchaseReorder />) },
+  { path: '/vendor-price-lists',       element: guard(<VendorPriceLists />) },
+  { path: '/vendor-price-list/:id',    element: guard(<VendorPriceListDetail />) },
   { path: '/app/purchase/settings',    element: ph('Purchase Settings') },
 
   // --- Sales Orders ---
@@ -78,23 +109,23 @@ export const router = createBrowserRouter([
   { path: '/access-management/myaccount',  element: guard(<MyAccount />) },
 
   // --- Warehouse ---
-  { path: '/packing',           element: ph('Packing') },
-  { path: '/pack-details/:id',  element: ph('Pack Detail') },
-  { path: '/picking',           element: ph('Picking') },
-  { path: '/pick-details/:id',  element: ph('Pick Detail') },
-  { path: '/shipping',          element: ph('Shipping') },
-  { path: '/ship-details/:id',  element: ph('Ship Detail') },
-  { path: '/transfer',          element: ph('Transfers') },
-  { path: '/transfer/:id',      element: ph('Transfer Detail') },
+  { path: '/packing',           element: guard(<Packing />) },
+  { path: '/pack-details/:id',  element: guard(<PackDetail />) },
+  { path: '/picking',           element: guard(<Picking />) },
+  { path: '/pick-details/:id',  element: guard(<PickDetail />) },
+  { path: '/shipping',          element: guard(<Shipping />) },
+  { path: '/ship-details/:id',  element: guard(<ShipDetail />) },
+  { path: '/transfer',          element: guard(<TransferList />) },
+  { path: '/transfer/:id',      element: guard(<TransferDetail />) },
   { path: '/app/warehouse/settings', element: ph('Warehouse Settings') },
 
   // --- RMA ---
-  { path: '/rma',     element: ph('RMAs') },
-  { path: '/rma/:id', element: ph('RMA Detail') },
+  { path: '/rma',     element: guard(<RmaList />) },
+  { path: '/rma/:id', element: guard(<RmaDetail />) },
 
   // --- Service Orders ---
-  { path: '/serviceorder',       element: ph('Service Orders') },
-  { path: '/serviceorder/:id',   element: ph('Service Order Detail') },
+  { path: '/serviceorder',       element: guard(<ServiceOrderList />) },
+  { path: '/serviceorder/:id',   element: guard(<ServiceOrderDetail />) },
   { path: '/new-serviceorder',   element: ph('New Service Order') },
 
   // --- Reporting ---
@@ -123,9 +154,8 @@ export const router = createBrowserRouter([
   { path: '/admin/app-search',      element: guard(<AppSearch />) },
 
   // --- Edge Hubs ---
-  { path: '/edgehubs',              element: ph('Edge Hubs') },
-  { path: '/edgehubs/:id',          element: ph('Edge Hub Detail') },
-  { path: '/edgehubs/tags',         element: ph('Edge Hub Tags') },
+  { path: '/edgehubs',              element: guard(<EdgeHubList />) },
+  { path: '/edgehubs/:id',          element: guard(<EdgeHubDetail />) },
   { path: '/app/edgehubs/settings', element: ph('Edge Hub Settings') },
 
   // --- Auth ---
