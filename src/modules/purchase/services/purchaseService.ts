@@ -9,6 +9,7 @@ import type {
   ReceiveStockRequest,
   SavePOItemsRequest,
   PriceList,
+  PriceListItem,
   PriceListSummary,
   SavePLItemsRequest,
   RestockItem,
@@ -92,4 +93,13 @@ export const purchaseService = {
     filters: { state: string }[]
   }): Promise<AxiosResponse<PagedResult<POSummary>>> =>
     axiosInstance.post<PagedResult<POSummary>>('/capture/purchase/report/state', data),
+
+  findRestockBySkuId: (id: string): Promise<AxiosResponse<PriceListItem>> =>
+    axiosInstance.get<PriceListItem>(`/capture/purchase/pricelist/sku/${id}`),
+
+  saveVendorPricelistItem: (data: PriceListItem): Promise<AxiosResponse<PriceListItem>> =>
+    axiosInstance.post<PriceListItem>('/capture/purchase/pricelist/item', data),
+
+  findVendorsNotInRestock: (id: string): Promise<AxiosResponse<{ id: string; name: string }[]>> =>
+    axiosInstance.get<{ id: string; name: string }[]>(`/capture/purchase/vendor/restock/${id}`),
 }

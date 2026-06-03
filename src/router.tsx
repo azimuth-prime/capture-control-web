@@ -10,6 +10,14 @@ const AdminConfig = lazy(() => import('./modules/admin/components/AdminConfig').
 const AppConfig   = lazy(() => import('./modules/admin/components/AppConfig').then((m) => ({ default: m.AppConfig })))
 const AppSearch   = lazy(() => import('./modules/admin/components/AppSearch').then((m) => ({ default: m.AppSearch })))
 
+// Products
+const ProductList       = lazy(() => import('./modules/products/components/ProductList').then((m) => ({ default: m.ProductList })))
+const ProductDetail     = lazy(() => import('./modules/products/components/ProductDetail').then((m) => ({ default: m.ProductDetail })))
+const SkuDetail         = lazy(() => import('./modules/products/components/SkuDetail').then((m) => ({ default: m.SkuDetail })))
+const SkuBundleDetail   = lazy(() => import('./modules/products/components/SkuBundleDetail').then((m) => ({ default: m.SkuBundleDetail })))
+const InventoryDetail   = lazy(() => import('./modules/products/components/InventoryDetail').then((m) => ({ default: m.InventoryDetail })))
+const ProductImport     = lazy(() => import('./modules/products/components/ProductImport').then((m) => ({ default: m.ProductImport })))
+
 // CRM
 const OrganizationList   = lazy(() => import('./modules/crm/components/OrganizationList').then((m) => ({ default: m.OrganizationList })))
 const OrganizationDetail = lazy(() => import('./modules/crm/components/OrganizationDetail').then((m) => ({ default: m.OrganizationDetail })))
@@ -73,13 +81,13 @@ export const router = createBrowserRouter([
   { path: '/wms-dashboard', element: ph('Warehouse Dashboard') },
 
   // --- Products ---
-  { path: '/products',                       element: ph('Products') },
-  { path: '/products/:id',                   element: ph('Product Detail') },
-  { path: '/products/skus/:id',              element: ph('SKU Detail') },
-  { path: '/products/skus/inventory/:id',    element: ph('Inventory Detail') },
-  { path: '/products/skus/bundles/:id',      element: ph('SKU Bundle Detail') },
+  { path: '/products',                       element: guard(<ProductList />) },
+  { path: '/products/:id',                   element: guard(<ProductDetail />) },
+  { path: '/products/skus/:id',              element: guard(<SkuDetail />) },
+  { path: '/products/skus/inventory/:id',    element: guard(<InventoryDetail />) },
+  { path: '/products/skus/bundles/:id',      element: guard(<SkuBundleDetail />) },
   { path: '/app/products/settings',          element: ph('Product Settings') },
-  { path: '/import',                         element: ph('Inventory Import') },
+  { path: '/import',                         element: guard(<ProductImport />) },
 
   // --- Purchase Orders ---
   { path: '/purchase',                 element: guard(<PurchaseList />) },
