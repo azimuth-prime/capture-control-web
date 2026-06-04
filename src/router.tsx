@@ -51,6 +51,24 @@ const ShipDetail   = lazy(() => import('./modules/warehouse/components/ShipDetai
 const TransferList = lazy(() => import('./modules/warehouse/components/TransferList').then((m) => ({ default: m.TransferList })))
 const TransferDetail = lazy(() => import('./modules/warehouse/components/TransferDetail').then((m) => ({ default: m.TransferDetail })))
 
+// Reporting
+const ReportingLanding        = lazy(() => import('./modules/reporting/components/ReportingLanding').then((m) => ({ default: m.ReportingLanding })))
+const InventoryCountLocation  = lazy(() => import('./modules/reporting/components/InventoryCountLocation').then((m) => ({ default: m.InventoryCountLocation })))
+const ProductAvailability     = lazy(() => import('./modules/reporting/components/ProductAvailability').then((m) => ({ default: m.ProductAvailability })))
+const InventoryAvailability   = lazy(() => import('./modules/reporting/components/InventoryAvailability').then((m) => ({ default: m.InventoryAvailability })))
+const InventoryAdjustments    = lazy(() => import('./modules/reporting/components/InventoryAdjustments').then((m) => ({ default: m.InventoryAdjustments })))
+const InventoryReceipts       = lazy(() => import('./modules/reporting/components/InventoryReceipts').then((m) => ({ default: m.InventoryReceipts })))
+const InventoryTransfers      = lazy(() => import('./modules/reporting/components/InventoryTransfers').then((m) => ({ default: m.InventoryTransfers })))
+const InventorySpotCount      = lazy(() => import('./modules/reporting/components/InventorySpotCount').then((m) => ({ default: m.InventorySpotCount })))
+const InventoryAuditList      = lazy(() => import('./modules/reporting/components/InventoryAuditList').then((m) => ({ default: m.InventoryAuditList })))
+const InventoryAuditDetail    = lazy(() => import('./modules/reporting/components/InventoryAuditDetail').then((m) => ({ default: m.InventoryAuditDetail })))
+const SalesOrdersByDate       = lazy(() => import('./modules/reporting/components/SalesOrdersByDate').then((m) => ({ default: m.SalesOrdersByDate })))
+const CancelledSalesOrders    = lazy(() => import('./modules/reporting/components/CancelledSalesOrders').then((m) => ({ default: m.CancelledSalesOrders })))
+const BackorderedSalesOrders  = lazy(() => import('./modules/reporting/components/BackorderedSalesOrders').then((m) => ({ default: m.BackorderedSalesOrders })))
+const OverdueSalesOrders      = lazy(() => import('./modules/reporting/components/OverdueSalesOrders').then((m) => ({ default: m.OverdueSalesOrders })))
+const SalesBySalesperson      = lazy(() => import('./modules/reporting/components/SalesBySalesperson').then((m) => ({ default: m.SalesBySalesperson })))
+const SalesByCustomer         = lazy(() => import('./modules/reporting/components/SalesByCustomer').then((m) => ({ default: m.SalesByCustomer })))
+
 // Purchase Orders
 const PurchaseList         = lazy(() => import('./modules/purchase/components/PurchaseList').then((m) => ({ default: m.PurchaseList })))
 const PurchaseDetail       = lazy(() => import('./modules/purchase/components/PurchaseDetail').then((m) => ({ default: m.PurchaseDetail })))
@@ -137,23 +155,23 @@ export const router = createBrowserRouter([
   { path: '/new-serviceorder',   element: ph('New Service Order') },
 
   // --- Reporting ---
-  { path: '/reporting',                                element: ph('Reporting') },
-  { path: '/reporting/inventory-count-location',       element: ph('Inventory Count by Location') },
-  { path: '/reporting/product-availability',           element: ph('Product Availability') },
-  { path: '/reporting/inventory-availability',         element: ph('Inventory Availability') },
-  { path: '/reporting/sales-orders-by-dates',          element: ph('Sales Orders by Date') },
-  { path: '/reporting/inventory-adjustments',          element: ph('Inventory Adjustments') },
-  { path: '/reporting/inventory-receipts',             element: ph('Inventory Receipts') },
-  { path: '/reporting/inventory-spot-count',           element: ph('Inventory Spot Count') },
-  { path: '/reporting/inventory-audit',                element: ph('Inventory Audit') },
-  { path: '/reporting/inventory-audit-new',            element: ph('New Inventory Audit') },
-  { path: '/reporting/inventory-audit/:id',            element: ph('Inventory Audit Detail') },
-  { path: '/reporting/inventory-transfers',            element: ph('Inventory Transfers') },
-  { path: '/reporting/cancelled-sales-orders',         element: ph('Cancelled Sales Orders') },
-  { path: '/reporting/backordered-sales-orders',       element: ph('Backordered Sales Orders') },
-  { path: '/reporting/overdue-sales-orders',           element: ph('Overdue Sales Orders') },
-  { path: '/reporting/sales-orders-by-salesperson',    element: ph('Sales by Salesperson') },
-  { path: '/reporting/sales-orders-by-customer',       element: ph('Sales by Customer') },
+  { path: '/reporting',                                element: guard(<ReportingLanding />) },
+  { path: '/reporting/inventory-count-location',       element: guard(<InventoryCountLocation />) },
+  { path: '/reporting/product-availability',           element: guard(<ProductAvailability />) },
+  { path: '/reporting/inventory-availability',         element: guard(<InventoryAvailability />) },
+  { path: '/reporting/inventory-adjustments',          element: guard(<InventoryAdjustments />) },
+  { path: '/reporting/inventory-receipts',             element: guard(<InventoryReceipts />) },
+  { path: '/reporting/inventory-transfers',            element: guard(<InventoryTransfers />) },
+  { path: '/reporting/inventory-spot-count',           element: guard(<InventorySpotCount />) },
+  { path: '/reporting/inventory-audit',                element: guard(<InventoryAuditList />) },
+  { path: '/reporting/inventory-audit-new',            element: <Navigate to="/reporting/inventory-audit" replace /> },
+  { path: '/reporting/inventory-audit/:id',            element: guard(<InventoryAuditDetail />) },
+  { path: '/reporting/sales-orders-by-dates',          element: guard(<SalesOrdersByDate />) },
+  { path: '/reporting/cancelled-sales-orders',         element: guard(<CancelledSalesOrders />) },
+  { path: '/reporting/backordered-sales-orders',       element: guard(<BackorderedSalesOrders />) },
+  { path: '/reporting/overdue-sales-orders',           element: guard(<OverdueSalesOrders />) },
+  { path: '/reporting/sales-orders-by-salesperson',    element: guard(<SalesBySalesperson />) },
+  { path: '/reporting/sales-orders-by-customer',       element: guard(<SalesByCustomer />) },
 
   // --- Admin ---
   { path: '/admin/settings',        element: guard(<AdminConfig />) },
