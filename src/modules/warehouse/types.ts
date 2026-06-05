@@ -95,6 +95,31 @@ export interface ShipOrderRequest {
 
 export type TransferState = 'NEW' | 'COMPLETE'
 
+export type WarehouseType = 'PHYSICAL' | 'LOGICAL'
+export type WarehouseState = 'ACTIVE' | 'INACTIVE'
+
+export interface WarehouseAddress {
+  attention?: string
+  address1?: string
+  address2?: string
+  address3?: string
+  city?: string
+  country?: string
+  province?: string
+  postalCode?: string
+  phone?: string
+}
+
+export interface Warehouse {
+  id?: string
+  name: string
+  type: WarehouseType
+  state?: WarehouseState
+  description?: string
+  address?: WarehouseAddress
+  parentWarehouse?: { id: string; name: string }
+}
+
 export interface PhysicalWarehouse {
   id: string
   name: string

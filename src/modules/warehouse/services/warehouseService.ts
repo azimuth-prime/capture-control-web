@@ -12,6 +12,7 @@ import type {
   AddTransferItemRequest,
   RemoveTransferItemRequest,
   PhysicalWarehouse,
+  Warehouse,
   PickablePagedResult,
   PackablePagedResult,
   AvailableInventoryPagedResult,
@@ -81,6 +82,15 @@ export const warehouseService = {
 
   findAllPhysicalWarehouses: () =>
     axiosInstance.get<PhysicalWarehouse[]>('/capture/warehouse/physical'),
+
+  findAllWarehouses: () =>
+    axiosInstance.get<Warehouse[]>('/capture/warehouse'),
+
+  findWarehouseById: (id: string) =>
+    axiosInstance.get<Warehouse>(`/capture/warehouse/${id}`),
+
+  saveWarehouse: (data: Partial<Warehouse>) =>
+    axiosInstance.post<Warehouse>('/capture/warehouse', data),
 
   findAvailableInventoryByKeyword: (data: InventorySearchRequest) =>
     axiosInstance.post<AvailableInventoryPagedResult>('/capture/inventory/search/available', data),

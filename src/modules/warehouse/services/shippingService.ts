@@ -18,4 +18,7 @@ export const shippingService = {
 
   shipOrder: (data: ShipOrderRequest) =>
     axiosInstance.post<void>('/capture/shipping', data),
+
+  saveCarrier: (data: Partial<Carrier>) =>
+    axiosInstance.post<Carrier>('/capture/carrier', data),
 }

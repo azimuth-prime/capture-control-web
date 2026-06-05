@@ -21,6 +21,30 @@ export interface GlobalConfig {
   productLabelPrinterType?: string
   productLabelTemplate?: string
   qboEnabled?: boolean
+  // Product settings
+  singleVariation?: boolean
+  // Purchase settings
+  autoGenPOs?: boolean
+  vendorSelection?: string
+  autoSendPO?: boolean
+  poRequireInvoice?: boolean
+  landedCostExecution?: string
+  landedCostCalculation?: string
+  // Order settings
+  backorder?: boolean
+  splitShip?: boolean
+  fulfillOnReceipt?: boolean
+  allocationMethod?: string
+  multiWarehouse?: boolean
+  geoWarehouse?: boolean
+  countryLimitedWarehouse?: boolean
+  invoiceCreation?: string
+  invoiceAutoSend?: boolean
+  enableDropship?: boolean
+  dropshipDirectShip?: boolean
+  // EdgeHub settings
+  customRFIDTag?: boolean
+  rfidTagTemplate?: string
 }
 
 export interface Printer {

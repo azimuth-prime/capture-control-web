@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { AuthGuard } from './auth/AuthGuard'
 import { LoadingSpinner } from './shared/components/LoadingSpinner'
-import Placeholder from './modules/Placeholder'
 import Login from './modules/auth/Login'
 
 // Dashboards
@@ -13,9 +12,10 @@ const SalesDashboard     = lazy(() => import('./modules/dashboard/components/Sal
 const WarehouseDashboard = lazy(() => import('./modules/dashboard/components/WarehouseDashboard').then((m) => ({ default: m.WarehouseDashboard })))
 
 // Admin
-const AdminConfig = lazy(() => import('./modules/admin/components/AdminConfig').then((m) => ({ default: m.AdminConfig })))
-const AppConfig   = lazy(() => import('./modules/admin/components/AppConfig').then((m) => ({ default: m.AppConfig })))
-const AppSearch   = lazy(() => import('./modules/admin/components/AppSearch').then((m) => ({ default: m.AppSearch })))
+const AdminConfig    = lazy(() => import('./modules/admin/components/AdminConfig').then((m) => ({ default: m.AdminConfig })))
+const AppConfig      = lazy(() => import('./modules/admin/components/AppConfig').then((m) => ({ default: m.AppConfig })))
+const AppSearch      = lazy(() => import('./modules/admin/components/AppSearch').then((m) => ({ default: m.AppSearch })))
+const AppIntegrations = lazy(() => import('./modules/admin/components/AppIntegrations').then((m) => ({ default: m.AppIntegrations })))
 
 // Products
 const ProductList       = lazy(() => import('./modules/products/components/ProductList').then((m) => ({ default: m.ProductList })))
@@ -24,6 +24,7 @@ const SkuDetail         = lazy(() => import('./modules/products/components/SkuDe
 const SkuBundleDetail   = lazy(() => import('./modules/products/components/SkuBundleDetail').then((m) => ({ default: m.SkuBundleDetail })))
 const InventoryDetail   = lazy(() => import('./modules/products/components/InventoryDetail').then((m) => ({ default: m.InventoryDetail })))
 const ProductImport     = lazy(() => import('./modules/products/components/ProductImport').then((m) => ({ default: m.ProductImport })))
+const ProductSettings   = lazy(() => import('./modules/products/components/ProductSettings').then((m) => ({ default: m.ProductSettings })))
 
 // CRM
 const OrganizationList   = lazy(() => import('./modules/crm/components/OrganizationList').then((m) => ({ default: m.OrganizationList })))
@@ -43,20 +44,23 @@ const RmaDetail = lazy(() => import('./modules/rma/components/RmaDetail').then((
 // Service Orders
 const ServiceOrderList   = lazy(() => import('./modules/service/components/ServiceOrderList').then((m) => ({ default: m.ServiceOrderList })))
 const ServiceOrderDetail = lazy(() => import('./modules/service/components/ServiceOrderDetail').then((m) => ({ default: m.ServiceOrderDetail })))
+const NewServiceOrder    = lazy(() => import('./modules/service/components/NewServiceOrder').then((m) => ({ default: m.NewServiceOrder })))
 
 // Edge Hubs
-const EdgeHubList   = lazy(() => import('./modules/edgehub/components/EdgeHubList').then((m) => ({ default: m.EdgeHubList })))
-const EdgeHubDetail = lazy(() => import('./modules/edgehub/components/EdgeHubDetail').then((m) => ({ default: m.EdgeHubDetail })))
+const EdgeHubList      = lazy(() => import('./modules/edgehub/components/EdgeHubList').then((m) => ({ default: m.EdgeHubList })))
+const EdgeHubDetail    = lazy(() => import('./modules/edgehub/components/EdgeHubDetail').then((m) => ({ default: m.EdgeHubDetail })))
+const EdgeHubSettings  = lazy(() => import('./modules/edgehub/components/EdgeHubSettings').then((m) => ({ default: m.EdgeHubSettings })))
 
 // Warehouse
-const Picking      = lazy(() => import('./modules/warehouse/components/Picking').then((m) => ({ default: m.Picking })))
-const PickDetail   = lazy(() => import('./modules/warehouse/components/PickDetail').then((m) => ({ default: m.PickDetail })))
-const Packing      = lazy(() => import('./modules/warehouse/components/Packing').then((m) => ({ default: m.Packing })))
-const PackDetail   = lazy(() => import('./modules/warehouse/components/PackDetail').then((m) => ({ default: m.PackDetail })))
-const Shipping     = lazy(() => import('./modules/warehouse/components/Shipping').then((m) => ({ default: m.Shipping })))
-const ShipDetail   = lazy(() => import('./modules/warehouse/components/ShipDetail').then((m) => ({ default: m.ShipDetail })))
-const TransferList = lazy(() => import('./modules/warehouse/components/TransferList').then((m) => ({ default: m.TransferList })))
-const TransferDetail = lazy(() => import('./modules/warehouse/components/TransferDetail').then((m) => ({ default: m.TransferDetail })))
+const Picking            = lazy(() => import('./modules/warehouse/components/Picking').then((m) => ({ default: m.Picking })))
+const PickDetail         = lazy(() => import('./modules/warehouse/components/PickDetail').then((m) => ({ default: m.PickDetail })))
+const Packing            = lazy(() => import('./modules/warehouse/components/Packing').then((m) => ({ default: m.Packing })))
+const PackDetail         = lazy(() => import('./modules/warehouse/components/PackDetail').then((m) => ({ default: m.PackDetail })))
+const Shipping           = lazy(() => import('./modules/warehouse/components/Shipping').then((m) => ({ default: m.Shipping })))
+const ShipDetail         = lazy(() => import('./modules/warehouse/components/ShipDetail').then((m) => ({ default: m.ShipDetail })))
+const TransferList       = lazy(() => import('./modules/warehouse/components/TransferList').then((m) => ({ default: m.TransferList })))
+const TransferDetail     = lazy(() => import('./modules/warehouse/components/TransferDetail').then((m) => ({ default: m.TransferDetail })))
+const WarehouseSettings  = lazy(() => import('./modules/warehouse/components/WarehouseSettings').then((m) => ({ default: m.WarehouseSettings })))
 
 // Reporting
 const ReportingLanding        = lazy(() => import('./modules/reporting/components/ReportingLanding').then((m) => ({ default: m.ReportingLanding })))
@@ -84,18 +88,19 @@ const NewPurchaseOrder     = lazy(() => import('./modules/purchase/components/Ne
 const PurchaseReorder      = lazy(() => import('./modules/purchase/components/PurchaseReorder').then((m) => ({ default: m.PurchaseReorder })))
 const VendorPriceLists     = lazy(() => import('./modules/purchase/components/VendorPriceLists').then((m) => ({ default: m.VendorPriceLists })))
 const VendorPriceListDetail = lazy(() => import('./modules/purchase/components/VendorPriceListDetail').then((m) => ({ default: m.VendorPriceListDetail })))
+const PurchaseSettings     = lazy(() => import('./modules/purchase/components/PurchaseSettings').then((m) => ({ default: m.PurchaseSettings })))
 
 // Order
-const OrderList   = lazy(() => import('./modules/order/components/OrderList').then((m) => ({ default: m.OrderList })))
-const OrderDetail = lazy(() => import('./modules/order/components/OrderDetail').then((m) => ({ default: m.OrderDetail })))
+const OrderList      = lazy(() => import('./modules/order/components/OrderList').then((m) => ({ default: m.OrderList })))
+const OrderDetail    = lazy(() => import('./modules/order/components/OrderDetail').then((m) => ({ default: m.OrderDetail })))
+const NewSalesOrder  = lazy(() => import('./modules/order/components/NewSalesOrder').then((m) => ({ default: m.NewSalesOrder })))
+const OrderSettings  = lazy(() => import('./modules/order/components/OrderSettings').then((m) => ({ default: m.OrderSettings })))
 
 const guard = (element: React.ReactNode) => (
   <AuthGuard>
     <Suspense fallback={<LoadingSpinner />}>{element}</Suspense>
   </AuthGuard>
 )
-
-const ph = (name: string) => guard(<Placeholder module={name} />)
 
 export const router = createBrowserRouter([
   // --- Dashboards ---
@@ -111,7 +116,7 @@ export const router = createBrowserRouter([
   { path: '/products/skus/:id',              element: guard(<SkuDetail />) },
   { path: '/products/skus/inventory/:id',    element: guard(<InventoryDetail />) },
   { path: '/products/skus/bundles/:id',      element: guard(<SkuBundleDetail />) },
-  { path: '/app/products/settings',          element: ph('Product Settings') },
+  { path: '/app/products/settings',          element: guard(<ProductSettings />) },
   { path: '/import',                         element: guard(<ProductImport />) },
 
   // --- Purchase Orders ---
@@ -122,13 +127,13 @@ export const router = createBrowserRouter([
   { path: '/purchase-reorder/:id',     element: guard(<PurchaseReorder />) },
   { path: '/vendor-price-lists',       element: guard(<VendorPriceLists />) },
   { path: '/vendor-price-list/:id',    element: guard(<VendorPriceListDetail />) },
-  { path: '/app/purchase/settings',    element: ph('Purchase Settings') },
+  { path: '/app/purchase/settings',    element: guard(<PurchaseSettings />) },
 
   // --- Sales Orders ---
   { path: '/order',              element: guard(<OrderList />) },
   { path: '/order/:id',          element: guard(<OrderDetail />) },
-  { path: '/new-order',          element: ph('New Sales Order') },
-  { path: '/app/order/settings', element: ph('Order Settings') },
+  { path: '/new-order',          element: guard(<NewSalesOrder />) },
+  { path: '/app/order/settings', element: guard(<OrderSettings />) },
 
   // --- Invoice ---
   { path: '/invoice',     element: guard(<InvoiceList />) },
@@ -150,7 +155,7 @@ export const router = createBrowserRouter([
   { path: '/ship-details/:id',  element: guard(<ShipDetail />) },
   { path: '/transfer',          element: guard(<TransferList />) },
   { path: '/transfer/:id',      element: guard(<TransferDetail />) },
-  { path: '/app/warehouse/settings', element: ph('Warehouse Settings') },
+  { path: '/app/warehouse/settings', element: guard(<WarehouseSettings />) },
 
   // --- RMA ---
   { path: '/rma',     element: guard(<RmaList />) },
@@ -159,7 +164,7 @@ export const router = createBrowserRouter([
   // --- Service Orders ---
   { path: '/serviceorder',       element: guard(<ServiceOrderList />) },
   { path: '/serviceorder/:id',   element: guard(<ServiceOrderDetail />) },
-  { path: '/new-serviceorder',   element: ph('New Service Order') },
+  { path: '/new-serviceorder',   element: guard(<NewServiceOrder />) },
 
   // --- Reporting ---
   { path: '/reporting',                                element: guard(<ReportingLanding />) },
@@ -183,13 +188,13 @@ export const router = createBrowserRouter([
   // --- Admin ---
   { path: '/admin/settings',        element: guard(<AdminConfig />) },
   { path: '/admin/app-config',      element: guard(<AppConfig />) },
-  { path: '/admin/app-integration', element: ph('Integrations') },
+  { path: '/admin/app-integration', element: guard(<AppIntegrations />) },
   { path: '/admin/app-search',      element: guard(<AppSearch />) },
 
   // --- Edge Hubs ---
   { path: '/edgehubs',              element: guard(<EdgeHubList />) },
   { path: '/edgehubs/:id',          element: guard(<EdgeHubDetail />) },
-  { path: '/app/edgehubs/settings', element: ph('Edge Hub Settings') },
+  { path: '/app/edgehubs/settings', element: guard(<EdgeHubSettings />) },
 
   // --- Auth ---
   { path: '/login', element: <Login /> },

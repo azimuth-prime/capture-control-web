@@ -21,6 +21,9 @@ export const userService = {
   findAllWarehouses: () =>
     axiosInstance.get<Warehouse[]>('/capture/warehouse/physical'),
 
+  findSalesUsers: () =>
+    axiosInstance.get<UserSummary[]>('/capture/user/sales'),
+
   resetPassword: (data: ResetPasswordRequest) =>
     axiosInstance.post<void>('/capture/user/resetpassword', data),
 }
