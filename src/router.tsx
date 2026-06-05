@@ -5,6 +5,13 @@ import { LoadingSpinner } from './shared/components/LoadingSpinner'
 import Placeholder from './modules/Placeholder'
 import Login from './modules/auth/Login'
 
+// Dashboards
+const MainDashboard      = lazy(() => import('./modules/dashboard/components/MainDashboard').then((m) => ({ default: m.MainDashboard })))
+const ProductsDashboard  = lazy(() => import('./modules/dashboard/components/ProductsDashboard').then((m) => ({ default: m.ProductsDashboard })))
+const PurchaseDashboard  = lazy(() => import('./modules/dashboard/components/PurchaseDashboard').then((m) => ({ default: m.PurchaseDashboard })))
+const SalesDashboard     = lazy(() => import('./modules/dashboard/components/SalesDashboard').then((m) => ({ default: m.SalesDashboard })))
+const WarehouseDashboard = lazy(() => import('./modules/dashboard/components/WarehouseDashboard').then((m) => ({ default: m.WarehouseDashboard })))
+
 // Admin
 const AdminConfig = lazy(() => import('./modules/admin/components/AdminConfig').then((m) => ({ default: m.AdminConfig })))
 const AppConfig   = lazy(() => import('./modules/admin/components/AppConfig').then((m) => ({ default: m.AppConfig })))
@@ -92,11 +99,11 @@ const ph = (name: string) => guard(<Placeholder module={name} />)
 
 export const router = createBrowserRouter([
   // --- Dashboards ---
-  { path: '/',             element: ph('Dashboard') },
-  { path: '/prd-dashboard', element: ph('Products Dashboard') },
-  { path: '/po-dashboard',  element: ph('Purchase Orders Dashboard') },
-  { path: '/so-dashboard',  element: ph('Sales Orders Dashboard') },
-  { path: '/wms-dashboard', element: ph('Warehouse Dashboard') },
+  { path: '/',              element: guard(<MainDashboard />) },
+  { path: '/prd-dashboard', element: guard(<ProductsDashboard />) },
+  { path: '/po-dashboard',  element: guard(<PurchaseDashboard />) },
+  { path: '/so-dashboard',  element: guard(<SalesDashboard />) },
+  { path: '/wms-dashboard', element: guard(<WarehouseDashboard />) },
 
   // --- Products ---
   { path: '/products',                       element: guard(<ProductList />) },
